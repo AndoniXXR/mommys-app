@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coordinatorLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- AppBar con Toolbar (exact like original) -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBar"
+        android:fitsSystemWindows="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="?myToolbarBackgroundColor"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:contentInsetLeft="2dp"
+            app:contentInsetStart="2dp"
+            app:layout_scrollFlags="scroll|enterAlways">
+
+            <RelativeLayout
+                android:id="@+id/toolbar_relative_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- Dummy LinearLayout for focus handling (exact like original) -->
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp" />
+
+                <!-- MySearchView con contorno visible -->
+                <com.mommys.app.ui.views.MySearchView
+                    android:id="@+id/searchView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@id/btnSearch"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:background="@drawable/search_view_background"
+                    android:textColor="?mySearchHintTextColor"
+                    android:textColorHint="?mySearchHintTextColor"
+                    android:hint="@string/main_search_hint"
+                    android:maxLines="1"
+                    android:inputType="textPersonName"
+                    android:imeOptions="actionSearch|flagNoExtractUi|flagNoFullscreen|flagNoPersonalizedLearning"
+                    android:searchIcon="@null"
+                    android:importantForAutofill="no"
+                    app:goIcon="@drawable/ic_search"
+                    app:iconifiedByDefault="false"
+                    app:searchIcon="@null" />
+
+                <!-- Botón Lupa/Buscar (entre SearchView y menú hamburguesa) -->
+                <ImageButton
+                    android:id="@+id/btnSearch"
+                    android:layout_width="@dimen/main_btn_width"
+                    android:layout_height="@dimen/main_btn_width"
+                    android:layout_toStartOf="@id/btnMenu"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/cd_search"
+                    android:src="@drawable/ic_search"
+                    android:tint="?mySearchHintTextColor" />
+
+                <!-- Botón Menú (exact like original) -->
+                <ImageButton
+                    android:id="@+id/btnMenu"
+                    android:longClickable="true"
+                    android:layout_width="@dimen/main_btn_width"
+                    android:layout_height="@dimen/main_btn_width"
+                    android:layout_alignParentEnd="true"
+                    android:backgroundTint="?myToolbarBackgroundColor"
+                    android:contentDescription="@string/cd_main_menu"
+                    android:src="@drawable/ic_menu"
+                    android:tooltipText="@string/cd_main_menu" />
+
+            </RelativeLayout>
+
+        </com.google.android.material.appbar.MaterialToolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Content -->
+    <LinearLayout
+        android:id="@+id/lLText"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- Número de página -->
+        <TextView
+            android:id="@+id/txtPageNr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="?mySecondaryTextAlpha"
+            android:background="?myToolbarBackgroundColor"
+            android:text="@string/main_page_nr"
+            android:textAlignment="center" />
+
+        <!-- Posts ocultos (contenido restringido, requiere login en e621.net) -->
+        <TextView
+            android:id="@+id/txtHiddenPosts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?myToolbarBackgroundColor"
+            android:textColor="@android:color/holo_orange_dark"
+            android:textAlignment="center"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <!-- Banner Ad Container (exactly like original app) -->
+        <include
+            layout="@layout/banner_ad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- ProgressBar -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+        <!-- SwipeRefresh + ViewPager2 para paginación horizontal -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <!-- No results (se maneja dentro de cada página ahora) -->
+        <TextView
+            android:id="@+id/txtNoResults"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="32dp"
+            android:text="@string/no_results"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/darkColorToolbar"
+        app:itemIconTint="@color/colorWhite"
+        app:itemTextColor="@color/colorWhite"
+        app:labelVisibilityMode="labeled"
+        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
+        app:menu="@menu/bottom_nav_menu" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

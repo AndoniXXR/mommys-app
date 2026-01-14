@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Layout personalizado de controles del reproductor de video
+     Similar al usado en la app original -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Fondo oscuro para los controles -->
+    <View
+        android:id="@+id/exo_controls_background"
+        android:background="@color/exo_black_opacity_60"
+        android:layout_width="0dp"
+        android:layout_height="0dp"/>
+
+    <!-- Barra inferior con tiempo y controles -->
+    <FrameLayout
+        android:layout_gravity="bottom"
+        android:id="@+id/exo_bottom_bar"
+        android:background="@color/exo_bottom_bar_background"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/exo_styled_bottom_bar_height"
+        android:layout_marginTop="@dimen/exo_styled_bottom_bar_margin_top"
+        android:layoutDirection="ltr">
+
+        <!-- Tiempo de reproducción -->
+        <LinearLayout
+            android:layout_gravity="start|center_vertical"
+            android:id="@+id/exo_time"
+            android:paddingLeft="@dimen/exo_styled_bottom_bar_time_padding"
+            android:paddingRight="@dimen/exo_styled_bottom_bar_time_padding"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layoutDirection="ltr"
+            android:paddingStart="@dimen/exo_styled_bottom_bar_time_padding"
+            android:paddingEnd="@dimen/exo_styled_bottom_bar_time_padding">
+
+            <TextView
+                android:id="@+id/exo_position"
+                style="@style/ExoStyledControls.TimeText.Position"/>
+
+            <TextView style="@style/ExoStyledControls.TimeText.Separator"/>
+
+            <TextView
+                android:id="@+id/exo_duration"
+                style="@style/ExoStyledControls.TimeText.Duration"/>
+
+        </LinearLayout>
+
+        <!-- Controles básicos (settings) -->
+        <LinearLayout
+            android:layout_gravity="end|center_vertical"
+            android:id="@+id/exo_basic_controls"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layoutDirection="ltr">
+
+            <ImageButton
+                android:id="@+id/exo_settings"
+                style="@style/ExoStyledControls.Button.Bottom.Settings"/>
+
+        </LinearLayout>
+
+        <!-- Extra controls scroll -->
+        <HorizontalScrollView
+            android:layout_gravity="end|center_vertical"
+            android:id="@+id/exo_extra_controls_scroll_view"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/exo_extra_controls"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layoutDirection="ltr">
+
+                <ImageButton
+                    android:id="@+id/exo_overflow_hide"
+                    style="@style/ExoStyledControls.Button.Bottom.OverflowHide"/>
+
+            </LinearLayout>
+
+        </HorizontalScrollView>
+
+    </FrameLayout>
+
+    <!-- Placeholder para la barra de progreso -->
+    <View
+        android:layout_gravity="bottom"
+        android:id="@+id/exo_progress_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/exo_styled_progress_layout_height"
+        android:layout_marginBottom="@dimen/exo_styled_progress_margin_bottom"/>
+
+    <!-- Controles centrales (play/pause, rewind, forward) -->
+    <LinearLayout
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:id="@+id/exo_center_controls"
+        android:background="@android:color/transparent"
+        android:padding="@dimen/exo_styled_controls_padding"
+        android:clipToPadding="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <!-- Botón rewind -->
+        <FrameLayout
+            android:addStatesFromChildren="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            style="@style/ExoStyledControls.Button.Center">
+
+            <Button
+                android:id="@+id/exo_rew_with_amount"
+                android:background="@drawable/exo_styled_controls_rewind"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                android:singleLine="false"
+                style="@style/ExoStyledControls.Button.Center.RewWithAmount"/>
+
+        </FrameLayout>
+
+        <!-- Botón play/pause -->
+        <ImageButton
+            android:id="@+id/exo_play_pause"
+            style="@style/ExoStyledControls.Button.Center.PlayPause"/>
+
+        <!-- Botón fast forward -->
+        <FrameLayout
+            android:addStatesFromChildren="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            style="@style/ExoStyledControls.Button.Center">
+
+            <Button
+                android:id="@+id/exo_ffwd_with_amount"
+                android:background="@drawable/exo_styled_controls_fastforward"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                android:singleLine="false"
+                style="@style/ExoStyledControls.Button.Center.FfwdWithAmount"/>
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+</merge>

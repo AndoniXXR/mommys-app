@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Grupo cuando NO está logueado -->
+    <group
+        android:id="@+id/groupNotLoggedIn"
+        android:visible="true">
+        <item
+            android:id="@+id/login"
+            android:title="@string/menu_login"/>
+    </group>
+    
+    <!-- Grupo cuando está logueado -->
+    <group 
+        android:id="@+id/groupLoggedIn"
+        android:visible="false">
+        <item android:title="@string/menu_my_account">
+            <menu>
+                <item
+                    android:id="@+id/my_profile"
+                    android:title="@string/menu_my_profile"/>
+                <item
+                    android:id="@+id/my_favourites"
+                    android:title="@string/menu_my_favourites"/>
+                <item
+                    android:id="@+id/my_upvotes"
+                    android:title="@string/menu_my_upvotes"/>
+                <item
+                    android:id="@+id/my_posts"
+                    android:title="@string/menu_my_posts"/>
+                <item
+                    android:id="@+id/logout"
+                    android:title="@string/menu_my_log_out"/>
+            </menu>
+        </item>
+    </group>
+    
+    <!-- Go To submenu -->
+    <item android:title="@string/menu_go_to">
+        <menu>
+            <item
+                android:id="@+id/go_to_page"
+                android:title="@string/menu_go_to_page"/>
+            <item
+                android:id="@+id/go_to_random_post"
+                android:title="@string/menu_go_to_random_post"/>
+            <item
+                android:id="@+id/go_to_user"
+                android:title="@string/menu_go_to_user"/>
+        </menu>
+    </item>
+    
+    <!-- Popular submenu -->
+    <item android:title="@string/menu_popular">
+        <menu>
+            <item
+                android:id="@+id/popular_by_day"
+                android:title="@string/menu_popular_by_day"/>
+            <item
+                android:id="@+id/popular_by_week"
+                android:title="@string/menu_popular_by_week"/>
+            <item
+                android:id="@+id/popular_by_month"
+                android:title="@string/menu_popular_by_month"/>
+        </menu>
+    </item>
+    
+    <!-- Browse submenu -->
+    <item android:title="@string/menu_browse">
+        <menu>
+            <item
+                android:id="@+id/browse_tags"
+                android:title="@string/menu_browse_tags"/>
+            <item
+                android:id="@+id/browse_pools"
+                android:title="@string/menu_browse_pools"/>
+        </menu>
+    </item>
+    
+    <!-- Queued Downloads -->
+    <item
+        android:id="@+id/downloads"
+        android:title="@string/menu_downloads"/>
+    
+    <!-- Followed Tag Posts -->
+    <item
+        android:id="@+id/following_posts"
+        android:title="@string/menu_following_tags"/>
+    
+    <!-- About submenu -->
+    <item android:title="@string/menu_about">
+        <menu>
+            <item
+                android:id="@+id/about"
+                android:title="@string/menu_about_about"/>
+            <item
+                android:id="@+id/help"
+                android:title="@string/menu_about_help"/>
+        </menu>
+    </item>
+    
+    <!-- Saved Searches -->
+    <item
+        android:id="@+id/saved_searches"
+        android:title="@string/menu_saved_searches"/>
+    
+    <!-- Check for Updates -->
+    <item
+        android:id="@+id/check_updates"
+        android:title="@string/menu_check_updates"/>
+    
+    <!-- Settings -->
+    <item
+        android:id="@+id/settings"
+        android:title="@string/menu_settings"/>
+</menu>

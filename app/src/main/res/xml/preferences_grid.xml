@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreferenceCompat
+        android:key="grid_stats"
+        android:title="@string/pref_grid_stats_title"
+        android:summary="@string/pref_grid_stats_summary"
+        android:icon="@drawable/ic_assessment"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="grid_info"
+        android:title="@string/pref_grid_info_title"
+        android:summary="@string/pref_grid_info_summary"
+        android:icon="@drawable/ic_info"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="grid_new_label"
+        android:title="@string/pref_grid_new_label_title"
+        android:summary="@string/pref_grid_new_label_summary"
+        android:icon="@drawable/ic_new_releases"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="grid_darken_seen"
+        android:title="@string/pref_grid_darken_viewed_title"
+        android:summary="@string/pref_grid_darken_viewed_summary"
+        android:icon="@drawable/ic_eye"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="grid_hide_seen"
+        android:title="@string/pref_grid_hide_viewed_title"
+        android:summary="@string/pref_grid_hide_viewed_summary"
+        android:icon="@drawable/ic_eye"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <Preference
+        android:key="grid_darken_clear"
+        android:title="@string/pref_grid_darken_clear_title"
+        android:summary="@string/pref_grid_darken_clear_summary"
+        android:icon="@drawable/ic_clear"
+        android:dependency="grid_darken_seen"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="grid_colours"
+        android:title="@string/pref_grid_colours_title"
+        android:summary="@string/pref_grid_colours_summary"
+        android:icon="@drawable/ic_color"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="grid_refresh"
+        android:title="@string/pref_grid_refresh_title"
+        android:summary="@string/pref_grid_refresh_summary"
+        android:icon="@drawable/ic_refresh"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <androidx.preference.SeekBarPreference
+        android:key="grid_height"
+        android:title="@string/pref_grid_height_title"
+        android:summary="@string/pref_grid_height_summary"
+        android:icon="@drawable/ic_height"
+        android:defaultValue="110"
+        android:max="200"
+        app:min="100"
+        app:seekBarIncrement="2"
+        app:showSeekBarValue="true"
+        android:singleLineTitle="false"
+        xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+    <androidx.preference.SeekBarPreference
+        android:key="grid_width"
+        android:title="@string/pref_grid_width_title"
+        android:summary="@string/pref_grid_width_summary"
+        android:icon="@drawable/ic_grid"
+        android:defaultValue="3"
+        android:max="9"
+        app:min="1"
+        app:seekBarIncrement="1"
+        app:showSeekBarValue="true"
+        android:singleLineTitle="false"
+        xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+    <androidx.preference.SeekBarPreference
+        android:key="search_posts_count"
+        android:title="@string/pref_search_posts_per_page_title"
+        android:summary="@string/pref_search_posts_per_page_summary"
+        android:icon="@drawable/ic_grid"
+        android:defaultValue="75"
+        android:max="320"
+        app:min="45"
+        app:seekBarIncrement="3"
+        app:showSeekBarValue="true"
+        android:singleLineTitle="false"
+        xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+    <SwitchPreferenceCompat
+        android:key="grid_gifs"
+        android:title="@string/pref_grid_gifs_title"
+        android:summary="@string/pref_grid_gifs_summary"
+        android:icon="@drawable/ic_gif"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="grid_navigate"
+        android:title="@string/pref_grid_navigate_title"
+        android:summary="@string/pref_grid_navigate_summary"
+        android:icon="@drawable/ic_navigate_next"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+</PreferenceScreen>

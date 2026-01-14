@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Menú de navegación inferior para modo selección (exacto como menu_main_bottom_selected.xml original) -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- Limpiar selección -->
+    <item
+        android:id="@+id/selected_clear"
+        android:icon="@drawable/ic_close"
+        android:title="@string/selected_clear" />
+    
+    <!-- Descargar seleccionados (mostrará badge con cantidad) -->
+    <item
+        android:id="@+id/selected_download"
+        android:icon="@drawable/ic_download"
+        android:title="@string/selected_download" />
+    
+    <!-- Seleccionar todo (todos los posts de la página actual) -->
+    <item
+        android:id="@+id/selected_select_all"
+        android:icon="@drawable/ic_select_all"
+        android:title="@string/selected_select_all" />
+    
+</menu>

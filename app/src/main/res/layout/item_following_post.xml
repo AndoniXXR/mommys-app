@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Layout completo para grid item como adapter_grid_item.xml original -->
+<androidx.cardview.widget.CardView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="2dp"
+    app:cardCornerRadius="4dp">
+    
+    <!-- Container con borde coloreado según rating (fLFlag) -->
+    <FrameLayout 
+        android:id="@+id/fLFlag"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        
+        <!-- Imagen principal con altura variable -->
+        <ImageView
+            android:id="@+id/imgPreview"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            android:src="@color/colorBlack25"/>
+        
+        <!-- Checkmark grande centrado (visible al seleccionar) -->
+        <ImageView
+            android:id="@+id/imgSelected"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_check"
+            android:alpha="0.9"
+            android:visibility="gone"/>
+        
+        <!-- Texto de stats abajo (score, favs) -->
+        <TextView
+            android:id="@+id/txtInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:gravity="bottom|center"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:background="@color/colorStatsBG"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:visibility="gone"/>
+        
+        <!-- Botón info arriba izquierda -->
+        <ImageView
+            android:id="@+id/imgInfoBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|top"
+            android:padding="4dp"
+            android:src="@drawable/ic_info"
+            android:alpha="0.7"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"/>
+        
+        <!-- Etiqueta NEW abajo derecha -->
+        <ImageView
+            android:id="@+id/imgNewLabel"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="end|bottom"
+            android:src="@drawable/ic_new_releases"
+            android:visibility="gone"/>
+        
+        <!-- Indicador video arriba derecha -->
+        <ImageView
+            android:id="@+id/imgVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|top"
+            android:padding="4dp"
+            android:background="@color/colorBlack35"
+            android:src="@drawable/ic_movie"
+            android:alpha="0.7"
+            android:visibility="gone"
+            android:clickable="false"
+            android:focusable="false"/>
+        
+        <!-- Indicador GIF arriba derecha -->
+        <ImageView
+            android:id="@+id/imgGif"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|top"
+            android:padding="4dp"
+            android:background="@color/colorBlack35"
+            android:src="@drawable/ic_gif"
+            android:alpha="0.7"
+            android:visibility="gone"
+            android:clickable="false"
+            android:focusable="false"/>
+        
+        <!-- Overlay oscuro para posts vistos -->
+        <FrameLayout
+            android:id="@+id/fLOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorBlack25"
+            android:visibility="gone"/>
+        
+        <!-- Indicador de tag (pequeño punto) - legacy -->
+        <View
+            android:id="@+id/tagIndicator"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_gravity="top|start"
+            android:layout_margin="4dp"
+            android:background="@drawable/circle_indicator"
+            android:visibility="gone"/>
+            
+    </FrameLayout>
+</androidx.cardview.widget.CardView>

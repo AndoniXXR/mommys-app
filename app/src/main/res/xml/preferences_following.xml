@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreferenceCompat
+        android:key="following_enabled"
+        android:title="@string/pref_following_enabled_title"
+        android:summary="@string/pref_following_enabled_summary"
+        android:icon="@drawable/ic_notifications_active"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <Preference
+        android:key="following_manage"
+        android:title="@string/pref_following_manage_title"
+        android:icon="@drawable/ic_add_alert"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="following_only_wifi"
+        android:title="@string/pref_following_only_unmetered_title"
+        android:summary="@string/pref_following_only_unmetered_summary"
+        android:icon="@drawable/ic_network_cell"
+        android:dependency="following_enabled"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <ListPreference
+        android:key="following_period"
+        android:title="@string/pref_following_period_title"
+        android:summary="%s"
+        android:icon="@drawable/ic_access_time"
+        android:entries="@array/post_following_period_entries"
+        android:entryValues="@array/post_following_period_values"
+        android:dependency="following_enabled"
+        android:defaultValue="1"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="following_display_tag"
+        android:title="@string/pref_following_display_tag_title"
+        android:summary="@string/pref_following_display_tag_summary"
+        android:icon="@drawable/ic_eye"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="following_display_in_saved_search"
+        android:title="@string/pref_following_display_in_saved_search_title"
+        android:summary="@string/pref_following_display_in_saved_search_summary"
+        android:icon="@drawable/ic_eye"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <Preference
+        android:key="following_view_log"
+        android:title="@string/pref_following_view_log_title"
+        android:icon="@drawable/ic_error_outline"
+        android:singleLineTitle="false" />
+
+</PreferenceScreen>

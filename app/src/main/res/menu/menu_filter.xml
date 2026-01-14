@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Menú de filtros y ordenación exacto como la app original -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- Rating -->
+    <item
+        android:id="@+id/filter_rating"
+        android:title="@string/filter_rating">
+        <menu>
+            <item
+                android:id="@+id/filter_rating_e"
+                android:title="@string/filter_rating_show_e"
+                android:checkable="true" />
+            <item
+                android:id="@+id/filter_rating_q"
+                android:title="@string/filter_rating_show_q"
+                android:checkable="true" />
+            <item
+                android:id="@+id/filter_rating_s"
+                android:title="@string/filter_rating_show_s"
+                android:checkable="true" />
+        </menu>
+    </item>
+    
+    <!-- Tipo de post -->
+    <item
+        android:id="@+id/filter_type"
+        android:title="@string/filter_type">
+        <menu>
+            <item
+                android:id="@+id/filter_type_all"
+                android:title="@string/filter_type_all"
+                android:checkable="true" />
+            <item
+                android:id="@+id/filter_type_images"
+                android:title="@string/filter_type_only_images"
+                android:checkable="true" />
+            <item
+                android:id="@+id/filter_type_videos"
+                android:title="@string/filter_type_only_videos"
+                android:checkable="true" />
+            <item
+                android:id="@+id/filter_type_gifs"
+                android:title="@string/filter_type_only_gifs"
+                android:checkable="true" />
+        </menu>
+    </item>
+    
+    <!-- Ordenación -->
+    <item
+        android:id="@+id/filter_order"
+        android:title="@string/filter_order_page_by">
+        <menu>
+            <item
+                android:id="@+id/filter_order_by_newest"
+                android:title="@string/filter_order_by_newest"
+                android:checkable="true" />
+            <item
+                android:id="@+id/filter_order_by_oldest"
+                android:title="@string/filter_order_by_oldest"
+                android:checkable="true" />
+            <item
+                android:id="@+id/filter_order_by_score"
+                android:title="@string/filter_order_by_score"
+                android:checkable="true" />
+            <item
+                android:id="@+id/filter_order_by_favs"
+                android:title="@string/filter_order_by_favs"
+                android:checkable="true" />
+        </menu>
+    </item>
+    
+</menu>

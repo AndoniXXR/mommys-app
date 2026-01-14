@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors -->
+    <color name="colorPrimary">#FF1976D2</color>
+    <color name="colorPrimaryDark">#FF1565C0</color>
+    <color name="colorAccent">#FF4980BB</color>
+    
+    <!-- Dark Theme Colors (exact from original app) -->
+    <color name="darkColorPrimary">#FF1976D2</color>
+    <color name="darkColorPrimaryDark">#FF0D47A1</color>
+    <color name="darkColorBg">#FF121212</color>
+    <color name="darkColorSurface">#FF1E1E1E</color>
+    <color name="darkColorToolbar">#ff080808</color>
+    <color name="darkColorBtn">#FF2D2D2D</color>
+    <color name="darkColorCommentBg">#FF252525</color>
+    <color name="darkColorPostTitleBG">#E6000000</color>
+    <color name="darkSearchTextColor">#fff5f5f5</color>
+    
+    <!-- Light Theme Colors (exact from original app) -->
+    <color name="lightColorPrimary">#FF1976D2</color>
+    <color name="lightColorPrimaryDark">#FF1565C0</color>
+    <color name="lightColorBg">#FFFFFFFF</color>
+    <color name="lightColorSurface">#FFF5F5F5</color>
+    <color name="lightColorToolbar">#fffbfbfb</color>
+    <color name="lightColorBtn">#FFE0E0E0</color>
+    <color name="lightColorCommentBg">#FFF0F0F0</color>
+    <color name="lightColorPostTitleBG">#E6FFFFFF</color>
+    <color name="lightSearchTextColor">#ff191919</color>
+    
+    <!-- Common Colors -->
+    <color name="colorBlack">#FF000000</color>
+    <color name="colorBlack25">#40000000</color>
+    <color name="colorBlack35">#59000000</color>
+    <color name="colorBlack45">#73080808</color>
+    <color name="colorBlack65">#A6000000</color>
+    <color name="colorBlack80">#CC000000</color>
+    <color name="colorWhite">#FFFFFFFF</color>
+    <color name="colorWhite65">#A6FFFFFF</color>
+    <color name="colorDarkGrey">#8e8e8e</color>
+    <color name="colorGreen">#FF1E8737</color>
+    <color name="colorRed">#FFA62429</color>
+    <color name="colorBlue">#FF0778B5</color>
+    <color name="colorOrange">#FFFFA500</color>
+    <color name="colorPurple">#FF6C328B</color>
+    <color name="colorTextImportant">#FF4980BB</color>
+    <color name="colorStatsBG">#80000000</color>
+    
+    <!-- e621 Brand Colors -->
+    <color name="e621_orange">#FFFF6600</color>
+    <color name="e621_orange_light">#33FF6600</color>
+    <color name="e621_blue">#FF012E57</color>
+    
+    <!-- Tag Colors (based on e621 categories) -->
+    <color name="tagGeneral">#FF0075F8</color>
+    <color name="tagArtist">#FFF2AC08</color>
+    <color name="tagCopyright">#FFDD00DD</color>
+    <color name="tagCharacter">#FF00AA00</color>
+    <color name="tagSpecies">#FFED5D1F</color>
+    <color name="tagMeta">#FFFFFFFF</color>
+    <color name="tagInvalid">#FFFF3D3D</color>
+    <color name="tagLore">#FF228822</color>
+    
+    <!-- Vote Colors -->
+    <color name="colorVoteUp">#FF3F8E42</color>
+    <color name="colorVoteDown">#FFAB3335</color>
+    <color name="colorLoadingTextBG">#80000000</color>
+    
+    <!-- Rating Colors -->
+    <color name="colorRatingSafe">#FF00AA00</color>
+    <color name="colorRatingQuestionable">#FFDDDD00</color>
+    <color name="colorRatingExplicit">#FFDD0000</color>
+    <color name="colorYellow">#FFDDDD00</color>
+    
+    <!-- Additional UI Colors -->
+    <color name="darkColorBackground">#FF121212</color>
+    <color name="colorGray">#FF404040</color>
+    <color name="colorDivider">#33FFFFFF</color>
+    
+    <!-- Tag Display Colors (for PostActivity) -->
+    <color name="colorArtist">#FFF2AC08</color>
+    <color name="colorSpecies">#FFED5D1F</color>
+    <color name="colorCharacter">#FF00AA00</color>
+    <color name="colorGeneral">#FF0075F8</color>
+    <color name="colorTagArtist">#FFF2AC08</color>
+    <color name="colorUpvote">#FF3F8E42</color>
+    <color name="colorDownvote">#FFAB3335</color>
+    <color name="colorFavorite">#FFDD6600</color>
+    
+    <!-- ExoPlayer control colors -->
+    <color name="exo_black_opacity_60">#99000000</color>
+    <color name="exo_bottom_bar_background">#CC000000</color>
+    
+    <!-- SearchView border color -->
+    <color name="searchViewBorderColor">#66FFFFFF</color>
+    
+    <!-- Parent/Children relation color (exact from original app) -->
+    <color name="colorParentChild">#ffffa500</color>
+</resources>

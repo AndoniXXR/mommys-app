@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Layout para item de sugerencia de búsqueda - Exacto como el original -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/search_suggestion_item_height"
+    style="@style/RtlOverlay.Widget.AppCompat.Search.DropDown">
+    
+    <!-- Icono del tipo de sugerencia -->
+    <ImageView
+        android:id="@android:id/icon1"
+        android:visibility="invisible"
+        android:layout_width="@dimen/search_suggestion_icon_width"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_history"
+        android:scaleType="centerInside"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"/>
+    
+    <!-- Botón para editar query -->
+    <ImageView
+        android:id="@+id/edit_query"
+        android:background="?attr/selectableItemBackground"
+        android:visibility="gone"
+        android:layout_width="@dimen/search_suggestion_edit_icon_width"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_arrow_insert"
+        android:scaleType="centerInside"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"/>
+    
+    <!-- Icono secundario -->
+    <ImageView
+        android:id="@+id/icon2"
+        android:visibility="gone"
+        android:layout_width="@dimen/search_suggestion_edit_icon_width"
+        android:layout_height="@dimen/search_suggestion_edit_icon_width"
+        android:src="@drawable/ic_arrow_back"
+        android:scaleType="centerInside"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_toStartOf="@+id/edit_query"/>
+    
+    <!-- Texto principal de la sugerencia -->
+    <TextView
+        android:id="@android:id/text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:layout_above="@android:id/text2"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@+id/edit_query"
+        android:layout_toEndOf="@android:id/icon1"
+        style="?android:attr/dropDownItemStyle"/>
+    
+    <!-- Texto secundario (tipo/categoría) -->
+    <TextView
+        android:textAppearance="?attr/textAppearanceSearchResultSubtitle"
+        android:textSize="10sp"
+        android:gravity="top"
+        android:id="@android:id/text2"
+        android:visibility="visible"
+        android:layout_width="match_parent"
+        android:layout_height="18dp"
+        android:maxLines="1"
+        android:layout_alignParentBottom="true"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_toStartOf="@+id/edit_query"
+        android:layout_toEndOf="@android:id/icon1"
+        android:alpha="0.7"
+        style="?android:attr/dropDownItemStyle"/>
+
+</RelativeLayout>

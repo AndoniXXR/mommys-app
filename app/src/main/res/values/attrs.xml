@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Custom theme attributes exactly like the original app -->
+    <attr name="myToolbarBackgroundColor" format="color" />
+    <attr name="mySearchHintTextColor" format="color" />
+    <attr name="mySecondaryTextAlpha" format="float" />
+    <attr name="myIconTintColor" format="color" />
+    <attr name="myImageButtonBackgroundColor" format="color" />
+    <attr name="myCommentItemBackgroundColor" format="color" />
+    <attr name="myPostButtonsBackgroundColor" format="color" />
+    <attr name="myPostFullscreenBackgroundColor" format="color" />
+    <attr name="myPostInfoBackground" format="color" />
+    <attr name="myPostBackgroundColor" format="color" />
+    <attr name="myPostCardBackgroundColor" format="color" />
+    <attr name="myPostButtonBarBackgroundColor" format="color" />
+</resources>

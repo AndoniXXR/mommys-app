@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreferenceCompat
+        android:key="post_expand_tags"
+        android:title="@string/pref_post_expand_tags_title"
+        android:summary="@string/pref_post_expand_tags_summary"
+        android:icon="@drawable/ic_expand_more"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_expand_description"
+        android:title="@string/pref_post_expand_description_title"
+        android:summary="@string/pref_post_expand_description_summary"
+        android:icon="@drawable/ic_expand_more"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_back_button"
+        android:title="@string/pref_post_back_button_title"
+        android:summary="@string/pref_post_back_button_summary"
+        android:icon="@drawable/ic_arrow_back"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <ListPreference
+        android:key="post_back_button_location"
+        android:title="@string/pref_post_back_button_location_title"
+        android:summary="%s"
+        android:icon="@drawable/ic_edit_location"
+        android:entries="@array/post_back_button_entries"
+        android:entryValues="@array/post_back_button_values"
+        android:dependency="post_back_button"
+        android:defaultValue="0"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_load_hq"
+        android:title="@string/pref_post_load_hq_title"
+        android:summary="@string/pref_post_load_hq_summary"
+        android:icon="@drawable/ic_quality"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_edge_navigation"
+        android:title="@string/pref_post_edge_navigation_title"
+        android:summary="@string/pref_post_edge_navigation_summary"
+        android:icon="@drawable/ic_navigate_next"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_keep_screen_awake"
+        android:title="@string/pref_post_keep_screen_awake_title"
+        android:summary="@string/pref_post_keep_screen_awake_summary"
+        android:icon="@drawable/ic_eye"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_hide_status_bar"
+        android:title="@string/pref_post_hide_status_bar_title"
+        android:summary="@string/pref_post_hide_status_bar_summary"
+        android:icon="@drawable/ic_border_top"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_hide_nav_bar"
+        android:title="@string/pref_post_hide_nav_bar_title"
+        android:summary="@string/pref_post_hide_nav_bar_summary"
+        android:icon="@drawable/ic_border_bottom"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <ListPreference
+        android:key="post_default_video_quality"
+        android:title="@string/pref_post_default_video_quality_title"
+        android:summary="%s"
+        android:icon="@drawable/ic_quality"
+        android:entries="@array/post_default_video_quality_entries"
+        android:entryValues="@array/post_default_video_quality_values"
+        android:defaultValue="1"
+        android:singleLineTitle="false" />
+
+    <ListPreference
+        android:key="post_default_video_format"
+        android:title="@string/pref_post_default_video_format_title"
+        android:summary="%s"
+        android:icon="@drawable/ic_quality"
+        android:entries="@array/post_default_video_format_entries"
+        android:entryValues="@array/post_default_video_format_values"
+        android:defaultValue="0"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_mute_videos"
+        android:title="@string/pref_post_video_muted_title"
+        android:summary="@string/pref_post_video_muted_summary"
+        android:icon="@drawable/ic_volume_off"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_autoplay_videos"
+        android:title="@string/pref_post_video_autoplay_title"
+        android:summary="@string/pref_post_video_autoplay_summary"
+        android:icon="@drawable/ic_play_circle"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_landscape_videos"
+        android:title="@string/pref_post_video_landscape_title"
+        android:summary="@string/pref_post_video_landscape_summary"
+        android:icon="@drawable/ic_screen_rotation"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_fullscreen_videos"
+        android:title="@string/pref_post_video_fullscreen_title"
+        android:summary="@string/pref_post_video_fullscreen_summary"
+        android:icon="@drawable/ic_fullscreen"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_action_upvote_on_fav"
+        android:title="@string/pref_post_action_upvote_on_fav_title"
+        android:summary="@string/pref_post_action_upvote_on_fav_summary"
+        android:icon="@drawable/ic_thumb_up"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_action_upvote_on_download"
+        android:title="@string/pref_post_action_upvote_on_download_title"
+        android:summary="@string/pref_post_action_upvote_on_download_summary"
+        android:icon="@drawable/ic_thumb_up"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_action_fav_on_download"
+        android:title="@string/pref_post_action_fav_on_download_title"
+        android:summary="@string/pref_post_action_fav_on_download_summary"
+        android:icon="@drawable/ic_favorite"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_long_click_to_unfav"
+        android:title="@string/pref_post_long_click_to_unfav_title"
+        android:summary="@string/pref_post_long_click_to_unfav_summary"
+        android:icon="@drawable/ic_favorite"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_hide_score"
+        android:title="@string/pref_post_hide_score_title"
+        android:summary="@string/pref_post_hide_score_summary"
+        android:icon="@drawable/ic_visibility_off"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_top_preview"
+        android:title="@string/pref_post_top_preview_title"
+        android:summary="@string/pref_post_top_preview_summary"
+        android:icon="@drawable/ic_gradient"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_controls_fullscreen"
+        android:title="@string/pref_post_controls_fullscreen_title"
+        android:summary="@string/pref_post_controls_fullscreen_summary"
+        android:icon="@drawable/ic_border_bottom"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_hide_comments"
+        android:title="@string/pref_post_hide_comments_title"
+        android:summary="@string/pref_post_hide_comments_summary"
+        android:icon="@drawable/ic_comment"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_pull_to_close"
+        android:title="@string/pref_post_pull_to_close_title"
+        android:summary="@string/pref_post_pull_to_close_summary"
+        android:icon="@drawable/ic_arrow_back"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_data_saver"
+        android:title="@string/pref_post_data_saver_title"
+        android:summary="@string/pref_post_data_saver_message"
+        android:icon="@drawable/ic_data_saver"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="post_disable_share"
+        android:title="@string/pref_post_disable_share_title"
+        android:summary="@string/pref_post_disable_share_message"
+        android:icon="@drawable/ic_stop_share"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+</PreferenceScreen>

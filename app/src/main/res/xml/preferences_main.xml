@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+        android:key="menu_general"
+        android:title="@string/pref_general"
+        android:summary="@string/pref_general_summary"
+        android:icon="@drawable/ic_settings"
+        android:singleLineTitle="false" />
+
+    <Preference
+        android:key="menu_follow_tags"
+        android:title="@string/pref_following"
+        android:summary="@string/pref_following_summary"
+        android:icon="@drawable/ic_following"
+        android:singleLineTitle="false" />
+
+    <Preference
+        android:key="menu_search_and_tags"
+        android:title="@string/pref_searching"
+        android:summary="@string/pref_searching_summary"
+        android:icon="@drawable/ic_search"
+        android:singleLineTitle="false" />
+
+    <Preference
+        android:key="menu_grid_view"
+        android:title="@string/pref_grid_view"
+        android:summary="@string/pref_grid_view_summary"
+        android:icon="@drawable/ic_grid"
+        android:singleLineTitle="false" />
+
+    <Preference
+        android:key="menu_post_view"
+        android:title="@string/pref_post_view"
+        android:summary="@string/pref_post_view_summary"
+        android:icon="@drawable/ic_eye"
+        android:singleLineTitle="false" />
+
+    <Preference
+        android:key="menu_storage_and_downloads"
+        android:title="@string/pref_storage"
+        android:summary="@string/pref_storage_summary"
+        android:icon="@drawable/ic_download"
+        android:singleLineTitle="false" />
+
+    <PreferenceCategory android:title="@string/pref_export">
+
+        <Preference
+            android:key="export_export"
+            android:title="@string/pref_export_export_title"
+            android:summary="@string/pref_export_export_summary"
+            android:icon="@drawable/ic_cloud_upload"
+            android:singleLineTitle="false" />
+
+        <Preference
+            android:key="export_import"
+            android:title="@string/pref_export_import_title"
+            android:summary="@string/pref_export_import_summary"
+            android:icon="@drawable/ic_cloud_download"
+            android:singleLineTitle="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_cloudflare">
+
+        <Preference
+            android:key="cloudflare"
+            android:title="@string/pref_cloudflare_self_title"
+            android:summary="@string/pref_cloudflare_self_summary"
+            android:icon="@drawable/ic_cloud_circle"
+            android:singleLineTitle="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_ads">
+
+        <SwitchPreferenceCompat
+            android:key="ads_banner_grid3"
+            android:title="@string/pref_ads_banner_grid_title"
+            android:summary="@string/pref_ads_banner_grid_summary"
+            android:icon="@drawable/ic_border_bottom"
+            android:persistent="false"
+            android:defaultValue="false"
+            android:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="ads_banner_post3"
+            android:title="@string/pref_ads_banner_post_title"
+            android:summary="@string/pref_ads_banner_post_summary"
+            android:icon="@drawable/ic_border_top"
+            android:persistent="false"
+            android:defaultValue="false"
+            android:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="ads_interstitial3"
+            android:title="@string/pref_ads_interstitial_title"
+            android:summary="@string/pref_ads_interstitial_summary"
+            android:icon="@drawable/ic_fullscreen"
+            android:persistent="false"
+            android:defaultValue="false"
+            android:singleLineTitle="false" />
+
+        <Preference
+            android:key="ads_form"
+            android:title="@string/pref_consent_ads_form_title"
+            android:icon="@drawable/ic_person"
+            android:persistent="false"
+            android:singleLineTitle="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_privacy">
+
+        <SwitchPreferenceCompat
+            android:key="privacy_crash_reports"
+            android:title="@string/pref_privacy_crash_reports_title"
+            android:summary="@string/pref_privacy_crash_reports_summary"
+            android:icon="@drawable/ic_bug_report"
+            android:persistent="false"
+            android:defaultValue="true"
+            android:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="privacy_analytics"
+            android:title="@string/pref_privacy_analytics_title"
+            android:summary="@string/pref_privacy_analytics_summary"
+            android:icon="@drawable/ic_analytics"
+            android:persistent="false"
+            android:defaultValue="true"
+            android:singleLineTitle="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_network">
+
+        <SwitchPreferenceCompat
+            android:key="proxy"
+            android:title="@string/pref_network_proxy_title"
+            android:summary="@string/pref_network_proxy_summary"
+            android:icon="@drawable/ic_directions"
+            android:persistent="false"
+            android:defaultValue="false"
+            android:singleLineTitle="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

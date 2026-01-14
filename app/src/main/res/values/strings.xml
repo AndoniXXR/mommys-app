@@ -1,0 +1,1063 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mommys</string>
+    <string name="app_details">Version 1.0.0 © 2026</string>
+    <string name="app_version">v1.0.0</string>
+    
+    <!-- Common strings -->
+    <string name="search">Search</string>
+    <string name="clear">Clear</string>
+    <string name="copied">Copied</string>
+    <string name="stopped">Stopped</string>
+    <string name="cleared">Cleared</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="settings">Settings</string>
+    <string name="main_btn_search">Search</string>
+    <string name="dialogs_tag_blacklisted">%1$s added to blacklist</string>
+    <string name="dialogs_tag_is_already_blacklisted">Tag is already in blacklist</string>
+    
+    <!-- Launcher -->
+    <string name="launcher_title">Welcome to Mommys</string>
+    <string name="launcher_sub_title">Your personal image gallery</string>
+    <string name="launcher_icon_text">Made with ❤️</string>
+    <string name="launcher_read_and_agree">Please read and agree to continue</string>
+    <string name="launcher_cb_accept_pp">I have read and accept the Terms of Service and Privacy Policy</string>
+    <string name="launcher_language">Language</string>
+    <string name="launcher_button_start">Get Started</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="divider_horizontal"> | </string>
+    
+    <!-- Main -->
+    <string name="main_search_hint">Search tags…</string>
+    <string name="main_page_nr">Page %1$d</string>
+    <string name="main_page_nr_full">Page %1$d / %2$s</string>
+    <!-- Formato de página con rango de posts como app original: p1/?: 1-75 -->
+    <string name="main_page_nr_range">p%1$d/%2$s: %3$d–%4$d</string>
+    <!-- Con posts ocultos (H = Hidden, posts sin URLs porque no hay login a e621) -->
+    <string name="main_page_nr_range_hidden">p%1$d/%2$s: %3$d–%4$d (%5$dH)</string>
+    <string name="main_hidden_posts">%1$d posts hidden by blacklist</string>
+    <string name="main_blacklisted_posts">%1$d blacklisted</string>
+    
+    <!-- Blacklist dialog (exact from original app) -->
+    <string name="post_blacklisted_dialog_title">This post is blacklisted</string>
+    <string name="post_blacklisted_dialog_message">This post contains tags that you have blacklisted:\n\n%1$s\n\nDo you still want to view this post?</string>
+    
+    <!-- Mensajes de posts ocultos como la app original -->
+    <string name="main_hidden_post">%1$d post is hidden because you are not logged in</string>
+    <string name="main_hidden_posts_restricted">%1$d posts are hidden because you are not logged in</string>
+    <string name="main_btn_previous">Previous</string>
+    <string name="main_btn_next">Next</string>
+    <string name="main_back_again_to_exit">Press back again to exit</string>
+    
+    <!-- Menú principal (exact from original) -->
+    <string name="menu_login">Login</string>
+    <string name="menu_my_account">My account</string>
+    <string name="menu_my_profile">My profile</string>
+    <string name="menu_my_favourites">My favourites</string>
+    <string name="menu_my_upvotes">My upvotes</string>
+    <string name="menu_my_posts">My posts</string>
+    <string name="menu_my_log_out">Log out</string>
+    <string name="menu_go_to">Go to</string>
+    <string name="menu_go_to_page">Page</string>
+    <string name="menu_go_to_random_post">Random post</string>
+    <string name="menu_go_to_user">User</string>
+    <string name="menu_popular">Popular</string>
+    <string name="menu_popular_by_day">Popular by day</string>
+    <string name="menu_popular_by_week">Popular by week</string>
+    <string name="menu_popular_by_month">Popular by month</string>
+    
+    <!-- Popular Activity -->
+    <string name="popular_by_day">Popular by day</string>
+    <string name="popular_by_week">Popular by week</string>
+    <string name="popular_by_month">Popular by month</string>
+    <string name="popular_previous">Prev</string>
+    <string name="popular_next">Next</string>
+    <string name="popular_choose_day">Select day</string>
+    <string name="popular_choose_week">Select week</string>
+    <string name="popular_choose_month">Select month</string>
+    <string name="refresh">Refresh</string>
+    
+    <string name="menu_browse">Browse</string>
+    <string name="menu_browse_tags">Tags</string>
+    <string name="menu_browse_pools">Pools</string>
+    <string name="menu_about">About</string>
+    <string name="menu_about_about">About</string>
+    <string name="menu_about_help">Help</string>
+    <string name="menu_about_send_feedback">Send feedback</string>
+    <string name="menu_saved_searches">Saved searches</string>
+    <string name="menu_check_updates">Check for updates</string>
+    <string name="menu_settings">Settings</string>
+    
+    <!-- Update Checker -->
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_available_title">New version available</string>
+    <string name="update_new_version">New version: %1$s</string>
+    <string name="update_current_version">Current version: %1$s</string>
+    <string name="update_download">Download &amp; Install</string>
+    <string name="update_later">Later</string>
+    <string name="update_downloading">Downloading update…</string>
+    <string name="update_download_complete">Download complete. Installing…</string>
+    <string name="update_no_update">You have the latest version</string>
+    <string name="update_error">Error checking for updates: %1$s</string>
+    <string name="update_install_permission">Please enable \"Install unknown apps\" permission for this app</string>
+    
+    <!-- Browse Tags (from original app) -->
+    <string name="browse_tags_title">Tags</string>
+    <string name="browse_tags_subtitle">Browse among all the existing tags. Click on an item in the list to show options. Search for tags and order them in the menu</string>
+    <string name="browse_tags_menu_search">Search by name</string>
+    <string name="browse_tags_menu_order">Order by</string>
+    <string name="browse_tags_search_hint">Tag</string>
+    <string name="browse_tags_search_message">Search for tags by name (supports patterns)</string>
+    <string name="browse_tags_item_info">Posts: %1$d, id: %2$d, category: %3$s</string>
+    <string name="browse_tags_item_related_tags">Related tags: %1$s</string>
+    <string name="tags_sort_by_date">Date modified</string>
+    <string name="tags_sort_by_name">Name</string>
+    <string name="tags_sort_by_count">Count</string>
+    
+    <!-- Browse Pools (from original app) -->
+    <string name="browse_pools_title">Pools</string>
+    <string name="browse_pools_subtitle">Browse among all the existing pools, sorted by date updated. Click on an item in the list to show options. Search for pool titles in the menu</string>
+    <string name="browse_pools_menu_search">Search by title</string>
+    <string name="browse_pools_search_hint">Title</string>
+    <string name="browse_pools_search_message">Search for pools by title</string>
+    <string name="browse_pools_item_info">Posts: %1$d, id: %2$d, user: %3$s</string>
+    <string name="browse_pools_item_date">Created: %1$s, updated: %2$s</string>
+    <string name="browse_pools_item_description">Description: %1$s</string>
+    
+    <!-- Tag menu options -->
+    <string name="tag_menu_search">Search posts</string>
+    <string name="tag_menu_add_to_search">Add to search</string>
+    <string name="tag_menu_add_to_blacklist">Add to blacklist</string>
+    <string name="tag_menu_copy">Copy</string>
+    
+    <!-- Pool menu options -->
+    <string name="pool_menu_open">Open pool</string>
+    <string name="pool_menu_add_to_search">Add to search</string>
+    
+    <!-- About Activity -->
+    <string name="about_title">About</string>
+    <string name="about_about">Welcome to Mommys!\n\nA client for e621/e926.\n\nTo report problems or send feedback, use the Send feedback button below.</string>
+    <string name="about_flavour">Build flavour: %1$s</string>
+    <string name="no_email_app">No email app found</string>
+    
+    <!-- Menú y filtros (exact from original) -->
+    <string name="saved_title">Saved searches</string>
+    <string name="menu_filter">Filters &amp; ordering</string>
+    
+    <!-- Filtros de Rating -->
+    <string name="filter_rating">Rating</string>
+    <string name="filter_rating_show_e">Show explicit</string>
+    <string name="filter_rating_show_q">Show questionable</string>
+    <string name="filter_rating_show_s">Show safe</string>
+    
+    <!-- Filtros de Tipo -->
+    <string name="filter_type">Post type</string>
+    <string name="filter_type_all">Show all</string>
+    <string name="filter_type_only_images">Only images</string>
+    <string name="filter_type_only_videos">Only videos</string>
+    <string name="filter_type_only_gifs">Only gifs</string>
+    
+    <!-- Ordenación -->
+    <string name="filter_order">Order by</string>
+    <string name="filter_order_page_by">Order posts by</string>
+    <string name="filter_order_by_newest">Newest first (default)</string>
+    <string name="filter_order_by_oldest">Oldest first</string>
+    <string name="filter_order_by_score">Highest score</string>
+    <string name="filter_order_by_favs">Most favourites</string>
+    
+    <!-- Go to page dialog -->
+    <string name="go_to_page_title">Go to page</string>
+    <string name="go_to_page_message">Input the page to go to (1–750)\nCurrent: %1$d\nLast: %2$d</string>
+    <string name="go_to_page_hint">Page number</string>
+    <string name="go_to_page_error">Invalid page number</string>
+    <string name="go_to_page_error_range">Input a number between 1 and %1$d</string>
+    <string name="go_to_page_error_fetch">Failed to fetch last page</string>
+    
+    <!-- Go to user dialog -->
+    <string name="go_to_user_title">Go to user</string>
+    <string name="go_to_user_message">Input the username or user id of the user to go to</string>
+    <string name="go_to_user_hint">Username or user ID</string>
+    
+    <!-- Loading -->
+    <string name="loading">Loading…</string>
+    <string name="loading_message">Loading %1$s…</string>
+    <string name="loading_random_post">random post</string>
+    <string name="go">Go</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_popular">Popular</string>
+    <string name="nav_pools">Pools</string>
+    <string name="nav_saved">Saved</string>
+    <string name="nav_profile">Profile</string>
+    
+    <!-- Profile -->
+    <string name="profile_title">%1$s\'s profile</string>
+    <string name="profile_error">Failed to fetch profile\nCheck your internet connection and try again</string>
+    <string name="profile_menu_view_favourites">View user\'s favourites</string>
+    <string name="profile_menu_view_uploads">View user\'s uploads</string>
+    <string name="profile_avatar">User avatar</string>
+    
+    <!-- Login -->
+    <string name="login_title">Login</string>
+    <string name="login_subtitle">Enter your username and API key to access your account</string>
+    <string name="login_subtitle_instructions">Enter your API key (not your password!) and login to e621.\n\nDon\'t have an API key yet? Follow these steps:\n 1. Login and go to https://e621.net/users/home\n 2. Click on \"Manage API Access\"\n 3. Re-enter your password and click Submit\n 4. Generate an API key and copy it\n 5. Use this API key together with your username to login to the app</string>
+    <string name="login_description">Login with your e926 account to access all features</string>
+    <string name="login_username">Username</string>
+    <string name="login_username_hint">Input your username</string>
+    <string name="login_api_key">API Key</string>
+    <string name="login_api_key_hint">Input your API key</string>
+    <string name="login_button">Login</string>
+    <string name="login_cancel">Cancel</string>
+    <string name="login_success_toast">Logged in successfully as %1$s</string>
+    <string name="login_username_empty">A username is required</string>
+    <string name="login_api_key_empty">An API key is required</string>
+    <string name="login_error_title">Login failed</string>
+    <string name="login_error_message">Error: %1$s</string>
+    <string name="login_error_wrong_credentials">Wrong username or API key</string>
+    <string name="login_error_network">Network error: %1$s</string>
+    <string name="login_anyway">Login anyway</string>
+    <string name="hint_username">Username</string>
+    <string name="hint_api_key">API Key</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="btn_login">Login</string>
+    <string name="btn_skip">Skip for now</string>
+    <string name="txt_register">Don\'t have an account? Register</string>
+    <string name="error_username_required">Username is required</string>
+    <string name="error_api_key_required">API Key is required</string>
+    
+    <!-- Post -->
+    <string name="post_info">Info</string>
+    <string name="post_title">Post</string>
+    <string name="post_tags">Tags</string>
+    <string name="post_comments">Comments</string>
+    <string name="post_download">Download</string>
+    <string name="post_share">Share</string>
+    <string name="post_favorite">Favorite</string>
+    <string name="post_vote_up">Upvote</string>
+    <string name="post_vote_down">Downvote</string>
+    <string name="post_score">Score: %d</string>
+    <string name="unknown_artist">Unknown artist</string>
+    <string name="share_post">Share post</string>
+    <string name="btn_favorite">Favorite</string>
+    <string name="btn_download">Download</string>
+    <string name="btn_share">Share</string>
+    
+    <!-- Post Activity Buttons -->
+    <string name="post_back_button">Back</string>
+    <string name="post_description">Description</string>
+    <string name="post_details">Details</string>
+    <string name="post_parent">Parent: %1$s</string>
+    <string name="post_child">Child: %1$s</string>
+    <string name="post_has_children">Has children</string>
+    <string name="post_pool">Pool: %1$s</string>
+    <string name="post_select_child">Select child</string>
+    <string name="post_select_pool">Select pool</string>
+    <string name="post_created">Created:</string>
+    <string name="post_uploader">Uploaded by:</string>
+    <string name="post_size">Size:</string>
+    <string name="post_format">Format:</string>
+    <string name="post_file_size">File size:</string>
+    <string name="post_sources">Sources:</string>
+    
+    <!-- Content Descriptions para Post -->
+    <string name="cd_vote_up">Vote up</string>
+    <string name="cd_vote_down">Vote down</string>
+    <string name="cd_favorite">Favorite</string>
+    <string name="cd_comments">Comments</string>
+    <string name="cd_download">Download</string>
+    <string name="cd_more">More options</string>
+    <string name="cd_expand">Expand/collapse</string>
+    <string name="cd_post_image">Post image</string>
+    <string name="cd_play_video">Play video</string>
+    <string name="cd_toggle_mute">Toggle mute</string>
+    <string name="cd_score_up">Score up</string>
+    <string name="cd_score_down">Score down</string>
+    <string name="cd_favorites">Favorites count</string>
+    <string name="cd_main_refresh">Refresh</string>
+    
+    <!-- Post browser/errors -->
+    <string name="post_open_in_browser_failed">No compatible browser found. The URL was copied to the clipboard.</string>
+    <string name="post_error_not_logged_in">You need to be logged in to view this post</string>
+    <string name="post_error_deleted">This post has been deleted</string>
+    
+    <!-- Actions -->
+    <string name="action_favourite_added">Favourite added</string>
+    <string name="action_favourite_removed">Favourite removed</string>
+    <string name="action_favourite_already_added">Already in favourites</string>
+    <string name="action_voted_up">Upvote added</string>
+    <string name="action_voted_up_already">Previously voted, upvote kept</string>
+    <string name="action_voted_down">Downvote added</string>
+    <string name="action_voted_down_already">Previously downvoted, downvote kept</string>
+    <string name="action_voted_removed_up">Upvote removed</string>
+    <string name="action_voted_removed_down">Downvote removed</string>
+    <string name="action_forbidden">403 forbidden! Are you logged in?</string>
+    <string name="action_unknown">Unknown error: %1$d %2$s</string>
+    <string name="action_not_logged_in">You need to be logged in to vote</string>
+    <string name="action_downloading">Downloading…</string>
+    <string name="action_downloaded">Download complete</string>
+    <string name="action_download_failed">Download failed</string>
+    <string name="permission_required">Permission required</string>
+    <string name="permission_required_storage">Storage permission required!</string>
+    <string name="permission_required_notification">Grant the notification permission to receive notifications!</string>
+    
+    <!-- Multi-select (exact from original app) -->
+    <string name="selected_clear">Clear selection</string>
+    <string name="selected_download">Download</string>
+    <string name="selected_select_all">Select all</string>
+    <string name="no_posts_selected">No posts selected</string>
+    <string name="downloading_posts">Downloading %1$d posts…</string>
+    
+    <!-- Batch Download Notifications (exact from original app) -->
+    <string name="worker_download_start">Download started! Check the notification for progress.</string>
+    <string name="worker_download_notification_title">Downloading posts (%1$d/%2$d), %3$sMB</string>
+    <string name="worker_download_done">Done - downloaded %1$d posts!</string>
+    <string name="worker_download_cancelled">Cancelled - downloaded %1$d posts!</string>
+    <string name="worker_download_error_toast">Failed to download. Error: %1$s</string>
+    
+    <!-- Download Notifications -->
+    <string name="worker_download_notification_channel_name">Downloads</string>
+    <string name="worker_download_notification_channel_description">Shows a notification while downloading posts</string>
+    <string name="download_notification_title">Downloading…</string>
+    <string name="download_notification_complete">Download complete</string>
+    <string name="download_notification_error">Download failed</string>
+    
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_general">General</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_downloads">Downloads</string>
+    <string name="settings_cache">Cache</string>
+    <string name="settings_privacy">Privacy</string>
+    <string name="settings_about">About</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_system">System default</string>
+    <string name="settings_clear_cache">Clear cache</string>
+    <string name="settings_cache_cleared">Cache cleared</string>
+    <string name="settings_account">Account</string>
+    <string name="settings_content">Content</string>
+    <string name="settings_storage">Storage</string>
+    <string name="settings_grid_columns">Grid columns</string>
+    <string name="settings_dark_mode">Dark mode</string>
+    <string name="settings_safe_mode">Safe mode</string>
+    <string name="settings_safe_mode_desc">Only show safe content</string>
+    <string name="settings_auto_play">Auto-play videos</string>
+    <string name="btn_clear">Clear</string>
+    <string name="btn_logout">Logout</string>
+    <string name="not_logged_in">Not logged in</string>
+    
+    <!-- Pin Code -->
+    <string name="pin_title">Enter PIN</string>
+    <string name="pin_set_title">Set a pin code</string>
+    <string name="pin_set_message">Set a four-digit pin code that needs to be entered when launching the app.</string>
+    <string name="pin_set_hint">0000–9999</string>
+    <string name="pin_confirm_title">Confirm PIN</string>
+    <string name="pin_wrong">Wrong PIN</string>
+    <string name="pin_use_biometric">Use biometric</string>
+    <string name="pin_enter_title">Enter PIN</string>
+    <string name="pin_enter_subtitle">Enter your 4-digit PIN</string>
+    <string name="pin_set_subtitle">Enter a 4-digit PIN</string>
+    <string name="pin_confirm_subtitle">Confirm your PIN</string>
+    <string name="pin_set_success">PIN set successfully</string>
+    <string name="pin_mismatch">PINs don\'t match, try again</string>
+    <string name="pin_incorrect">Incorrect PIN</string>
+    <string name="backspace">Backspace</string>
+    <string name="save">Save</string>
+    <string name="saved">Saved</string>
+    <string name="disable">Disable</string>
+    
+    <!-- Blacklist -->
+    <string name="blacklist">Blacklist</string>
+    <string name="blacklist_title">Posts matching a line in the blacklist will be hidden</string>
+    <string name="blacklist_add">Add tag</string>
+    <string name="blacklist_empty">No blacklisted tags</string>
+    <string name="blacklist_add_title">Add to blacklist</string>
+    <string name="blacklist_tag_hint">Tag name</string>
+    <string name="blacklist_added">"%s" added to blacklist</string>
+    <string name="blacklist_remove">Remove</string>
+    <string name="blacklist_remove_title">Remove from blacklist</string>
+    <string name="blacklist_remove_message">Remove "%s" from blacklist?</string>
+    <string name="blacklist_removed">"%s" removed from blacklist</string>
+    <string name="blacklist_saved">Blacklist saved</string>
+    <string name="blacklist_save_close">Save blacklist</string>
+    <string name="blacklist_export_hint">Example:\nanthro dog\nmy_little_pony\ninside\ndragon -flying</string>
+    <string name="blacklist_export_menu_copy">Copy to clipboard</string>
+    <string name="blacklist_export_menu_share_plain_text">Share as plain text</string>
+    <string name="blacklist_export_menu_to_file">Save to file</string>
+    <string name="blacklist_import_menu_import_from_file">Import from file</string>
+    <string name="blacklist_menu_help">Help</string>
+    <string name="blacklist_menu_help_text">Put a tag you want to blacklist on its own line. Example:\n male\n horse\n fox\n\n This will hide all posts with the entered tags. ALL male posts, ALL posts with a horse, and ALL fox posts will be hidden.\n\n You can also combine tags on a line. Example:\n female fox solo\n male wolf outside\n Each line is regarded separately so posts with ALL the tags on a given line will be hidden, but each line will be matched individually.\n\n You can also blacklist a tag only if the post also contains another tag by using a minus sign. Example:\n female -solo\n This will hide all female posts that are NOT solo.</string>
+    <string name="menu_order_alphabetically">Order alphabetically</string>
+    
+    <!-- Post Show More/Less -->
+    <string name="post_show_more">Show more…</string>
+    <string name="post_show_less">Show less</string>
+    <string name="post_loading_text" formatted="false">%.2f MB / %.2f MB</string>
+    
+    <!-- Tag Categories (like original) -->
+    <string name="tag_category_artist">Artist</string>
+    <string name="tag_category_character">Character</string>
+    <string name="tag_category_copyright">Copyright</string>
+    <string name="tag_category_species">Species</string>
+    <string name="tag_category_general">General</string>
+    <string name="tag_category_lore">Lore</string>
+    <string name="tag_category_meta">Meta</string>
+    <string name="tag_category_invalid">Invalid</string>
+    
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="error">Error</string>
+    <string name="error_generic">An error occurred. Please try again.</string>
+    <string name="no_results">No results found</string>
+    <string name="no_more_results">End of results</string>
+    <string name="retry">Retry</string>
+    <string name="share">Share</string>
+    <string name="copy">Copy</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="sort">Sort</string>
+    
+    <!-- Comments -->
+    <string name="comments_title">Comments</string>
+    <string name="no_comments">No comments yet</string>
+    <string name="comment_create_title">Add comment</string>
+    <string name="comment_create_message">Write your comment below:</string>
+    <string name="comment_create_hint">Your comment...</string>
+    <string name="comment_post_reply">Post</string>
+    <string name="comment_sort_wait">Please wait while comments are loading</string>
+    <string name="comment_sort_newest">Newest first</string>
+    <string name="comment_sort_oldest">Oldest first</string>
+    <string name="comment_sort_score">By score</string>
+    <string name="comment_posted">Comment posted</string>
+    <string name="comment_error">Failed to post comment</string>
+    
+    <!-- Content descriptions -->
+    <string name="cd_main_menu">Menu</string>
+    <string name="cd_search">Search</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_image">Image</string>
+    <string name="cd_insert_suggestion">Insert suggestion</string>
+    <string name="cd_clear_search">Clear search</string>
+    
+    <!-- Content descriptions para barra de botones (como la app original) -->
+    <string name="cd_posts_vote_up">Vote up</string>
+    <string name="cd_posts_vote_down">Vote down</string>
+    <string name="cd_posts_fav">Favourite post</string>
+    <string name="cd_posts_comments">Comments</string>
+    <string name="cd_posts_download">Download post</string>
+    <string name="cd_posts_more">More options</string>
+    
+    <!-- Search suggestions -->
+    <string name="suggestion_type_recent">Recent</string>
+    <string name="suggestion_type_saved">Saved</string>
+    <string name="suggestion_type_tag">Tag</string>
+    <string name="suggestion_type_operator">Operator</string>
+    <string name="search_no_suggestions">No suggestions</string>
+    <string name="search_history_title">Recent searches</string>
+    <string name="search_clear_history">Clear history</string>
+    <string name="search_save">Save search</string>
+    <string name="saved_searches_title">Saved searches</string>
+    <string name="saved_search_name_hint">Search name</string>
+    <string name="saved_search_saved">Search saved</string>
+    <string name="saved_search_deleted">Search deleted</string>
+    <string name="saved_search_updated">Search updated</string>
+    <string name="saved_option_open">Open</string>
+    <string name="saved_option_edit">Edit</string>
+    <string name="saved_option_delete">Delete</string>
+    <string name="saved_edit_title">Edit saved search</string>
+    <string name="saved_no_searches">No saved searches</string>
+    <string name="favourites_login_required">You need to login to view your favourites</string>
+    
+    <!-- Saved Searches Activity -->
+    <string name="saved_add">Add search</string>
+    <string name="saved_clear_all">Clear all</string>
+    <string name="saved_order_by">Order by</string>
+    <string name="saved_order_date_used">Date used</string>
+    <string name="saved_order_date_created">Date created</string>
+    <string name="saved_order_name">Name</string>
+    <string name="saved_order_tags">Tags</string>
+    <string name="saved_import">Import</string>
+    <string name="saved_export">Export</string>
+    <string name="saved_continue">Continue</string>
+    <string name="saved_follow">Follow</string>
+    <string name="saved_unfollow">Unfollow</string>
+    <string name="saved_page_info">Page %1$d • Used %2$s</string>
+    <string name="saved_add_title">Save current search</string>
+    <string name="saved_add_hint">Enter a name for this search</string>
+    <string name="saved_confirm_delete">Delete this saved search?</string>
+    <string name="saved_confirm_clear">Delete all saved searches?</string>
+    <string name="saved_exported">Saved searches exported</string>
+    <string name="saved_imported">Imported %1$d searches</string>
+    <string name="saved_following">Now following this search</string>
+    <string name="saved_unfollowed">Unfollowed this search</string>
+    
+    <!-- Tag click menu (como la app original post_tag_clicked) -->
+    <string name="tag_menu_add_to_saved">Add to Saved searches</string>
+    <string name="tag_menu_follow">Follow tag</string>
+    <string name="tag_menu_unfollow">Unfollow tag</string>
+    <string name="tag_menu_remove_from_search">Remove from current search</string>
+    <string name="tag_menu_view_wiki">View Wiki for this tag</string>
+    <string name="tag_copied">Tag copied to clipboard</string>
+    <string name="tag_added_to_search">Tag added to current search</string>
+    <string name="tag_removed_from_search">Tag removed from current search</string>
+    <string name="tag_added_to_saved">Tag added to saved searches</string>
+    <string name="tag_already_in_saved">Tag already in saved searches</string>
+    <string name="tag_added_to_blacklist">Tag added to blacklist</string>
+    <string name="tag_already_in_blacklist">Tag already in blacklist</string>
+    <string name="tag_following">Now following this tag</string>
+    <string name="tag_unfollowed">Unfollowed this tag</string>
+    <string name="tag_already_following">Tag is already being followed</string>
+    <string name="tag_not_following">Tag is not being followed</string>
+    
+    <!-- ============ PREFERENCES ============ -->
+    
+    <!-- Main Settings Menu -->
+    <string name="pref_general">General</string>
+    <string name="pref_general_summary">e621/e926, language, theme, thumbnail quality, blacklist, pin code, etc.</string>
+    <string name="pref_following">Follow tags</string>
+    <string name="pref_following_summary">Follow tags, artists, etc.</string>
+    <string name="pref_searching">Searching &amp; tags</string>
+    <string name="pref_searching_summary">Search history, suggestions, posts per page, etc.</string>
+    <string name="pref_grid_view">Grid view customisation</string>
+    <string name="pref_grid_view_summary">Show stats, info button, posts per row, etc.</string>
+    <string name="pref_post_view">Post view customisation</string>
+    <string name="pref_post_view_summary">Expand tags, data saver, back button, etc.</string>
+    <string name="pref_storage">Storage and downloads</string>
+    <string name="pref_storage_summary">Save location, cache, file names, etc.</string>
+    
+    <!-- Export & Import -->
+    <string name="pref_export">Export &amp; import</string>
+    <string name="pref_export_export_title">Export app data</string>
+    <string name="pref_export_export_summary">Export all user data and settings to a backup file</string>
+    <string name="pref_export_import_title">Import app data</string>
+    <string name="pref_export_import_summary">Import user data, saved searches and settings from a backup file.\n\nWarning! This will overwrite all of your app data, including settings and saved searches!</string>
+    <string name="pref_export_encrypt_dialog_title">Encrypt exported file?</string>
+    <string name="pref_export_encrypt_dialog_message">Do you want the exported file to be encrypted? (prevents other apps and users from reading its contents)</string>
+    <string name="encrypt">Encrypt</string>
+    <string name="export_success">File exported to %s</string>
+    <string name="export_error">Error: %s</string>
+    <string name="import_success">Data imported, app is restarting</string>
+    <string name="import_error">Error: %s</string>
+    <string name="import_invalid_file">Not a valid tws file :)</string>
+    <string name="import_decrypt_error">Couldn\'t decrypt the file</string>
+    <string name="import_file_not_found">File not found</string>
+    
+    <!-- Cloudflare -->
+    <string name="pref_cloudflare">Cookies &amp; Cloudflare</string>
+    <string name="pref_cloudflare_self_title">Reload cookies/Cloudflare</string>
+    <string name="pref_cloudflare_self_summary">Posts or thumbnails not loading? The API calls are possibly blocked by CloudFlare. A captcha must be completed to use the app. Click on this to open e926 manually to get the necessary cookies.</string>
+    <string name="cookies_saved">Done. Please reload the pages/redo your search</string>
+    <string name="cookies_save_error">Failed to save cookies</string>
+    <string name="done">Done</string>
+    
+    <!-- Ads -->
+    <string name="pref_ads">Optional ads</string>
+    <string name="pref_ads_banner_grid_title">Banner ads in the grid</string>
+    <string name="pref_ads_banner_grid_summary">Display banner ads below the grid view</string>
+    <string name="pref_ads_banner_post_title">Banner ads above posts</string>
+    <string name="pref_ads_banner_post_summary">Display banner ads above posts</string>
+    <string name="pref_ads_interstitial_title">Enable interstitial ads</string>
+    <string name="pref_ads_interstitial_summary">Occasionally display a fullscreen ad when returning from viewing posts</string>
+    <string name="pref_consent_ads_form_title">Show ad consent form</string>
+    
+    <!-- Privacy -->
+    <string name="pref_privacy">Privacy</string>
+    <string name="pref_privacy_crash_reports_title">Send crash reports</string>
+    <string name="pref_privacy_crash_reports_summary">Enable to contribute with crash reports to improve the app</string>
+    <string name="pref_privacy_analytics_title">Send analytics</string>
+    <string name="pref_privacy_analytics_summary">Enable to contribute with analytics data to improve the app</string>
+    <string name="restart_app_for_changes">Restart the app for changes to take effect</string>
+    
+    <!-- Network -->
+    <string name="pref_network">Network</string>
+    <string name="pref_network_proxy_title">Proxy configuration</string>
+    <string name="pref_network_proxy_summary">Enable to use a proxy server instead of connecting directly to e926/e621.</string>
+    <string name="pref_network_proxy_summary_">You are connecting through %1$s:%2$d</string>
+    <string name="proxy_host_hint">Proxy IP or address</string>
+    <string name="proxy_port_hint">Proxy port (0–65535)</string>
+    <string name="proxy_username_hint">Username (optional)</string>
+    <string name="proxy_password_hint">Password (optional)</string>
+    
+    <!-- Following Settings -->
+    <string name="pref_following_enabled_title">Following enabled</string>
+    <string name="pref_following_enabled_summary">Enable to get notified when a tag you follow has new posts</string>
+    <string name="pref_following_manage_title">Manage followed tags</string>
+    <string name="pref_following_only_unmetered_title">Unmetered networks only</string>
+    <string name="pref_following_only_unmetered_summary">Enable to check only when using WiFi</string>
+    <string name="pref_following_period_title">Check for new posts every</string>
+    <string name="pref_following_display_tag_title">Display tag in notification</string>
+    <string name="pref_following_display_tag_summary">Disable to hide the tag in the notification</string>
+    <string name="pref_following_display_in_saved_search_title">Indicator in Saved searches</string>
+    <string name="pref_following_display_in_saved_search_summary">Enable to display an indicator for followed tags in saved searches</string>
+    <string name="pref_following_view_log_title">View app logs</string>
+    
+    <!-- Following edit dialog -->
+    <string name="following_edit_title">Edit followed tags</string>
+    <string name="following_edit_message">Add the tags that you want to follow, one per line. Combine several tags on a line for advanced queries</string>
+    <string name="following_edit_hint">Example:\nanthro\nmale -female feral\nhorse -outside\nwolf -male favcount:>10</string>
+    
+    <!-- App Logs -->
+    <string name="app_logs_title">App logs</string>
+    <string name="app_logs_menu_share">Share logs</string>
+    <string name="app_logs_empty">No logs available</string>
+    
+    <!-- Following Notifications -->
+    <string name="following_notification_channel_title">Following</string>
+    <string name="following_notification_channel_description">Get notifications when there are new posts for tags you follow!</string>
+    <string name="following_notification_title">New Posts Available</string>
+    <string name="notification_permission_required">Notification permission is required to receive alerts for new posts</string>
+    
+    <!-- Account Preferences -->
+    <string name="pref_account">Account</string>
+    <string name="pref_account_info">Account info</string>
+    <string name="pref_account_not_logged_in">Not logged in</string>
+    <string name="pref_account_logout">Log out</string>
+    <string name="pref_account_login">Log in</string>
+    <string name="logged_out">Logged out successfully</string>
+    
+    <!-- About Preferences -->
+    <string name="pref_about">About</string>
+    <string name="pref_about_version">Version</string>
+    <string name="pref_about_help">Help</string>
+    <string name="pref_about_help_message">Visit e621.net/help for more information</string>
+    
+    <!-- General Settings -->
+    <string name="pref_general_host_category">Host</string>
+    <string name="pref_consent_above_18_title">I am 18+ years old</string>
+    <string name="pref_consent_above_18_summary">Enable explicit content (e621.net)</string>
+    <string name="pref_general_host_title">API Host</string>
+    <string name="pref_general_host_summary">Select the API host to use</string>
+    
+    <string name="pref_general_appearance_category">Appearance</string>
+    <string name="pref_general_dark_mode_title">Theme</string>
+    <string name="pref_general_dark_mode_summary">Select app theme</string>
+    <string name="pref_general_post_quality_title">Post quality</string>
+    <string name="pref_general_post_quality_summary">Quality of images when viewing posts</string>
+    <string name="pref_general_thumb_quality_title">Thumbnail quality</string>
+    <string name="pref_general_thumb_quality_summary">Quality of thumbnails in grid view</string>
+    
+    <string name="pref_general_blacklist_category">Blacklist</string>
+    <string name="pref_general_blacklist_enable_title">Enable blacklist</string>
+    <string name="pref_general_blacklist_enable_summary">Hide posts matching blacklisted tags</string>
+    <string name="pref_general_blacklist_title">Edit blacklist</string>
+    <string name="pref_general_blacklist_summary">Manage your blacklisted tags</string>
+    
+    <string name="pref_general_privacy_category">Privacy</string>
+    <string name="pref_general_hide_in_task_title">Hide in recent apps</string>
+    <string name="pref_general_hide_in_task_summary">Blur app preview in recent apps</string>
+    <string name="pref_general_start_in_saved_title">Start in saved searches</string>
+    <string name="pref_general_start_in_saved_summary">Open saved searches on app launch</string>
+    
+    <!-- Grid Settings -->
+    <string name="pref_grid_layout_category">Layout</string>
+    <string name="pref_grid_width_title">Grid columns</string>
+    <string name="pref_grid_width_summary">Number of columns in the grid</string>
+    <string name="pref_grid_height_title">Thumbnail height</string>
+    <string name="pref_grid_height_summary">Height of thumbnails in dp</string>
+    <string name="pref_search_posts_per_page_title">Posts per page</string>
+    <string name="pref_search_posts_per_page_summary">Number of posts to load per page</string>
+    
+    <string name="pref_grid_display_category">Display</string>
+    <string name="pref_grid_stats_title">Show statistics</string>
+    <string name="pref_grid_stats_summary">Show post score and favorites on thumbnails</string>
+    <string name="pref_grid_info_title">Show info indicator</string>
+    <string name="pref_grid_info_summary">Show file type indicator on thumbnails</string>
+    <string name="pref_grid_colours_title">Show rating colors</string>
+    <string name="pref_grid_colours_summary">Color border based on post rating</string>
+    <string name="pref_grid_gifs_title">Animate GIFs</string>
+    <string name="pref_grid_gifs_summary">Play GIF animations in grid view</string>
+    
+    <string name="pref_grid_viewed_category">Viewed Posts</string>
+    <string name="pref_grid_darken_viewed_title">Darken viewed posts</string>
+    <string name="pref_grid_darken_viewed_summary">Dim posts you have already viewed</string>
+    <string name="pref_grid_hide_viewed_title">Hide viewed posts</string>
+    <string name="pref_grid_hide_viewed_summary">Completely hide posts you have viewed</string>
+    <string name="pref_grid_darken_clear_title">Clear viewed history</string>
+    <string name="pref_grid_darken_clear_summary">Clear all viewed posts from history</string>
+    <string name="pref_grid_darken_clear_count_summary">%1$d posts in viewed history</string>
+    <string name="pref_grid_darken_cleared">Viewed history cleared</string>
+    
+    <string name="pref_grid_behavior_category">Behavior</string>
+    <string name="pref_grid_refresh_title">Pull to refresh</string>
+    <string name="pref_grid_refresh_summary">Enable pull down to refresh posts</string>
+    <string name="pref_grid_navigate_title">Edge navigation</string>
+    <string name="pref_grid_navigate_summary">Tap edges to navigate pages</string>
+    
+    <!-- Post Settings -->
+    <string name="pref_post_display_category">Display</string>
+    <string name="pref_post_expand_tags_title">Expand tags by default</string>
+    <string name="pref_post_expand_tags_summary">Show all tags when opening a post</string>
+    <string name="pref_post_expand_description_title">Expand description</string>
+    <string name="pref_post_expand_description_summary">Show full description when opening a post</string>
+    <string name="pref_post_hide_comments_title">Hide comments</string>
+    <string name="pref_post_hide_comments_summary">Do not show comments section</string>
+    <string name="pref_post_hide_score_title">Hide score</string>
+    <string name="pref_post_hide_score_summary">Do not show post score</string>
+    
+    <string name="pref_post_navigation_category">Navigation</string>
+    <string name="pref_post_back_button_title">Show back button</string>
+    <string name="pref_post_back_button_summary">Display a back button in post view</string>
+    <string name="pref_post_back_button_location_title">Back button position</string>
+    <string name="pref_post_back_button_location_summary">Where to display the back button</string>
+    <string name="pref_post_edge_navigation_title">Edge navigation</string>
+    <string name="pref_post_edge_navigation_summary">Tap edges to navigate between posts</string>
+    <string name="pref_post_pull_to_close_title">Pull to close</string>
+    <string name="pref_post_pull_to_close_summary">Pull down on image to close post</string>
+    
+    <string name="pref_post_video_category">Video</string>
+    <string name="pref_post_default_video_quality_title">Default video quality</string>
+    <string name="pref_post_video_muted_title">Mute videos</string>
+    <string name="pref_post_video_muted_summary">Start videos with audio muted</string>
+    <string name="pref_post_video_autoplay_title">Autoplay videos</string>
+    <string name="pref_post_video_autoplay_summary">Automatically play videos when viewing</string>
+    <string name="pref_post_video_fullscreen_title">Fullscreen videos</string>
+    <string name="pref_post_video_fullscreen_summary">Play videos in fullscreen by default</string>
+    
+    <string name="pref_post_ui_category">UI</string>
+    <string name="pref_post_keep_screen_awake_title">Keep screen awake</string>
+    <string name="pref_post_keep_screen_awake_summary">Prevent screen from turning off</string>
+    <string name="pref_post_load_hq_title">Load high quality</string>
+    <string name="pref_post_load_hq_summary">Always load highest quality version</string>
+    <string name="pref_post_data_saver_title">Data saver</string>
+    <string name="pref_post_data_saver_summary">Load lower quality to save data</string>
+    <string name="pref_post_screen_on_title">Keep screen on</string>
+    <string name="pref_post_screen_on_summary">Prevent screen from turning off while viewing posts</string>
+    <string name="pref_post_external_links_title">Open links externally</string>
+    <string name="pref_post_external_links_summary">Open links in external browser</string>
+    
+    <string name="pref_post_actions_category">Actions</string>
+    <string name="pref_post_long_press_download_title">Long press to download</string>
+    <string name="pref_post_long_press_download_summary">Download image on long press</string>
+    <string name="pref_post_double_tap_favorite_title">Double tap to favorite</string>
+    <string name="pref_post_double_tap_favorite_summary">Add to favorites on double tap</string>
+    <string name="pref_post_action_upvote_on_fav_title">Upvote on favorite</string>
+    <string name="pref_post_action_upvote_on_fav_summary">Automatically upvote when favoriting</string>
+    <string name="pref_post_action_upvote_on_download_title">Upvote on download</string>
+    <string name="pref_post_action_upvote_on_download_summary">Automatically upvote when downloading</string>
+    <string name="pref_post_action_fav_on_download_title">Favorite on download</string>
+    <string name="pref_post_action_fav_on_download_summary">Automatically favorite when downloading</string>
+    
+    <!-- Search Settings -->
+    <string name="pref_search_history_category">History</string>
+    <string name="pref_search_history_title">Save search history</string>
+    <string name="pref_search_history_summary">Remember your recent searches</string>
+    <string name="pref_search_clear_history_title">Clear search history</string>
+    <string name="pref_search_clear_history_summary">Delete all search history</string>
+    <string name="pref_search_history_cleared">Search history cleared</string>
+    
+    <string name="pref_search_suggestions_category">Suggestions</string>
+    <string name="pref_search_suggestions_title">Show suggestions</string>
+    <string name="pref_search_suggestions_summary">Display tag suggestions while typing</string>
+    
+    <string name="pref_search_behavior_category">Behavior</string>
+    <string name="pref_search_saved_new_window_title">Open saved in new window</string>
+    <string name="pref_search_saved_new_window_summary">Open saved searches in a new activity</string>
+    <string name="pref_search_last_on_start_title">Restore last search</string>
+    <string name="pref_search_last_on_start_summary">Load last search when opening app</string>
+    <string name="pref_search_newest_first_title">Newest first</string>
+    <string name="pref_search_newest_first_summary">Order results by newest first</string>
+    
+    <!-- Storage Settings -->
+    <string name="pref_storage_folder_category">Download Folder</string>
+    <string name="pref_storage_custom_folder_enabled_title">Use custom folder</string>
+    <string name="pref_storage_custom_folder_enabled_summary">Save downloads to a custom folder</string>
+    <string name="pref_storage_custom_folder_title">Select folder</string>
+    <string name="pref_storage_custom_folder_summary">Choose where to save downloads</string>
+    <string name="pref_storage_custom_folder_default">Default folder</string>
+    <string name="pref_storage_folder_picker_coming_soon">Folder picker coming soon</string>
+    <string name="pref_storage_file_name_title">File name format</string>
+    <string name="pref_storage_file_name_summary">Customize downloaded file names</string>
+    <string name="pref_storage_file_name_info">Available: {id}, {md5}, {artist}, {rating}</string>
+    <string name="pref_storage_file_name_dialog_title">Customize file name</string>
+    
+    <string name="pref_storage_options_category">Options</string>
+    <string name="pref_storage_overwrite_title">Overwrite existing</string>
+    <string name="pref_storage_overwrite_summary">Replace existing files when downloading</string>
+    <string name="pref_storage_hide_title">Hide from gallery</string>
+    <string name="pref_storage_hide_summary">Don\'t show downloads in gallery apps</string>
+    
+    <string name="pref_storage_cache_category">Cache</string>
+    <string name="pref_storage_max_cache_title">Limit cache size</string>
+    <string name="pref_storage_max_cache_summary">Automatically clear cache when full</string>
+    <string name="pref_storage_max_cache_slider_title">Maximum cache size (MB)</string>
+    <string name="pref_storage_max_cache_slider_summary">Cache size limit in megabytes</string>
+    <string name="pref_storage_clear_cache_title">Clear cache</string>
+    <string name="pref_storage_clear_cache_summary">Current cache size: calculating…</string>
+    <string name="pref_storage_clear_cache_summary_size">Current cache size: %s</string>
+    <string name="pref_storage_clear_cache_confirm">Are you sure you want to clear %s of cached data? This will remove all cached images and media.</string>
+    <string name="pref_storage_cache_cleared">Cache cleared</string>
+    
+    <!-- Arrays for preferences -->
+    <string-array name="host_entries">
+        <item>e926.net (Safe)</item>
+        <item>e621.net (Explicit)</item>
+    </string-array>
+    <string-array name="host_values">
+        <item>e926.net</item>
+        <item>e621.net</item>
+    </string-array>
+    
+    <string-array name="theme_entries">
+        <item>Light</item>
+        <item>Dark</item>
+        <item>System default</item>
+    </string-array>
+    <string-array name="theme_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    
+    <string-array name="post_quality_entries">
+        <item>Preview</item>
+        <item>Sample</item>
+        <item>Original</item>
+    </string-array>
+    <string-array name="post_quality_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    
+    <string-array name="thumb_quality_entries">
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+    </string-array>
+    <string-array name="thumb_quality_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    
+    <string-array name="post_back_button_entries">
+        <item>Top left</item>
+        <item>Top right</item>
+        <item>Bottom left</item>
+        <item>Bottom right</item>
+    </string-array>
+    <string-array name="post_back_button_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    
+    <string-array name="post_default_video_quality_entries">
+        <item>480p</item>
+        <item>720p</item>
+        <item>Original</item>
+    </string-array>
+    <string-array name="post_default_video_quality_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    
+    <string-array name="post_default_video_format_entries">
+        <item>WebM</item>
+        <item>MP4</item>
+    </string-array>
+    <string-array name="post_default_video_format_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    
+    <string-array name="languages">
+        <item>English</item>
+        <item>Español</item>
+        <item>Deutsch</item>
+        <item>Français</item>
+        <item>Português</item>
+        <item>Русский</item>
+        <item>中文</item>
+    </string-array>
+    <string-array name="languages_values">
+        <item>en</item>
+        <item>es</item>
+        <item>de</item>
+        <item>fr</item>
+        <item>pt</item>
+        <item>ru</item>
+        <item>zh</item>
+    </string-array>
+    
+    <string-array name="post_following_period_entries">
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>12 hours</item>
+        <item>24 hours</item>
+    </string-array>
+    <string-array name="post_following_period_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    
+    <!-- Additional settings strings -->
+    <string name="pref_general_language_title">Language</string>
+    <string name="pref_general_language_summary">Select app language</string>
+    <string name="pref_general_edit_host_title">Change host</string>
+    <string name="pref_general_disguise_title">Disguise app</string>
+    <string name="pref_general_disguise_summary">Hide app as a calculator in launcher</string>
+    <string name="pref_general_blacklist_pool_posts_title">Blacklist pool posts</string>
+    <string name="pref_general_blacklist_pool_posts_summary">Apply blacklist to posts in pools</string>
+    
+    <!-- Disguise calculator name -->
+    <string name="calculator">Calculator</string>
+    
+    <!-- Pin/Security settings -->
+    <string name="pref_consent_pin_unlock_title">Pin at app launch</string>
+    <string name="pref_consent_pin_unlock_summary">Require pin code to open the app</string>
+    <string name="pref_consent_pin_unlock_summary_pin">Enable this to require a pin code when launching the app. Current pin: %1$s</string>
+    <string name="pref_consent_pin_app_link_title">Pin for app links</string>
+    <string name="pref_consent_pin_app_link_summary">Require pin when opening from links</string>
+    <string name="pref_consent_biometrics_title">Enable biometrics</string>
+    <string name="pref_consent_biometrics_summary">Use fingerprint instead of pin</string>
+    <string name="pref_consent_pin_auto_lock_title">Auto lock in background</string>
+    <string name="pref_consent_pin_auto_lock_summary">Lock app after 10 seconds in background</string>
+    <string name="pref_consent_pin_auto_lock_inst_title">Auto lock instantly</string>
+    <string name="pref_consent_pin_auto_lock_inst_summary">Lock app immediately when backgrounded</string>
+    
+    <!-- General messages -->
+    <string name="disguise_message_disguised">Disguised, it may take some seconds for the new app icon to appear!</string>
+    <string name="disguise_message_regular">Removed disguise, it may take some seconds for the stock app icon to appear!</string>
+    <string name="pref_general_edit_host_not_supported">Host not supported, reverting to e926</string>
+    
+    <!-- Grid additional settings -->
+    <string name="pref_grid_new_label_title">New post icon</string>
+    <string name="pref_grid_new_label_summary">Show icon on new posts when searching tags</string>
+    
+    <!-- Post additional settings -->
+    <string name="pref_post_hide_status_bar_title">Hide status bar</string>
+    <string name="pref_post_hide_status_bar_summary">Hide the top status bar when viewing posts</string>
+    <string name="pref_post_hide_nav_bar_title">Hide navigation bar</string>
+    <string name="pref_post_hide_nav_bar_summary">Hide the bottom navigation bar</string>
+    <string name="pref_post_default_video_format_title">Default video format</string>
+    <string name="pref_post_video_landscape_title">Landscape videos</string>
+    <string name="pref_post_video_landscape_summary">Force landscape orientation for videos</string>
+    <string name="pref_post_long_click_to_unfav_title">Long click to unfavorite</string>
+    <string name="pref_post_long_click_to_unfav_summary">Require long click to remove from favorites</string>
+    <string name="pref_post_top_preview_title">Preview on scroll</string>
+    <string name="pref_post_top_preview_summary">Show image preview when scrolling down</string>
+    <string name="pref_post_controls_fullscreen_title">Button menu in fullscreen</string>
+    <string name="pref_post_controls_fullscreen_summary">Show controls when in fullscreen mode</string>
+    <string name="pref_post_data_saver_message">Load only viewed post without preloading</string>
+    <string name="pref_post_disable_share_title">Disable share options</string>
+    <string name="pref_post_disable_share_message">Hide Share and Open in browser options</string>
+    
+    <!-- Search additional settings -->
+    <string name="pref_search_in_new_task_title">Open tags in new task</string>
+    <string name="pref_search_in_new_task_summary">Open tag searches in task switcher</string>
+    <string name="pref_search_fav_order_title">Sort favorites by date</string>
+    <string name="pref_search_fav_order_summary">Order favorites by when you added them</string>
+    <string name="pref_search_include_flash_title">Include flash posts</string>
+    <string name="pref_search_include_flash_summary">Show flash/animation content</string>
+    
+    <!-- Post Menu (exact from original) -->
+    <string name="post_menu_slideshow">Slideshow</string>
+    <string name="post_menu_edit_post">Edit post</string>
+    <string name="post_menu_add_to_set">Add to Set</string>
+    <string name="post_menu_open_post">Open in browser</string>
+    <string name="post_menu_open_post_in_vp">Open in video player</string>
+    <string name="post_menu_open_post_in_vp_error">Error: no video player found to handle file!</string>
+    <string name="post_menu_share_post">Share post</string>
+    <string name="post_menu_copy_post">Copy post link</string>
+    <string name="post_menu_copy_tags">Copy post tags</string>
+    <string name="post_menu_reload_post">Reload post</string>
+    <string name="post_menu_check_notes">Check for notes</string>
+    <string name="post_menu_view_json">View JSON data</string>
+    <string name="post_menu_open_post_disabled">You have disabled this</string>
+    <string name="post_menu_share_post_as">Share the</string>
+    
+    <!-- Slideshow (exact from original) -->
+    <string name="ss_title">Slideshow settings</string>
+    <string name="ss_slider_text">Seconds per post: %1$d</string>
+    <string name="ss_cb_fullscreen">Fullscreen</string>
+    <string name="ss_cb_backwards">Backwards</string>
+    <string name="ss_cb_repeat">Repeat this page</string>
+    <string name="ss_start">Start</string>
+    <string name="ss_toast_started">Slideshow started, press the back button to stop it</string>
+    <string name="ss_toast_stopped">Slideshow stopped</string>
+    
+    <!-- Notes -->
+    <string name="notes_only_images">Only image and GIF posts are supported!</string>
+    <string name="notes_feature_coming_soon">Notes feature coming soon</string>
+    
+    <!-- Edit post -->
+    <string name="post_menu_edit_post_not_logged_in">You need to be logged in to edit posts!</string>
+    
+    <!-- Add to set -->
+    <string name="set_choose_set_to_add_post_to">Choose a set to add this post to</string>
+    <string name="set_not_logged_in">You need to be logged in to add posts to sets!</string>
+    
+    <!-- Share options (exact from original) -->
+    <string name="share_link">Post url (e926.net/posts/)</string>
+    <string name="share_file_url">File url (static.e926.net/)</string>
+    <string name="share_image">Image file (jpg/png)</string>
+    <string name="share_video">Video file (webm/mp4)</string>
+    
+    <!-- Plurals for post relationships -->
+    <plurals name="post_children">
+        <item quantity="one">Child: %1$s</item>
+        <item quantity="other">Children: %1$s</item>
+    </plurals>
+    <plurals name="post_pools">
+        <item quantity="one">Pool: %1$s</item>
+        <item quantity="other">Pools: %1$s</item>
+    </plurals>
+    
+    <!-- Pool navigation -->
+    <string name="loading_pool">Loading pool #%1$d…</string>
+    <string name="pool_subtitle_loading">Loading…</string>
+    <string name="pool_menu_select_download">Download selected</string>
+    <string name="pool_menu_order_by">Order by</string>
+    <string name="pool_menu_order_by_oldest_first">Oldest first</string>
+    <string name="pool_menu_order_by_newest_first">Newest first</string>
+    
+    <!-- Download Manager -->
+    <string name="menu_downloads">Queued downloads</string>
+    <string name="download_manager_title">Download Queue</string>
+    <string name="download_manager_text">Here you can view all your queued and active downloads</string>
+    <string name="download_manager_start">Start</string>
+    <string name="download_manager_stop">Stop</string>
+    <string name="download_manager_clear_all">Clear all</string>
+    <string name="download_manager_clear_all_dialog_title">Clear all?</string>
+    <string name="download_manager_clear_all_dialog_message">This will remove all your queued downloads. Do you want to continue?</string>
+    <string name="download_manager_retry">Retry, add to queue</string>
+    <string name="download_manager_status_not_running">Status: not running</string>
+    <string name="download_manager_status_running">Status: running</string>
+    <string name="download_manager_empty">No downloads in queue</string>
+    <string name="download_manager_started">Download queue started</string>
+    <string name="download_item_title">#%1$d - %2$s</string>
+    <string name="download_item_details">%1$s, %2$s, %3$s</string>
+    <string name="download_error_message">Error: %1$s</string>
+    <string name="added_to_download_queue">Added %1$d posts to download queue</string>
+    
+    <!-- Following Posts -->
+    <string name="menu_following_tags">Followed tag posts</string>
+    <string name="following_post_title">Followed tags</string>
+    <string name="following_post_subtitle">Posts: %1$d</string>
+    <string name="following_post_help">Posts for tags you follow. Change your followed tags in the settings</string>
+    <string name="following_post_help_title">Help</string>
+    <string name="following_post_menu_clear">Clear all</string>
+    <string name="following_post_menu_clear_scrolled_past">Clear viewed</string>
+    <string name="following_post_dialog_clear_title">Clear all?</string>
+    <string name="following_post_dialog_clear_message">This will clear all stored posts. Continue?</string>
+    <string name="following_post_dialog_clear_scrolled_past_title">Clear viewed?</string>
+    <string name="following_post_dialog_clear_scrolled_past_message">This will clear all currently visible posts and any above. Continue?</string>
+    <string name="following_post_empty">No posts yet. Follow some tags in Settings to see posts here!</string>
+    <string name="cleared_count">Cleared %1$d posts</string>
+    
+</resources>

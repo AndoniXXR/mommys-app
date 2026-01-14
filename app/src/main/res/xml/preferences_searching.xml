@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreferenceCompat
+        android:key="search_history"
+        android:title="@string/pref_search_history_title"
+        android:summary="@string/pref_search_history_summary"
+        android:icon="@drawable/ic_history"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="search_suggestions"
+        android:title="@string/pref_search_suggestions_title"
+        android:summary="@string/pref_search_suggestions_summary"
+        android:icon="@drawable/ic_lightbulb"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="search_saved_new_window"
+        android:title="@string/pref_search_saved_new_window_title"
+        android:summary="@string/pref_search_saved_new_window_summary"
+        android:icon="@drawable/ic_open_in_new"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="search_last_on_start"
+        android:title="@string/pref_search_last_on_start_title"
+        android:summary="@string/pref_search_last_on_start_summary"
+        android:icon="@drawable/ic_last_search"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="search_in_new_task"
+        android:title="@string/pref_search_in_new_task_title"
+        android:summary="@string/pref_search_in_new_task_summary"
+        android:icon="@drawable/ic_open_in_new"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="grid_fav_order"
+        android:title="@string/pref_search_fav_order_title"
+        android:summary="@string/pref_search_fav_order_summary"
+        android:icon="@drawable/ic_favorite"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="search_newest_first"
+        android:title="@string/pref_search_newest_first_title"
+        android:summary="@string/pref_search_newest_first_summary"
+        android:icon="@drawable/ic_filter"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="search_include_flash"
+        android:title="@string/pref_search_include_flash_title"
+        android:summary="@string/pref_search_include_flash_summary"
+        android:icon="@drawable/ic_movie"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+</PreferenceScreen>

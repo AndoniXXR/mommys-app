@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+    
+    <!-- Icono de actualización -->
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/ic_update"
+        android:layout_marginBottom="16dp"/>
+    
+    <!-- Nueva versión disponible -->
+    <TextView
+        android:id="@+id/txtNewVersion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="?android:attr/textColorPrimary"
+        android:gravity="center"
+        android:layout_marginBottom="8dp"/>
+    
+    <!-- Versión actual -->
+    <TextView
+        android:id="@+id/txtCurrentVersion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+    
+    <!-- Notas de la release (opcional) -->
+    <ScrollView
+        android:id="@+id/scrollReleaseNotes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="150dp"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone">
+        
+        <TextView
+            android:id="@+id/txtReleaseNotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:background="?android:attr/selectableItemBackground"
+            android:padding="8dp"/>
+    </ScrollView>
+    
+    <!-- Progress bar (visible durante descarga) -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        android:layout_marginBottom="8dp"/>
+    
+    <!-- Texto de estado de descarga -->
+    <TextView
+        android:id="@+id/txtDownloadStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:gravity="center"
+        android:visibility="gone"/>
+        
+</LinearLayout>

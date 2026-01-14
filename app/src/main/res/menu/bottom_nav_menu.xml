@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Menú de navegación inferior exacto como la app original (sin paginación) -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- Búsquedas guardadas -->
+    <item
+        android:id="@+id/nav_saved_searches"
+        android:icon="@drawable/ic_save"
+        android:title="@string/saved_title" />
+    
+    <!-- Filtros y ordenación -->
+    <item
+        android:id="@+id/nav_filter"
+        android:icon="@drawable/ic_filter"
+        android:title="@string/menu_filter" />
+    
+    <!-- Favoritos -->
+    <item
+        android:id="@+id/nav_favourites"
+        android:icon="@drawable/ic_favorite"
+        android:title="@string/menu_my_favourites" />
+    
+</menu>

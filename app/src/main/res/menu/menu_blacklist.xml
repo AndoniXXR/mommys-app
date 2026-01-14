@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    
+    <item
+        android:icon="@drawable/ic_done"
+        android:id="@+id/save_blacklist"
+        android:title="@string/blacklist_save_close"
+        app:iconTint="@color/colorGreen"
+        app:showAsAction="always" />
+    
+    <item
+        android:icon="@drawable/ic_help"
+        android:id="@+id/help"
+        android:title="@string/blacklist_menu_help"
+        app:showAsAction="ifRoom" />
+    
+    <item
+        android:id="@+id/copy"
+        android:title="@string/blacklist_export_menu_copy"
+        app:showAsAction="never" />
+    
+    <item
+        android:id="@+id/share_plain_text"
+        android:title="@string/blacklist_export_menu_share_plain_text"
+        app:showAsAction="never" />
+    
+    <item
+        android:id="@+id/to_file"
+        android:title="@string/blacklist_export_menu_to_file"
+        app:showAsAction="never" />
+    
+    <item
+        android:id="@+id/from_file"
+        android:title="@string/blacklist_import_menu_import_from_file"
+        app:showAsAction="never" />
+    
+    <item
+        android:id="@+id/order_alphabetically"
+        android:title="@string/menu_order_alphabetically"
+        app:showAsAction="never" />
+
+</menu>

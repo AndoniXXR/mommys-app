@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    
+    <!-- Botón de ayuda (siempre visible) -->
+    <item
+        android:id="@+id/help"
+        android:icon="@drawable/ic_help"
+        android:title="@string/following_post_help_title"
+        app:showAsAction="always"/>
+    
+    <!-- Descargar seleccionados -->
+    <item
+        android:id="@+id/download_selected"
+        android:title="@string/pool_menu_select_download"
+        app:showAsAction="never"/>
+    
+    <!-- Submenú de ordenar -->
+    <item
+        android:title="@string/pool_menu_order_by"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/order_by_oldest"
+                android:title="@string/pool_menu_order_by_oldest_first"/>
+            <item
+                android:id="@+id/order_by_newest"
+                android:title="@string/pool_menu_order_by_newest_first"/>
+        </menu>
+    </item>
+    
+    <!-- Limpiar los ya vistos -->
+    <item
+        android:id="@+id/clear_scrolled_past"
+        android:title="@string/following_post_menu_clear_scrolled_past"
+        app:showAsAction="never"/>
+    
+    <!-- Limpiar todos -->
+    <item
+        android:id="@+id/clear_all"
+        android:title="@string/following_post_menu_clear"
+        app:showAsAction="never"/>
+</menu>

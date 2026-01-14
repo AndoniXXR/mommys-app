@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Layout exacto del grid item como en la app original -->
+<androidx.cardview.widget.CardView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/grid_item_margin"
+    app:cardCornerRadius="@dimen/card_corner_radius">
+    
+    <FrameLayout
+        android:id="@+id/fLFlag"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        
+        <!-- Imagen del post -->
+        <com.mommys.app.ui.views.AspectRatioImageView
+            android:id="@+id/imgPreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@color/colorWhite"
+            android:adjustViewBounds="true"/>
+        
+        <!-- Checkmark de selección (centro) - grande y visible con fondo circular -->
+        <ImageView
+            android:layout_gravity="center"
+            android:id="@+id/imgSelected"
+            android:src="@drawable/ic_selection_check"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:visibility="gone"/>
+        
+        <!-- Texto de info/stats (esquina inferior) -->
+        <TextView
+            android:textSize="@dimen/grid_item_info_text_size"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:gravity="bottom|center_horizontal"
+            android:layout_gravity="bottom"
+            android:id="@+id/txtInfo"
+            android:background="@color/colorStatsBG"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/grid_item_info_padding"
+            android:paddingEnd="@dimen/grid_item_info_padding"
+            android:visibility="gone"/>
+        
+        <!-- Botón de info (esquina superior izquierda) -->
+        <ImageView
+            android:layout_gravity="start|top"
+            android:id="@+id/imgInfoBtn"
+            android:background="@android:color/transparent"
+            android:padding="@dimen/grid_item_margin"
+            android:focusable="true"
+            android:clickable="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_info"
+            android:alpha="@dimen/grid_item_info_btn_alpha"
+            android:visibility="gone"/>
+        
+        <!-- Badge "nuevo" (esquina inferior derecha) -->
+        <ImageView
+            android:layout_gravity="end|bottom"
+            android:id="@+id/imgNewLabel"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_new_releases"
+            android:visibility="gone"/>
+        
+        <!-- Indicador de video (esquina superior derecha) -->
+        <ImageView
+            android:layout_gravity="end|top"
+            android:id="@+id/imgVideo"
+            android:background="@color/colorBlack35"
+            android:padding="@dimen/grid_item_margin"
+            android:focusable="false"
+            android:clickable="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_video"
+            android:alpha="@dimen/grid_item_info_btn_alpha"
+            android:visibility="gone"/>
+        
+        <!-- Indicador de GIF (esquina superior derecha) -->
+        <ImageView
+            android:layout_gravity="end|top"
+            android:id="@+id/imgGif"
+            android:background="@color/colorBlack35"
+            android:padding="@dimen/grid_item_margin"
+            android:focusable="false"
+            android:clickable="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_gif"
+            android:alpha="@dimen/grid_item_info_btn_alpha"
+            android:visibility="gone"/>
+        
+        <!-- Overlay para posts vistos -->
+        <FrameLayout
+            android:id="@+id/fLOverlay"
+            android:background="@color/colorBlack25"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
+            
+    </FrameLayout>
+
+</androidx.cardview.widget.CardView>

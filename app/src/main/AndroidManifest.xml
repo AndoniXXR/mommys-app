@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Permisos -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <application
+        android:name=".MommysApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Mommys.Dark"
+        android:largeHeap="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="34">
+
+        <!-- Launcher Activity (no launcher icon - handled by aliases) -->
+        <activity
+            android:name=".ui.launcher.LauncherActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Activity alias for REGULAR launcher icon -->
+        <activity-alias
+            android:name=".REGULAR"
+            android:enabled="true"
+            android:exported="true"
+            android:targetActivity=".ui.launcher.LauncherActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Activity alias for CALC (disguise) launcher icon -->
+        <activity-alias
+            android:name=".CALC"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_calc"
+            android:label="@string/calculator"
+            android:targetActivity=".ui.launcher.LauncherActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Main Activity -->
+        <activity
+            android:name=".ui.main.MainActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+        
+        <!-- Search Suggestions Provider -->
+        <provider
+            android:name=".data.search.SearchSuggestionsProvider"
+            android:authorities="com.mommys.app.search.provider"
+            android:exported="false" />
+
+        <!-- Post Activity -->
+        <activity
+            android:name=".ui.post.PostActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Notes Activity -->
+        <activity
+            android:name=".ui.notes.NotesActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Login Activity -->
+        <activity
+            android:name=".ui.login.LoginActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Pin Code Activity -->
+        <activity
+            android:name=".ui.pin.PinCodeActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode"
+            android:launchMode="singleTask" />
+
+        <!-- Settings Activity -->
+        <activity
+            android:name=".ui.settings.SettingsActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+        
+        <!-- Cookie WebView Activity (para Cloudflare) -->
+        <activity
+            android:name=".ui.settings.CookieWebViewActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode"
+            android:theme="@style/Theme.Mommys.Dark" />
+
+        <!-- Profile Activity -->
+        <activity
+            android:name=".ui.profile.ProfileActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Popular Activity -->
+        <activity
+            android:name=".ui.popular.PopularActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Saved Searches Activity -->
+        <activity
+            android:name=".ui.saved.SavedSearchesActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Browse Tags Activity -->
+        <activity
+            android:name=".ui.browse.BrowseTagsActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Browse Pools Activity -->
+        <activity
+            android:name=".ui.browse.BrowsePoolsActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- About Activity -->
+        <activity
+            android:name=".ui.about.AboutActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Pool Activity -->
+        <activity
+            android:name=".ui.pool.PoolActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Comments Activity -->
+        <activity
+            android:name=".ui.comments.CommentsActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Downloads Activity -->
+        <activity
+            android:name=".ui.downloads.DownloadsActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Download Manager Activity (Queue) -->
+        <activity
+            android:name=".ui.downloads.DownloadManagerActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Following Post Activity -->
+        <activity
+            android:name=".ui.following.FollowingPostActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Blacklist Activity -->
+        <activity
+            android:name=".ui.blacklist.BlacklistActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Log Activity (for Following logs) -->
+        <activity
+            android:name=".ui.LogActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Following Job Service -->
+        <service
+            android:name=".service.FollowingJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false" />
+
+        <!-- Boot receiver to reschedule jobs -->
+        <receiver
+            android:name=".receiver.BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- FileProvider para compartir archivos -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+    </application>
+
+</manifest>

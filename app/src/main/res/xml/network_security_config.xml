@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">e621.net</domain>
+        <domain includeSubdomains="true">e926.net</domain>
+        <domain includeSubdomains="true">static1.e621.net</domain>
+        <domain includeSubdomains="true">static1.e926.net</domain>
+    </domain-config>
+</network-security-config>

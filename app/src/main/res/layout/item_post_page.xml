@@ -1,0 +1,693 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?myPostBackgroundColor">
+
+    <!-- ScrollView principal -->
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:paddingBottom="60dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Fade ScrollView (para mini preview al scrollear) -->
+            <ScrollView
+                android:gravity="top"
+                android:orientation="vertical"
+                android:id="@+id/fadeScrollView"
+                android:clickable="false"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:scaleY="-1"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/imgFade"
+                    android:clickable="false"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerCrop"
+                    android:adjustViewBounds="true" />
+
+            </ScrollView>
+
+            <!-- Frame del contenido (imagen/video) -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- Preview Frame Parent -->
+                <FrameLayout
+                    android:id="@+id/previewFrameParent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.github.chrisbanes.photoview.PhotoView
+                        android:id="@+id/imgPreview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scaleType="fitCenter"
+                        android:adjustViewBounds="true"
+                        android:contentDescription="@string/cd_post_image" />
+
+                </FrameLayout>
+
+                <!-- Content Frame Parent (para video) -->
+                <FrameLayout
+                    android:id="@+id/contentFrameParent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <FrameLayout
+                        android:id="@+id/contentFrame"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <!-- Video container -->
+                        <FrameLayout
+                            android:id="@+id/videoContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone">
+
+                            <!-- Frame para click (como en la app original) -->
+                            <FrameLayout
+                                android:id="@+id/fLClick"
+                                android:focusable="true"
+                                android:clickable="true"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"/>
+
+                            <androidx.media3.ui.PlayerView
+                                android:id="@+id/playerView"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                app:controller_layout_id="@layout/player_control_view"
+                                app:resize_mode="fit"
+                                app:show_buffering="when_playing"
+                                app:show_shuffle_button="false"
+                                app:show_subtitle_button="false"
+                                app:show_vr_button="false"
+                                app:surface_type="surface_view"
+                                app:use_controller="true" />
+
+                            <!-- Preview thumbnail for video -->
+                            <ImageView
+                                android:id="@+id/imgVideoPreview"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:scaleType="fitCenter"
+                                android:visibility="visible" />
+
+                            <!-- Play button overlay -->
+                            <ImageView
+                                android:id="@+id/imgPlay"
+                                android:layout_width="80dp"
+                                android:layout_height="80dp"
+                                android:layout_gravity="center"
+                                android:alpha="0.8"
+                                android:src="@drawable/ic_play"
+                                android:visibility="visible"
+                                android:contentDescription="@string/cd_play_video" />
+
+                            <!-- Mute button overlay (como m0 en la app original) -->
+                            <ImageView
+                                android:id="@+id/imgMute"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:layout_gravity="top|end"
+                                android:layout_margin="8dp"
+                                android:padding="8dp"
+                                android:background="@drawable/bg_circle_dark"
+                                android:src="@drawable/ic_volume_off"
+                                android:visibility="gone"
+                                android:contentDescription="@string/cd_toggle_mute" />
+
+                        </FrameLayout>
+
+                    </FrameLayout>
+
+                </FrameLayout>
+
+            </FrameLayout>
+
+            <!-- Error layout -->
+            <LinearLayout
+                android:id="@+id/errorLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:visibility="gone">
+
+                <ImageButton
+                    android:id="@+id/btnRefresh"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_refresh"
+                    android:contentDescription="@string/retry" />
+
+                <TextView
+                    android:id="@+id/txtError"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/colorRed"
+                    android:textSize="14sp"
+                    tools:text="Error loading post" />
+
+            </LinearLayout>
+
+            <!-- Espaciador -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="8dp" />
+
+            <!-- Tarjeta de título (como adapter_post_item_title.xml) -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/titleCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardBackgroundColor="?myPostCardBackgroundColor"
+                app:contentPadding="8dp">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <!-- Primera fila: Artista y Posición -->
+                    <RelativeLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/txtArtist"
+                            android:textStyle="bold"
+                            android:paddingTop="4dp"
+                            android:focusable="true"
+                            android:clickable="true"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="30dp"
+                            android:textColor="@color/colorTagArtist"
+                            tools:text="artist_name" />
+
+                        <TextView
+                            android:id="@+id/txtPosition"
+                            android:paddingTop="4dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:textColor="?android:textColorSecondary"
+                            tools:text="1/100" />
+
+                    </RelativeLayout>
+
+                    <!-- Segunda fila: Rating, ID, Score, Favs -->
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="4dp">
+
+                        <TextView
+                            android:id="@+id/txtRatingE"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorRed"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="E"
+                            android:visibility="gone" />
+
+                        <TextView
+                            android:id="@+id/txtRatingQ"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorYellow"
+                            android:visibility="gone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Q" />
+
+                        <TextView
+                            android:id="@+id/txtRatingS"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorGreen"
+                            android:visibility="gone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="S" />
+
+                        <TextView
+                            android:id="@+id/txtPostId"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textIsSelectable="true"
+                            android:layout_marginStart="4dp"
+                            tools:text="#12345" />
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="0dp" />
+
+                        <ImageView
+                            android:id="@+id/imgUpInfo"
+                            android:layout_width="14dp"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_arrow_up"
+                            app:tint="@color/colorUpvote" />
+
+                        <TextView
+                            android:id="@+id/txtScoreUp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/colorUpvote"
+                            tools:text="100" />
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="0dp" />
+
+                        <ImageView
+                            android:id="@+id/imgDownInfo"
+                            android:layout_width="14dp"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_arrow_down"
+                            app:tint="@color/colorDownvote" />
+
+                        <TextView
+                            android:id="@+id/txtScoreDown"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/colorDownvote"
+                            tools:text="5" />
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="0dp" />
+
+                        <ImageView
+                            android:layout_width="14dp"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_favorite"
+                            app:tint="@color/colorFavorite" />
+
+                        <TextView
+                            android:id="@+id/txtFavCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/colorFavorite"
+                            tools:text="250" />
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="0dp" />
+
+                        <TextView
+                            android:id="@+id/txtCommentBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/colorTagArtist"
+                            tools:text="C" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Botones Relation: Parent / Children / Pool -->
+            <LinearLayout
+                android:id="@+id/relationButtonsLayout"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:layout_marginTop="4dp"
+                android:weightSum="3"
+                android:visibility="gone"
+                style="?android:buttonBarStyle">
+
+                <Button
+                    android:id="@+id/btnParent"
+                    android:textColor="@color/colorParentChild"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAllCaps="false"
+                    android:visibility="gone"
+                    style="@style/Widget.Material3.Button.TextButton" />
+
+                <Button
+                    android:id="@+id/btnChildren"
+                    android:textColor="@color/colorParentChild"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAllCaps="false"
+                    android:visibility="gone"
+                    style="@style/Widget.Material3.Button.TextButton" />
+
+                <Button
+                    android:id="@+id/btnPool"
+                    android:textColor="@color/colorGreen"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAllCaps="false"
+                    android:visibility="gone"
+                    style="@style/Widget.Material3.Button.TextButton" />
+
+            </LinearLayout>
+
+            <!-- Descripción Header + Content -->
+            <LinearLayout
+                android:id="@+id/descriptionHeader"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:paddingHorizontal="12dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/post_description" />
+
+                <ImageView
+                    android:id="@+id/imgDescriptionExpand"
+                    android:visibility="visible"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_expand_more" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/txtDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textIsSelectable="true"
+                android:layout_marginHorizontal="12dp"
+                android:maxLines="3"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/txtDescMore"
+                android:textStyle="bold"
+                android:textColor="@color/colorTextImportant"
+                android:padding="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/post_show_more"
+                android:visibility="gone" />
+
+            <!-- Tags y Details Section (como adapter_post_item_info.xml) -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:padding="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
+
+                <!-- Tags Header (lado izquierdo) -->
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:id="@+id/tagsHeader"
+                    android:padding="8dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toStartOf="@id/detailsHeader"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/txtTagsTitle"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/post_tags" />
+
+                    <ImageView
+                        android:id="@+id/imgTagsExpand"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_expand_more" />
+
+                </LinearLayout>
+
+                <!-- Tags Container (debajo del header de tags) -->
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:id="@+id/tagsContainer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:animateLayoutChanges="false"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="@id/tagsHeader"
+                    app:layout_constraintStart_toStartOf="@id/tagsHeader"
+                    app:layout_constraintTop_toBottomOf="@id/tagsHeader" />
+
+                <!-- Details Header (lado derecho) -->
+                <LinearLayout
+                    android:gravity="end"
+                    android:orientation="horizontal"
+                    android:id="@+id/detailsHeader"
+                    android:padding="8dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@id/tagsHeader"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/post_details" />
+
+                    <ImageView
+                        android:id="@+id/imgDetailsExpand"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_expand_more" />
+
+                </LinearLayout>
+
+                <!-- Details Container (debajo del header de details) -->
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:id="@+id/detailsContainer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:animateLayoutChanges="false"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/detailsHeader"
+                    app:layout_constraintTop_toBottomOf="@id/detailsHeader" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Espacio al final -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="16dp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- Mini preview imagen al scrollear -->
+    <ImageView
+        android:id="@+id/imgMini"
+        android:clickable="false"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Fullscreen content frame -->
+    <FrameLayout
+        android:gravity="center"
+        android:orientation="vertical"
+        android:id="@+id/contentFrameFullscreen"
+        android:background="@color/colorBlack"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Loading layout (como adapter_post_loading.xml) -->
+    <LinearLayout
+        android:id="@+id/loadingLayout"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal" />
+
+        <TextView
+            android:id="@+id/txtLoading"
+            android:textSize="12sp"
+            android:textColor="?android:textColorSecondary"
+            android:background="@color/colorLoadingTextBG"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            tools:text="0.5 MB / 2.0 MB" />
+
+    </LinearLayout>
+
+    <!-- Snackbar container -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/snackbarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/actionButtonsBar">
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/coordSnackbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <!-- Barra de botones de acción inferior (como la app original) -->
+    <LinearLayout
+        android:id="@+id/actionButtonsBar"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="6"
+        android:alpha="0.95"
+        android:background="?myPostCardBackgroundColor"
+        android:elevation="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        style="?android:buttonBarStyle">
+
+        <!-- Upvote -->
+        <ImageButton
+            android:id="@+id/btnUpvote"
+            android:background="?selectableItemBackgroundBorderless"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_arrow_up"
+            android:layout_weight="1"
+            android:contentDescription="@string/cd_posts_vote_up"
+            android:tooltipText="@string/cd_posts_vote_up"
+            style="?android:buttonBarButtonStyle" />
+
+        <!-- Downvote -->
+        <ImageButton
+            android:id="@+id/btnDownvote"
+            android:background="?selectableItemBackgroundBorderless"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_arrow_down"
+            android:layout_weight="1"
+            android:contentDescription="@string/cd_posts_vote_down"
+            android:tooltipText="@string/cd_posts_vote_down"
+            style="?android:buttonBarButtonStyle" />
+
+        <!-- Favorite -->
+        <ImageButton
+            android:id="@+id/btnFavorite"
+            android:background="?selectableItemBackgroundBorderless"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_favorite"
+            android:layout_weight="1"
+            android:contentDescription="@string/cd_posts_fav"
+            android:tooltipText="@string/cd_posts_fav"
+            style="?android:buttonBarButtonStyle" />
+
+        <!-- Comments -->
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1">
+
+            <ImageButton
+                android:id="@+id/btnComments"
+                android:background="?selectableItemBackgroundBorderless"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_comment"
+                android:contentDescription="@string/cd_posts_comments"
+                android:tooltipText="@string/cd_posts_comments"
+                style="?android:buttonBarButtonStyle" />
+
+            <TextView
+                android:id="@+id/txtCommentCount"
+                android:textSize="10sp"
+                android:textColor="@color/colorTagArtist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginStart="20dp"
+                android:layout_marginBottom="15dp"
+                android:visibility="gone" />
+
+        </RelativeLayout>
+
+        <!-- Download -->
+        <ImageButton
+            android:id="@+id/btnDownload"
+            android:background="?selectableItemBackgroundBorderless"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_download"
+            android:layout_weight="1"
+            android:contentDescription="@string/cd_posts_download"
+            android:tooltipText="@string/cd_posts_download"
+            style="?android:buttonBarButtonStyle" />
+
+        <!-- More options -->
+        <ImageButton
+            android:id="@+id/btnMore"
+            android:background="?selectableItemBackgroundBorderless"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_menu"
+            android:layout_weight="1"
+            android:contentDescription="@string/cd_posts_more"
+            android:tooltipText="@string/cd_posts_more"
+            style="?android:buttonBarButtonStyle" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

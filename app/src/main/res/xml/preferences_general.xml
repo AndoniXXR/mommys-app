@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="general_language"
+        android:title="@string/pref_general_language_title"
+        android:summary="%s"
+        android:icon="@drawable/ic_language"
+        android:entries="@array/languages"
+        android:entryValues="@array/languages_values"
+        android:defaultValue="en"
+        android:singleLineTitle="false" />
+
+    <EditTextPreference
+        android:key="general_change_host"
+        android:title="@string/pref_general_edit_host_title"
+        android:summary="e926.net"
+        android:icon="@drawable/ic_warning"
+        android:defaultValue="e926.net"
+        android:dependency="consent_above_18"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="consent_above_18"
+        android:title="@string/pref_consent_above_18_title"
+        android:summary="@string/pref_consent_above_18_summary"
+        android:icon="@drawable/ic_person"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <ListPreference
+        android:key="general_dark_mode"
+        android:title="@string/pref_general_dark_mode_title"
+        android:summary="%s"
+        android:icon="@drawable/ic_night"
+        android:entries="@array/theme_entries"
+        android:entryValues="@array/theme_values"
+        android:defaultValue="0"
+        android:singleLineTitle="false" />
+
+    <ListPreference
+        android:key="general_post_quality"
+        android:title="@string/pref_general_post_quality_title"
+        android:summary="%s"
+        android:icon="@drawable/ic_quality"
+        android:entries="@array/post_quality_entries"
+        android:entryValues="@array/post_quality_values"
+        android:defaultValue="1"
+        android:singleLineTitle="false" />
+
+    <ListPreference
+        android:key="general_thumb_quality"
+        android:title="@string/pref_general_thumb_quality_title"
+        android:summary="%s"
+        android:icon="@drawable/ic_quality"
+        android:entries="@array/thumb_quality_entries"
+        android:entryValues="@array/thumb_quality_values"
+        android:defaultValue="0"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="general_blacklist_enabled"
+        android:title="@string/pref_general_blacklist_enable_title"
+        android:summary="@string/pref_general_blacklist_enable_summary"
+        android:icon="@drawable/ic_settings"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <Preference
+        android:key="general_blacklist"
+        android:title="@string/pref_general_blacklist_title"
+        android:icon="@drawable/ic_block"
+        android:dependency="general_blacklist_enabled"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="general_blacklist_pool_posts"
+        android:title="@string/pref_general_blacklist_pool_posts_title"
+        android:summary="@string/pref_general_blacklist_pool_posts_summary"
+        android:icon="@drawable/ic_pool"
+        android:dependency="general_blacklist_enabled"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="general_hide_in_tasks"
+        android:title="@string/pref_general_hide_in_task_title"
+        android:summary="@string/pref_general_hide_in_task_summary"
+        android:icon="@drawable/ic_visibility_off"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="general_disguise"
+        android:title="@string/pref_general_disguise_title"
+        android:summary="@string/pref_general_disguise_summary"
+        android:icon="@drawable/ic_calculate"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="general_start_in_saved"
+        android:title="@string/pref_general_start_in_saved_title"
+        android:summary="@string/pref_general_start_in_saved_summary"
+        android:icon="@drawable/ic_save"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="consent_pin_unlock"
+        android:title="@string/pref_consent_pin_unlock_title"
+        android:summary="@string/pref_consent_pin_unlock_summary"
+        android:icon="@drawable/ic_pin"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="consent_pin_app_link"
+        android:title="@string/pref_consent_pin_app_link_title"
+        android:summary="@string/pref_consent_pin_app_link_summary"
+        android:icon="@drawable/ic_link"
+        android:dependency="consent_pin_unlock"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="consent_biometrics"
+        android:title="@string/pref_consent_biometrics_title"
+        android:summary="@string/pref_consent_biometrics_summary"
+        android:icon="@drawable/ic_fingerprint"
+        android:dependency="consent_pin_unlock"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="consent_pin_auto_lock"
+        android:title="@string/pref_consent_pin_auto_lock_title"
+        android:summary="@string/pref_consent_pin_auto_lock_summary"
+        android:icon="@drawable/ic_access_time"
+        android:dependency="consent_pin_unlock"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
+        android:key="consent_pin_auto_lock_instantly"
+        android:title="@string/pref_consent_pin_auto_lock_inst_title"
+        android:summary="@string/pref_consent_pin_auto_lock_inst_summary"
+        android:icon="@drawable/ic_lock"
+        android:dependency="consent_pin_unlock"
+        android:defaultValue="false"
+        android:singleLineTitle="false" />
+
+</PreferenceScreen>

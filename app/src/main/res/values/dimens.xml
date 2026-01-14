@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dimensions exactly like the original app -->
+    <dimen name="main_btn_width">53dp</dimen>
+    <dimen name="toolbar_height">56dp</dimen>
+    <dimen name="grid_spacing">1dp</dimen>
+    <dimen name="grid_item_margin">1dp</dimen>
+    <dimen name="card_corner_radius">5dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_medium">16dp</dimen>
+    <dimen name="margin_large">24dp</dimen>
+    <dimen name="text_size_small">12sp</dimen>
+    <dimen name="text_size_medium">14sp</dimen>
+    <dimen name="text_size_large">18sp</dimen>
+    <dimen name="text_size_title">22sp</dimen>
+    <dimen name="icon_size_small">24dp</dimen>
+    <dimen name="icon_size_medium">36dp</dimen>
+    <dimen name="icon_size_large">48dp</dimen>
+    <dimen name="pin_button_size">72dp</dimen>
+    <dimen name="pin_dot_size">16dp</dimen>
+    
+    <!-- Search suggestions (exact from original) -->
+    <dimen name="search_suggestion_item_height">40dp</dimen>
+    <dimen name="search_suggestion_icon_width">32dp</dimen>
+    <dimen name="search_suggestion_edit_icon_width">48dp</dimen>
+    
+    <!-- Grid item dimensions (exact from original) -->
+    <item name="grid_item_info_btn_alpha" format="float" type="dimen">0.5</item>
+    <dimen name="grid_item_info_btn_margin">2dp</dimen>
+    <dimen name="grid_item_info_padding">5dp</dimen>
+    <dimen name="grid_item_info_text_size">11sp</dimen>
+    <dimen name="grid_item_refresh_width">70dp</dimen>
+</resources>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Theme (Default) - Exactly like AppThemeDark from original -->
+    <style name="Theme.Mommys.Dark" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/colorBlack</item>
+        <item name="android:statusBarColor">@color/darkColorBg</item>
+        <item name="android:navigationBarColor">@color/darkColorBg</item>
+        <item name="android:textColorLink">@color/colorTextImportant</item>
+        <item name="colorPrimary">@color/darkColorPrimary</item>
+        <item name="colorPrimaryDark">@color/darkColorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSecondary">@color/colorAccent</item>
+        <!-- Custom theme attributes (exact from original) -->
+        <item name="myToolbarBackgroundColor">@color/darkColorToolbar</item>
+        <item name="mySearchHintTextColor">@color/darkSearchTextColor</item>
+        <item name="mySecondaryTextAlpha">0.7</item>
+        <item name="myIconTintColor">@color/colorWhite</item>
+        <item name="myImageButtonBackgroundColor">@color/darkColorBtn</item>
+        <item name="myCommentItemBackgroundColor">@color/darkColorCommentBg</item>
+        <item name="myPostButtonsBackgroundColor">@color/colorBlack65</item>
+        <item name="myPostFullscreenBackgroundColor">@color/colorBlack</item>
+        <item name="myPostInfoBackground">@color/darkColorPostTitleBG</item>
+        <item name="myPostBackgroundColor">@color/darkColorBg</item>
+        <item name="myPostCardBackgroundColor">@color/darkColorSurface</item>
+        <item name="myPostButtonBarBackgroundColor">@color/darkColorToolbar</item>
+        <item name="searchViewStyle">@style/SearchView</item>
+    </style>
+
+    <!-- Light Theme - Exactly like AppThemeLight from original -->
+    <style name="Theme.Mommys.Light" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/colorWhite</item>
+        <item name="android:statusBarColor">@color/darkColorBg</item>
+        <item name="android:navigationBarColor">@color/lightColorToolbar</item>
+        <item name="android:textColorLink">@color/colorTextImportant</item>
+        <item name="colorPrimary">@color/lightColorPrimary</item>
+        <item name="colorPrimaryDark">@color/lightColorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSecondary">@color/colorAccent</item>
+        <!-- Custom theme attributes (exact from original) -->
+        <item name="myToolbarBackgroundColor">@color/lightColorToolbar</item>
+        <item name="mySearchHintTextColor">@color/lightSearchTextColor</item>
+        <item name="mySecondaryTextAlpha">0.7</item>
+        <item name="myIconTintColor">@color/colorBlack</item>
+        <item name="myImageButtonBackgroundColor">@color/lightColorBtn</item>
+        <item name="myCommentItemBackgroundColor">@color/lightColorCommentBg</item>
+        <item name="myPostButtonsBackgroundColor">@color/colorWhite65</item>
+        <item name="myPostFullscreenBackgroundColor">@color/colorWhite</item>
+        <item name="myPostInfoBackground">@color/lightColorPostTitleBG</item>
+        <item name="myPostBackgroundColor">@color/lightColorBg</item>
+        <item name="myPostCardBackgroundColor">@color/lightColorSurface</item>
+        <item name="myPostButtonBarBackgroundColor">@color/lightColorToolbar</item>
+        <item name="searchViewStyle">@style/SearchView</item>
+    </style>
+
+    <!-- SearchView Style (exact from original) -->
+    <style name="SearchView" parent="Widget.AppCompat.SearchView">
+        <item name="suggestionRowLayout">@layout/search_suggestion_layout</item>
+        <item name="android:textColor">?mySearchHintTextColor</item>
+        <item name="android:textColorHint">?mySearchHintTextColor</item>
+        <item name="android:editTextColor">?mySearchHintTextColor</item>
+    </style>
+
+    <!-- Transparent Button -->
+    <style name="TransparentButton" parent="Widget.Material3.Button.TextButton">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <!-- Tag Chip Style -->
+    <style name="TagChip" parent="Widget.Material3.Chip.Suggestion">
+        <item name="android:textSize">12sp</item>
+        <item name="chipMinHeight">28dp</item>
+        <item name="chipCornerRadius">4dp</item>
+    </style>
+    
+    <!-- PopupMenu Style (exact from original app) -->
+    <style name="PopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/popup_menu_background</item>
+    </style>
+    
+    <!-- Overlay para PopupMenu con colores correctos -->
+    <style name="PopupMenuOverlay" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:colorBackground">@color/darkColorSurface</item>
+        <item name="colorSurface">@color/darkColorSurface</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:textColorPrimary">@color/colorWhite</item>
+        <item name="android:textColorSecondary">@color/colorWhite</item>
+        <item name="popupMenuStyle">@style/PopupMenu</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu</item>
+    </style>
+</resources>
