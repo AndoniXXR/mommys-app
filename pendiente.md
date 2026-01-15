@@ -131,7 +131,25 @@
 
 ## ❌ PENDIENTE
 
-*Ninguna funcionalidad pendiente importante*
+### Traducciones Ruso (values-ru/strings.xml)
+Agregar todas las strings de configuración y vista de post que faltan:
+- Settings completas (pref_export, pref_cloudflare, pref_ads, pref_privacy, pref_network, pref_following_*, pref_account, pref_about, pref_general_*, pref_grid_*, pref_post_*, pref_search_*, pref_storage_*)
+- PIN/Segurança (pin_*, pref_consent_*)
+- Pool activity (pool_*, loading_pool, etc.)
+- Download manager (download_manager_*, worker_download_*)
+- Following posts (following_post_*, following_notification_*)
+- Edit post (edit_post_*)
+- Slideshow (ss_*)
+- Wiki (wiki_*)
+- Donate (donate_*)
+- About (about_*)
+- Update (update_*)
+- Arrays extras (arrays_*)
+- Saved searches extras (saved_*)
+- Blacklist export/import (blacklist_export_*, blacklist_import_*)
+- Network status (network_*)
+- Page errors extras (page_error_*)
+- Report (report_*)
 
 ### Funcionalidades Menores (Opcionales)
 | Feature | Descripción | Prioridad |

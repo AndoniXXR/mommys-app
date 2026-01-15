@@ -49,6 +49,19 @@ class MommysApplication : Application() {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         }
         
+        // Apply saved language at app startup
+        // This ensures the locale is restored when the app starts
+        try {
+            val savedLanguage = preferencesManager.getLanguage()
+            if (savedLanguage.isNotEmpty()) {
+                val localeList = androidx.core.os.LocaleListCompat.forLanguageTags(savedLanguage)
+                AppCompatDelegate.setApplicationLocales(localeList)
+            }
+        } catch (e: Exception) {
+            // If language restore fails, use system default
+            android.util.Log.e("MommysApplication", "Error restoring language", e)
+        }
+        
         // Inicializar NetworkMonitor y NetworkAwareDispatcher
         // Basado en ff/b.java constructor que llama a x() para registrar callbacks
         initializeNetworkMonitoring()

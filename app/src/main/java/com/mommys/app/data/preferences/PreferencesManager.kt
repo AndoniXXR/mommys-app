@@ -31,7 +31,7 @@ class PreferencesManager(context: Context) {
         private const val KEY_MUTE_VIDEO = "mute_video"
         private const val KEY_SHOW_POST_INFO = "show_post_info"
         private const val KEY_BLACKLIST = "blacklist"
-        private const val KEY_LANGUAGE = "language"
+        private const val KEY_LANGUAGE = "general_language"  // Matches XML key
         
         // Filter keys (como la app original usa filter_rating, filter_order, filter_type)
         private const val KEY_FILTER_RATING = "filter_rating"

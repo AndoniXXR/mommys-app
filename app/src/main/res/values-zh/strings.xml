@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 基本操作 -->
+    <string name="abc_action_bar_home_description">主页</string>
+    <string name="abc_action_bar_up_description">返回</string>
+    <string name="abc_action_menu_overflow_description">更多</string>
+    <string name="abc_action_mode_done">完成</string>
+    <string name="abc_search_hint">搜索…</string>
+    <string name="abc_searchview_description_search">搜索</string>
+    
+    <!-- 收藏和投票操作 -->
+    <string name="action_favourite_added">已添加到收藏</string>
+    <string name="action_favourite_already_added">已在收藏中！</string>
+    <string name="action_favourite_removed">已从收藏中移除</string>
+    <string name="action_forbidden">403 禁止访问。您登录了吗？</string>
+    <string name="action_voted_down">已踩</string>
+    <string name="action_voted_up">已赞</string>
+    <string name="action_voted_removed_down">已取消踩</string>
+    <string name="action_voted_removed_up">已取消赞</string>
+    
+    <!-- 基本按钮 -->
+    <string name="add">添加</string>
+    <string name="cancel">取消</string>
+    <string name="clear">清除</string>
+    <string name="copy">复制</string>
+    <string name="delete">删除</string>
+    <string name="done">完成</string>
+    <string name="download">下载</string>
+    <string name="downloading">正在下载...</string>
+    <string name="edit">编辑</string>
+    <string name="error">错误</string>
+    <string name="go">前往</string>
+    <string name="later">稍后</string>
+    <string name="loading">加载中…</string>
+    <string name="login">登录</string>
+    <string name="no">否</string>
+    <string name="ok">确定</string>
+    <string name="open">打开</string>
+    <string name="save">保存</string>
+    <string name="search">搜索</string>
+    <string name="settings">设置</string>
+    <string name="view">查看</string>
+    <string name="yes">是</string>
+    
+    <!-- 主菜单 -->
+    <string name="menu_about">关于</string>
+    <string name="menu_browse">浏览</string>
+    <string name="menu_browse_pools">池</string>
+    <string name="menu_browse_sets">集合</string>
+    <string name="menu_browse_tags">标签</string>
+    <string name="menu_downloads">下载队列</string>
+    <string name="menu_filter">筛选和排序</string>
+    <string name="menu_following_tags">关注的标签帖子</string>
+    <string name="menu_go_to">前往</string>
+    <string name="menu_go_to_page">页面</string>
+    <string name="menu_go_to_random_post">随机帖子</string>
+    <string name="menu_login">登录</string>
+    <string name="menu_my_account">我的账户</string>
+    <string name="menu_my_favourites">我的收藏</string>
+    <string name="menu_my_log_out">退出登录</string>
+    <string name="menu_my_profile">我的资料</string>
+    <string name="menu_popular">热门</string>
+    <string name="menu_popular_by_day">今日热门</string>
+    <string name="menu_popular_by_month">本月热门</string>
+    <string name="menu_popular_by_week">本周热门</string>
+    <string name="menu_settings">设置</string>
+    
+    <!-- 搜索 -->
+    <string name="main_search_hint">按标签搜索</string>
+    <string name="main_btn_next">下一页</string>
+    <string name="main_btn_previous">上一页</string>
+    <string name="main_btn_search">搜索</string>
+    <string name="main_back_again_to_exit">再按一次返回退出</string>
+    
+    <!-- 页面和错误 -->
+    <string name="page_empty">空白页面，未找到帖子</string>
+    <string name="page_error">加载失败\n检查您的连接并重试</string>
+    <string name="default_error_msg">未知错误</string>
+    
+    <!-- 帖子 - 基本信息 -->
+    <string name="post_description">描述</string>
+    <string name="post_details_title">帖子详情</string>
+    <string name="post_info_title">帖子 #%1$d</string>
+    <string name="post_info_artist">艺术家：%1$s</string>
+    <string name="post_info_favourites">收藏：%1$d</string>
+    <string name="post_info_score">评分：%1$d（%2$d 赞 %3$d 踩）</string>
+    <string name="post_info_children">有子项</string>
+    <string name="post_info_parent">有父项</string>
+    <string name="post_info_pool">池：%1$s</string>
+    <string name="post_info_rating">分级：%1$s</string>
+    <string name="post_info_comments">有 %1$d 条评论</string>
+    <string name="post_desc_more">更多…</string>
+    <string name="post_desc_less">收起…</string>
+    
+    <!-- 帖子 - 标签 -->
+    <string name="post_tags_title">标签（%1$d）</string>
+    <string name="post_tags_artist">艺术家</string>
+    <string name="post_tags_character">角色</string>
+    <string name="post_tags_copyright">版权</string>
+    <string name="post_tags_general">一般</string>
+    <string name="post_tags_species">种族</string>
+    <string name="post_tags_meta">元数据</string>
+    <string name="post_tags_lore">背景</string>
+    
+    <!-- 帖子 - 错误 -->
+    <string name="post_error">加载帖子失败\n检查您的连接并重试</string>
+    <string name="post_error_deleted">此帖子已被删除！</string>
+    <string name="post_error_not_logged_in">您需要登录才能查看此帖子</string>
+    <string name="post_error_not_sfw">您处于安全模式，此帖子为成人内容！</string>
+    
+    <!-- 帖子 - 菜单 -->
+    <string name="post_menu_copy_post">复制链接</string>
+    <string name="post_menu_edit_post">编辑帖子</string>
+    <string name="post_menu_open_post">在浏览器中打开</string>
+    <string name="post_menu_share_post">分享帖子</string>
+    <string name="post_menu_reload_post">重新加载帖子</string>
+    <string name="post_menu_add_to_set">添加到集合</string>
+    <string name="post_menu_slideshow">幻灯片</string>
+    
+    <!-- 筛选 -->
+    <string name="filter">筛选</string>
+    <string name="filter_order">排序方式</string>
+    <string name="filter_order_by_newest">最新优先（默认）</string>
+    <string name="filter_order_by_oldest">最旧优先</string>
+    <string name="filter_order_by_score">最高评分</string>
+    <string name="filter_order_by_favs">最多收藏</string>
+    <string name="filter_rating">分级</string>
+    <string name="filter_type">帖子类型</string>
+    <string name="filter_type_all">显示全部</string>
+    <string name="filter_type_only_images">仅图片</string>
+    <string name="filter_type_only_videos">仅视频</string>
+    <string name="filter_type_only_gifs">仅 GIF</string>
+    
+    <!-- 黑名单 -->
+    <string name="blacklist">黑名单</string>
+    <string name="blacklist_saved">黑名单已保存</string>
+    <string name="blacklist_menu_save">保存</string>
+    <string name="blacklist_menu_help">帮助</string>
+    <string name="blacklist_menu_import">导入</string>
+    <string name="blacklist_menu_export">导出</string>
+    
+    <!-- 已保存的搜索 -->
+    <string name="saved_title">已保存的搜索</string>
+    <string name="saved_save_current">保存当前搜索</string>
+    <string name="saved_item_added">已创建新搜索</string>
+    <string name="saved_item_deleted">已删除搜索</string>
+    
+    <!-- 评论 -->
+    <string name="comments_title">评论</string>
+    <string name="comments_create">添加评论</string>
+    <string name="comment_reply">回复</string>
+    <string name="comment_vote_up">赞</string>
+    <string name="comment_vote_down">踩</string>
+    
+    <!-- 标签菜单 -->
+    <string name="tag_menu_search">搜索</string>
+    <string name="tag_menu_add_to_saved">添加到搜索</string>
+    <string name="tag_menu_add_to_blacklist">添加到黑名单</string>
+    <string name="tag_menu_follow">关注标签</string>
+    <string name="tag_menu_unfollow">取消关注</string>
+    <string name="tag_menu_add_to_search">添加到搜索</string>
+    <string name="tag_menu_remove_from_search">从搜索中移除</string>
+    <string name="tag_menu_view_wiki">查看 Wiki</string>
+    <string name="tag_menu_copy">复制</string>
+    
+    <!-- 设置 - 通用 -->
+    <string name="pref_general">通用</string>
+    <string name="pref_general_summary">e621/e926、语言、主题、质量、黑名单、PIN 码等</string>
+    <string name="pref_general_language_title">语言</string>
+    <string name="pref_general_language_summary">更改语言</string>
+    <string name="pref_general_dark_mode_title">更改主题</string>
+    <string name="pref_general_dark_mode_summary">深色</string>
+    <string name="pref_general_blacklist_title">管理黑名单</string>
+    <string name="pref_general_blacklist_enable_title">启用黑名单</string>
+    <string name="pref_general_blacklist_enable_summary">禁用以显示所有帖子</string>
+    
+    <!-- 设置 - 存储 -->
+    <string name="pref_storage">存储和下载</string>
+    <string name="pref_storage_summary">位置、缓存、文件名等</string>
+    
+    <!-- 设置 - 搜索 -->
+    <string name="pref_searching">搜索和标签</string>
+    <string name="pref_searching_summary">历史记录、建议、每页帖子数等</string>
+    
+    <!-- 设置 - 帖子视图 -->
+    <string name="pref_post_view">自定义帖子视图</string>
+    <string name="pref_post_view_summary">标签、数据节省、返回按钮等</string>
+    
+    <!-- 登录 -->
+    <string name="login_success_toast">已登录为 %1$s</string>
+    <string name="login_error_title">登录失败</string>
+    
+    <!-- 池 -->
+    <string name="browse_pools_title">池</string>
+    <string name="pool_title">池 #%1$d</string>
+    
+    <!-- 标签 -->
+    <string name="browse_tags_title">标签</string>
+    <string name="tags">标签</string>
+    <string name="copied_to_clipboard">已复制到剪贴板</string>
+    
+    <!-- 权限 -->
+    <string name="permission_required">需要权限</string>
+    <string name="notifications_permission_title">允许通知？</string>
+    <string name="notifications_permission_confirm">允许</string>
+    <string name="notifications_permission_decline">不允许</string>
+    
+    <!-- 语言 -->
+    <string name="arrays_language_chinese_simplified">简体中文 (Chinese Simplified)</string>
+    <string name="arrays_language_japanese">日本語 (Japanese)</string>
+    <string name="arrays_language_english">英语 (English)</string>
+    <string name="arrays_language_spanish">西班牙语 (Spanish)</string>
+    
+    <!-- 质量 -->
+    <string name="arrays_qualities_high">高</string>
+    <string name="arrays_qualities_medium">中</string>
+    <string name="arrays_qualities_low">低</string>
+    
+    <!-- 主题 -->
+    <string name="arrays_theme_entries_dark">深色</string>
+    <string name="arrays_theme_entries_light">浅色</string>
+    <string name="arrays_theme_entries_system_default">系统默认（Android 10+）</string>
+    
+    <!-- 其他 -->
+    <string name="sources">来源</string>
+    <string name="details">详情</string>
+    <string name="restart_app_for_changes">重启应用以应用更改</string>
+    
+    <!-- 网络 -->
+    <string name="pref_network">网络</string>
+    
+    <!-- 导出 -->
+    <string name="pref_export">导出和导入</string>
+    <string name="encrypt">加密</string>
+    <string name="export_success">文件已导出到 %s</string>
+    <string name="import_success">数据已导入，应用正在重启</string>
+    
+    <!-- 下载管理器 -->
+    <string name="download_manager_title">下载队列</string>
+    <string name="download_manager_start">开始</string>
+    <string name="download_manager_stop">停止</string>
+    <string name="download_manager_empty">队列中没有下载</string>
+    
+    <!-- 集合 -->
+    <string name="browse_sets_title">集合</string>
+    <string name="menu_my_sets">我的集合</string>
+    
+    <!-- 关于菜单 -->
+    <string name="menu_about_changelog">更新日志</string>
+    <string name="menu_about_licenses">许可证</string>
+    <string name="licenses_title">开源许可证</string>
+    <string name="menu_about_news">新闻</string>
+    <string name="menu_about_donate">捐赠</string>
+    
+    <!-- 更新 -->
+    <string name="update_checking">正在检查更新…</string>
+    <string name="update_available_title">有新版本可用</string>
+    <string name="update_download">下载并安装</string>
+    <string name="update_no_update">您已使用最新版本</string>
+    
+    <!-- Wiki -->
+    <string name="wiki_show_title">%1$s - Wiki</string>
+    <string name="menu_browse_wiki">Wiki</string>
+    
+    <!-- 捐赠 -->
+    <string name="donate_title">捐赠</string>
+    <string name="donate_sub_title">支持此应用的开发！</string>
+    
+    <!-- 编辑帖子 -->
+    <string name="edit_post_title">正在编辑帖子 #%1$d</string>
+    <string name="edit_post_rating">分级</string>
+    <string name="edit_post_rating_s">安全</string>
+    <string name="edit_post_rating_q">可疑</string>
+    <string name="edit_post_rating_e">成人</string>
+    
+    <!-- 幻灯片 -->
+    <string name="ss_title">幻灯片设置</string>
+    <string name="ss_start">开始</string>
+</resources>

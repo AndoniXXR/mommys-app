@@ -899,6 +899,7 @@
         <item>Português</item>
         <item>Русский</item>
         <item>中文</item>
+        <item>日本語</item>
     </string-array>
     <string-array name="languages_values">
         <item>en</item>
@@ -908,6 +909,7 @@
         <item>pt</item>
         <item>ru</item>
         <item>zh</item>
+        <item>ja</item>
     </string-array>
     
     <string-array name="post_following_period_entries">
@@ -1193,6 +1195,7 @@
     
     <!-- WebView Activity -->
     <string name="webview_title">Please complete the captcha (if you get one). Press the "Done" button at the bottom when e621/e926 is displayed</string>
+    <string name="webview_toast_done">Done. Please reload the page / search again</string>
     
     <!-- ScrollViewText Activity -->
     <string name="scroll_date_accepted">Date of your agreement: %1$s (UTC)</string>
@@ -1271,5 +1274,302 @@
     <string name="post_info_parent">Has parent</string>
     <string name="post_info_children">Has children</string>
     <string name="cd_close_info">Close info</string>
+    
+    <!-- Additional missing strings from Spanish translation -->
+    <string name="add">Add</string>
+    <string name="download">Download</string>
+    <string name="downloading">Downloading…</string>
+    <string name="filter">Filter by</string>
+    <string name="open">Open</string>
+    <string name="view">View</string>
+    <string name="details">Details</string>
+    <string name="tags">Tags</string>
+    <string name="sources">Sources</string>
+    <string name="later">Later</string>
+    <string name="login">Login</string>
+    <string name="not_set">Not set</string>
+    <string name="high_quality">Load original resolution</string>
+    
+    <!-- Page errors -->
+    <string name="page_empty">Empty page, no posts found</string>
+    <string name="page_error">Failed to download page\nCheck your connection and try again</string>
+    <string name="page_error_with_message">Failed to download page\nCheck your connection and try again\n\nError: %1$s</string>
+    <string name="page_error_auth_failure">This error means your login info is incorrect! (username or API Key). \nTyping them manually (instead of copy-pasting) usually fixes this!</string>
+    <string name="page_error_cloudflare_dialog_title">Failed to load</string>
+    <string name="page_error_cloudflare_dialog_message">API call has been blocked by CloudFlare. A captcha must be completed to use the app</string>
+    
+    <!-- Post error messages -->
+    <string name="post_error">Error loading post\nCheck your internet connection and try again.</string>
+    <string name="post_error_with_message">Error loading post\nCheck your internet connection and try again.\n\nError: %1$s</string>
+    <string name="post_error_not_sfw">You are in SFW mode and this post is NSFW!</string>
+    <string name="post_reload_connection_error">Connection error. Try again</string>
+    <string name="post_reload_done">Post reloaded</string>
+    <string name="post_reload_failed">Failed to reload post: %1$s</string>
+    <string name="post_reload_starting">Reloading post…</string>
+    <string name="post_video_error">Video error: %1$s</string>
+    <string name="post_download_first_title">Choose download method</string>
+    <string name="post_download_first_message">You can download posts using the app\'s download manager (where you can choose a folder) or with Android\'s download manager (posts are saved in /Downloads).\n\nYou can change this anytime in settings</string>
+    <string name="post_download_first_app">App</string>
+    <string name="post_download_error_no_location">Please select a new save location!</string>
+    
+    <!-- Post tags categories -->
+    <string name="post_tags_title">Tags (%1$d)</string>
+    <string name="post_tags_artist">Artist</string>
+    <string name="post_tags_character">Character</string>
+    <string name="post_tags_copyright">Copyright</string>
+    <string name="post_tags_general">General</string>
+    <string name="post_tags_species">Species</string>
+    <string name="post_tags_lore">Lore</string>
+    <string name="post_tags_meta">Meta</string>
+    
+    <!-- Post details -->
+    <string name="post_details_title">Post details</string>
+    <string name="post_details_created_at">Created at: %1$s</string>
+    <string name="post_details_dimensions">Dimensions: %1$dx%2$d</string>
+    <string name="post_details_file_size">File size: %1$d bytes or %2$s MB</string>
+    <string name="post_details_file_type">File type: %1$s</string>
+    <string name="post_details_author">Author: %1$d</string>
+    <string name="post_details_author_start">Author:</string>
+    <string name="post_details_approver">Approver: %1$d</string>
+    <string name="post_details_approver_start">Approver:</string>
+    <string name="post_details_parent">Parent: %1$s</string>
+    <string name="post_details_pending">Post pending approval</string>
+    <string name="post_details_flagged">Post flagged for deletion</string>
+    <string name="post_image_desc">Post item</string>
+    <string name="post_desc_more">More…</string>
+    <string name="post_desc_less">Less…</string>
+    
+    <!-- Main page dialogs -->
+    <string name="main_dialog_go_to_page_title">Go to page</string>
+    <string name="main_dialog_go_to_page_message">Input the page to go to (1–750)\nCurrent: %1$d\nLast: %2$d</string>
+    <string name="main_dialog_go_to_page_input_error_invalid_range">Enter a number between 1 and %1$d</string>
+    <string name="main_dialog_go_to_page_error">Error fetching last page</string>
+    <string name="main_dialog_go_to_user_title">Go to user</string>
+    <string name="main_dialog_go_to_user_message">Enter the username or user id to go to</string>
+    <string name="main_page_number_help">Page %1$d of %2$d\n\n%3$d blacklisted posts\n%4$d hidden posts</string>
+    <string name="main_page_number_help_view_blacklisted">Show blacklisted</string>
+    <string name="main_page_number_help_view_blacklisted_toast">Added %1$d posts</string>
+    <string name="main_btn_next_desc">Go to next page</string>
+    <string name="main_btn_prev_desc">Go to previous page</string>
+    <string name="main_btn_search_desc">Search for entered text</string>
+    
+    <!-- Error messages -->
+    <string name="error_try_again_error">Error, please try again. Message: %1$s</string>
+    <string name="error_file_not_found">File not found</string>
+    <string name="default_error_msg">Unknown error</string>
+    
+    <!-- Content descriptions -->
+    <string name="cd_grid_refresh">Refresh page</string>
+    <string name="cd_main_menu_filter">Show filter menu</string>
+    <string name="cd_main_save">Saved searches</string>
+    <string name="post_back_button_desc">Back button</string>
+    
+    <!-- Arrays strings -->
+    <string name="arrays_search">Search</string>
+    <string name="arrays_add_to_current_search">Add to current search</string>
+    <string name="arrays_remove_from_current_search">Remove from current search</string>
+    <string name="arrays_add_to_blacklist">Add to blacklist</string>
+    <string name="arrays_add_to_saved_searches">Add to Saved Searches</string>
+    <string name="arrays_add_to_followed">Follow Tag</string>
+    <string name="arrays_remove_from_followed">Unfollow Tag</string>
+    <string name="arrays_tag_clicked_copy_clipboard">Copy to clipboard</string>
+    <string name="arrays_tag_view_wiki">View Wiki for this tag</string>
+    <string name="arrays_delete">Delete</string>
+    <string name="arrays_edit">Edit</string>
+    <string name="arrays_pool_clicked_view_pool">View pool</string>
+    <string name="arrays_set_clicked_view_set">View set</string>
+    <string name="arrays_set_clicked_add_post_to_set">Add post to this set</string>
+    <string name="arrays_saved_search_item_clicked_continue">Continue</string>
+    
+    <!-- Share options -->
+    <string name="arrays_share_post_url">Post url (e621.net/posts/)</string>
+    <string name="arrays_share_post_file_url">File url (static.e621.net/)</string>
+    <string name="arrays_share_post_image_file">Image file (jpg/png)</string>
+    
+    <!-- Video/quality options -->
+    <string name="arrays_post_default_video_quality_480p">480p</string>
+    <string name="arrays_post_default_video_quality_720p">720p</string>
+    <string name="arrays_post_default_video_quality_original">Original</string>
+    <string name="arrays_post_default_video_format_webm">WEBM</string>
+    <string name="arrays_post_default_video_format_mp4">MP4</string>
+    <string name="arrays_qualities_low">Low</string>
+    <string name="arrays_qualities_medium">Medium</string>
+    <string name="arrays_qualities_high">High</string>
+    
+    <!-- Theme options -->
+    <string name="arrays_theme_entries_light">Light</string>
+    <string name="arrays_theme_entries_dark">Dark</string>
+    <string name="arrays_theme_entries_system_default">System default (Android 10+)</string>
+    <string name="arrays_theme_entries_battery_saver">Battery saver mode</string>
+    
+    <!-- Back button position -->
+    <string name="arrays_back_button_pos_tleft">Top left</string>
+    <string name="arrays_back_button_pos_tright">Top right</string>
+    
+    <!-- Following period -->
+    <string name="arrays_following_period_30min">30 minutes</string>
+    <string name="arrays_following_period_1hour">1 hour</string>
+    <string name="arrays_following_period_3hour">3 hours</string>
+    <string name="arrays_following_period_6hour">6 hours</string>
+    <string name="arrays_following_period_12hour">12 hours</string>
+    <string name="arrays_following_period_24hour">24 hours</string>
+    
+    <!-- Language names -->
+    <string name="arrays_language_english">English</string>
+    <string name="arrays_language_spanish">Spanish (Español)</string>
+    <string name="arrays_language_german">German (Deutsch)</string>
+    <string name="arrays_language_french">French (Français)</string>
+    <string name="arrays_language_italian">Italian (Italiana)</string>
+    <string name="arrays_language_portuguese_brasil">Portuguese, Brazil (Português)</string>
+    <string name="arrays_language_russian">Russian (Русский)</string>
+    <string name="arrays_language_polish">Polish (Polski)</string>
+    <string name="arrays_language_korean">Korean (한국어)</string>
+    <string name="arrays_language_chinese_simplified">Chinese Simplified (简体中文)</string>
+    <string name="arrays_language_swedish">Swedish (Svenska)</string>
+    <string name="arrays_language_czech">Czech (Čech)</string>
+    
+    <!-- Long press options -->
+    <string name="arrays_post_long_press_download">Download</string>
+    <string name="arrays_post_long_press_favourite">Add to favourites</string>
+    <string name="arrays_post_long_press_vote_up">Vote up</string>
+    <string name="arrays_post_long_press_vote_down">Vote down</string>
+    <string name="arrays_post_long_press_comment">Comment</string>
+    
+    <!-- Blacklist export/import -->
+    <string name="blacklist_export_title">Export</string>
+    <string name="blacklist_export_sub_title">The text below has the same format as e926. Export it as a copy or to send to another device</string>
+    <string name="blacklist_export_nothing_to_export">Nothing to export</string>
+    <string name="blacklist_import_title">Import</string>
+    <string name="blacklist_import_sub_title">Enter a blacklist in the same format as your e926 profile. Each line is a blacklist entry. Paste text or import from a file in the menu</string>
+    <string name="blacklist_import_menu_import">Import</string>
+    <string name="blacklist_menu_export">Export</string>
+    <string name="blacklist_menu_import">Import</string>
+    <string name="blacklist_menu_save">Save blacklist</string>
+    
+    <!-- Saved searches -->
+    <string name="saved_sub_title">Save searches for later, name them, use the menu to organize and import/export lists.</string>
+    <string name="saved_tab_text_1">Searches</string>
+    <string name="saved_tab_text_2">Pools</string>
+    <string name="saved_menu_add">Add custom item</string>
+    <string name="saved_menu_clear_confirm_title">Are you sure?</string>
+    <string name="saved_menu_clear_confirm_message">This will delete all your saved searches. Do you want to continue?</string>
+    <string name="saved_item_add_title">Add custom search</string>
+    <string name="saved_item_added">New saved search created</string>
+    <string name="saved_item_already_exists">Not added, duplicate</string>
+    <string name="saved_item_deleted">Saved search deleted</string>
+    <string name="saved_item_deleted_undo">Undo</string>
+    <string name="saved_item_edit_title">Edit saved search</string>
+    <string name="saved_item_edit_name">Name for this search (optional):</string>
+    <string name="saved_item_edit_name_hint">Example: \"Good search #1\"</string>
+    <string name="saved_item_edit_tags">Tags:</string>
+    <string name="saved_item_edit_tags_hint">Example \"anthro horse -outside\"</string>
+    <string name="saved_item_edit_page">Page:</string>
+    <string name="saved_item_edit_page_hint">Example: 23</string>
+    <string name="saved_item_title">Page %1$d: %2$s</string>
+    <string name="saved_item_updated">Saved search updated</string>
+    <string name="saved_save_current">Save current search</string>
+    <string name="saved_check_new_posts">Check for new posts</string>
+    <string name="saved_check_new_posts_started">Starting service</string>
+    <string name="saved_check_new_posts_done">Service finished</string>
+    <string name="saved_export_title">Export searches to file</string>
+    <string name="saved_export_message">Export your current searches to a file.\n\nFile will be exported to: \"%1$s/TWS/export/\"</string>
+    <string name="saved_export_completed">Export completed</string>
+    <string name="saved_export_error">Failed to export searches. Please try again</string>
+    <string name="saved_export_error_empty">No searches to save</string>
+    <string name="saved_import_title">Import searches from file</string>
+    <string name="saved_import_error_no_files">No files found! Place a .tws or .tws2 file in:\n\"%1$s/\"\n\nExample: \"%2$s/NAME.tws2\"</string>
+    <string name="saved_import_error_empty">Error, empty filename</string>
+    <string name="saved_import_parse_failed">Failed to read file contents</string>
+    <string name="saved_import_imported">Imported %1$d saved searches (%2$d duplicates)</string>
+    <string name="saved_service_title">Checking for new posts</string>
+    <string name="saved_service_desc">Checking for new posts in your saved searches</string>
+    <string name="saved_service_description">Check for new posts in your saved searches</string>
+    <string name="saved_service_snackbar">Check the notification for progress</string>
+    <string name="saved_menu_order_tags_alphabetically">Sort tags alphabetically</string>
+    
+    <!-- Pool menu extras -->
+    <string name="pool_menu_clear_selection">Clear selection</string>
+    <string name="pool_subtitle">Pool #%1$d - %2$s\nPosts: %3$d, created by user #%4$d on %5$s</string>
+    <string name="pool_subtitle_status_1_fetching_pool_info">… Fetching pool info …</string>
+    <string name="pool_subtitle_status_2_fetching_page">… Fetching page %1$d …</string>
+    
+    <!-- Tag operations -->
+    <string name="tag_added_to_current_search">Tag %1$s added to current search</string>
+    <string name="tag_removed_from_current_search">Tag %1$s removed from current search</string>
+    
+    <!-- Comment voting -->
+    <string name="comment_sort_by_new">Newest first</string>
+    <string name="comment_sort_by_old">Oldest first</string>
+    <string name="comment_sort_by_score">Popular first</string>
+    <string name="comment_reply_title">Write a reply</string>
+    <string name="comment_reply_hint">Write a friendly reply</string>
+    <string name="comment_vote_error_own">You cannot vote on your own comments</string>
+    
+    <!-- Filter order extras -->
+    <string name="filter_order_by_date_faved">Date favourited</string>
+    
+    <!-- Preference copied -->
+    <string name="preference_copied">\"%1$s\" copied to clipboard.</string>
+    
+    <!-- Sets operations -->
+    <string name="set_added_post_to_set">Done! This post was added to the set</string>
+    <string name="set_added_post_to_set_error">%1$d error! %2$s, message: %3$s</string>
+    <string name="set_added_post_to_set_forbidden">403 forbidden! You are not authorized to modify this set!</string>
+    <string name="set_adding_post_to_set">Adding post %1$d, please wait…</string>
+    <string name="set_choose_set_maintained">MAINTAINER: %1$s</string>
+    <string name="set_choose_set_owned">OWNER: %1$s</string>
+    <string name="browse_sets_saved_search_name">Set: %1$s</string>
+    <string name="browse_sets_menu_search">Search</string>
+    <string name="browse_sets_search_user">Created by user</string>
+    <string name="browse_sets_sort_date_created">Date created</string>
+    <string name="browse_sets_sort_date_modified">Date modified</string>
+    <string name="browse_sets_sort_name">Name</string>
+    <string name="browse_sets_sort_shortname">Short name</string>
+    <string name="browse_sets_sort_post_count">Post count</string>
+    
+    <!-- Open in external player -->
+    <string name="post_menu_open_post_in_fp">Open in Flash Player</string>
+    <string name="post_menu_open_post_in_fp_error">Error: no flash player found to handle file!</string>
+    <string name="post_menu_open_post_message">This will open %1$s in the browser</string>
+    <string name="post_menu_open_post_title">Open post?</string>
+    
+    <!-- Copy toast -->
+    <string name="copy_toast_msg">Link copied to clipboard</string>
+    
+    <!-- Search menu -->
+    <string name="search_menu_title">Search</string>
+    
+    <!-- Pin/Biometric strings -->
+    <string name="pin_subtitle">App locked. Enter your PIN to continue.</string>
+    <string name="pin_login_with_bio">Login with biometrics</string>
+    <string name="pin_forgot">I forgot my PIN</string>
+    <string name="pin_forgot_dialog_title">Enter your API key</string>
+    <string name="pin_forgot_dialog_message">Enter your API key to reset the app PIN:</string>
+    <string name="pin_forgot_dialog_hint">API key</string>
+    <string name="pin_forgot_correct">PIN disabled</string>
+    <string name="pin_forgot_wrong">Incorrect API key, try again</string>
+    
+    <!-- Report -->
+    <string name="report_title">Report</string>
+    <string name="report_post_message">Report this post for inappropriate content?</string>
+    <string name="report_comment_message">Report this comment for inappropriate content?</string>
+    
+    <!-- Following service -->
+    <string name="follow_tag_service_scheduled_hours">Scheduled to check for new posts every %1$d hour(s)</string>
+    <string name="follow_tag_service_scheduled_minutes">Scheduled to check for new posts every %1$d minutes</string>
+    <string name="follow_tag_service_schedule_failed">Failed to schedule job (%1$d)</string>
+    
+    <!-- App update -->
+    <string name="app_update_available_title">Update available</string>
+    <string name="app_update_available_message">An update is available!\n\nNew version: %1$s</string>
+    <string name="app_update_latest_version_installed">You have the latest version!</string>
+    
+    <!-- Notifications permission -->
+    <string name="notifications_permission_title">Allow this app to send notifications?</string>
+    <string name="notifications_permission_confirm">Allow</string>
+    <string name="notifications_permission_decline">Don\'t allow</string>
+    
+    <!-- Unmute audio -->
+    <string name="unmute_the_audio">Unmute audio</string>
     
 </resources>

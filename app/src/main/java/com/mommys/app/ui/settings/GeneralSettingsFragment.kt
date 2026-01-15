@@ -48,7 +48,24 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
         val languagePref = findPreference<ListPreference>("general_language")
         languagePref?.apply {
             summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
-            // Language functionality will be implemented separately
+            
+            // Load current value from PreferencesManager
+            val currentLanguage = preferencesManager.getLanguage()
+            value = currentLanguage
+            
+            setOnPreferenceChangeListener { _, newValue ->
+                val languageCode = newValue as String
+                
+                // Save to PreferencesManager
+                preferencesManager.setLanguage(languageCode)
+                
+                // Apply locale using AndroidX AppCompat (like original app)
+                // This will persist the locale and recreate all activities automatically
+                val localeList = androidx.core.os.LocaleListCompat.forLanguageTags(languageCode)
+                androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(localeList)
+                
+                true
+            }
         }
     }
 
@@ -64,6 +81,14 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
             
             setOnBindEditTextListener { editText ->
                 editText.hint = "e621.net or e926.net"
+                // Fix for invisible text: Force a high-contrast style
+                // This ensures text is readable regardless of the theme glitch
+                editText.setBackgroundColor(android.graphics.Color.WHITE)
+                editText.setTextColor(android.graphics.Color.BLACK)
+                editText.setHintTextColor(android.graphics.Color.GRAY)
+                // Add some padding since we changed the background
+                val padding = (10 * resources.displayMetrics.density).toInt()
+                editText.setPadding(padding, padding, padding, padding)
             }
             
             setOnPreferenceChangeListener { _, newValue ->

@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Основные действия -->
+    <string name="abc_action_bar_home_description">Домой</string>
+    <string name="abc_action_bar_up_description">Назад</string>
+    <string name="abc_action_menu_overflow_description">Ещё</string>
+    <string name="abc_action_mode_done">Готово</string>
+    <string name="abc_search_hint">Поиск…</string>
+    <string name="abc_searchview_description_search">Поиск</string>
+    
+    <!-- Действия с избранным и голосами -->
+    <string name="action_favourite_added">Добавлено в избранное</string>
+    <string name="action_favourite_already_added">Уже в избранном!</string>
+    <string name="action_favourite_removed">Удалено из избранного</string>
+    <string name="action_forbidden">403 Доступ запрещён. Вы вошли?</string>
+    <string name="action_voted_down">Минус добавлен</string>
+    <string name="action_voted_up">Плюс добавлен</string>
+    <string name="action_voted_removed_down">Минус удалён</string>
+    <string name="action_voted_removed_up">Плюс удалён</string>
+    
+    <!-- Основные кнопки -->
+    <string name="add">Добавить</string>
+    <string name="cancel">Отмена</string>
+    <string name="clear">Очистить</string>
+    <string name="copy">Копировать</string>
+    <string name="delete">Удалить</string>
+    <string name="done">Готово</string>
+    <string name="download">Скачать</string>
+    <string name="downloading">Загрузка...</string>
+    <string name="edit">Редактировать</string>
+    <string name="error">Ошибка</string>
+    <string name="go">Перейти</string>
+    <string name="later">Позже</string>
+    <string name="loading">Загрузка…</string>
+    <string name="login">Войти</string>
+    <string name="no">Нет</string>
+    <string name="ok">ОК</string>
+    <string name="open">Открыть</string>
+    <string name="save">Сохранить</string>
+    <string name="search">Поиск</string>
+    <string name="settings">Настройки</string>
+    <string name="view">Просмотр</string>
+    <string name="yes">Да</string>
+    
+    <!-- Главное меню -->
+    <string name="menu_about">О приложении</string>
+    <string name="menu_browse">Обзор</string>
+    <string name="menu_browse_pools">Пулы</string>
+    <string name="menu_browse_sets">Наборы</string>
+    <string name="menu_browse_tags">Теги</string>
+    <string name="menu_downloads">Очередь загрузок</string>
+    <string name="menu_filter">Фильтры и сортировка</string>
+    <string name="menu_following_tags">Посты отслеживаемых тегов</string>
+    <string name="menu_go_to">Перейти к</string>
+    <string name="menu_go_to_page">Страница</string>
+    <string name="menu_go_to_random_post">Случайный пост</string>
+    <string name="menu_login">Войти</string>
+    <string name="menu_my_account">Мой аккаунт</string>
+    <string name="menu_my_favourites">Избранное</string>
+    <string name="menu_my_log_out">Выйти</string>
+    <string name="menu_my_profile">Мой профиль</string>
+    <string name="menu_popular">Популярное</string>
+    <string name="menu_popular_by_day">Популярное за день</string>
+    <string name="menu_popular_by_month">Популярное за месяц</string>
+    <string name="menu_popular_by_week">Популярное за неделю</string>
+    <string name="menu_settings">Настройки</string>
+    
+    <!-- Поиск -->
+    <string name="main_search_hint">Поиск по тегам</string>
+    <string name="main_btn_next">Далее</string>
+    <string name="main_btn_previous">Назад</string>
+    <string name="main_btn_search">Поиск</string>
+    <string name="main_back_again_to_exit">Нажмите ещё раз для выхода</string>
+    
+    <!-- Страницы и ошибки -->
+    <string name="page_empty">Пустая страница, посты не найдены</string>
+    <string name="page_error">Не удалось загрузить\nПроверьте соединение и попробуйте снова</string>
+    <string name="default_error_msg">Неизвестная ошибка</string>
+    
+    <!-- Посты - Основная информация -->
+    <string name="post_description">Описание</string>
+    <string name="post_details_title">Детали поста</string>
+    <string name="post_info_title">Пост #%1$d</string>
+    <string name="post_info_artist">Художники: %1$s</string>
+    <string name="post_info_favourites">В избранном: %1$d</string>
+    <string name="post_info_score">Очки: %1$d (%2$d плюс %3$d минус)</string>
+    <string name="post_info_children">Есть дочерние</string>
+    <string name="post_info_parent">Есть родитель</string>
+    <string name="post_info_pool">Пулы: %1$s</string>
+    <string name="post_info_rating">Рейтинг: %1$s</string>
+    <string name="post_info_comments">Комментариев: %1$d</string>
+    <string name="post_desc_more">Ещё …</string>
+    <string name="post_desc_less">Меньше …</string>
+    
+    <!-- Посты - Теги -->
+    <string name="post_tags_title">Теги (%1$d)</string>
+    <string name="post_tags_artist">Художник</string>
+    <string name="post_tags_character">Персонаж</string>
+    <string name="post_tags_copyright">Копирайт</string>
+    <string name="post_tags_general">Общие</string>
+    <string name="post_tags_species">Вид</string>
+    <string name="post_tags_meta">Мета</string>
+    <string name="post_tags_lore">Лор</string>
+    
+    <!-- Посты - Технические детали -->
+    <string name="post_details_created_at">Создан: %1$s</string>
+    <string name="post_details_dimensions">Размеры: %1$dx%2$d</string>
+    <string name="post_details_file_size">Размер файла: %1$d байт или %2$s МБ</string>
+    <string name="post_details_file_type">Тип файла: %1$s</string>
+    <string name="post_details_author">Автор: %1$d</string>
+    <string name="post_details_approver">Модератор: %1$d</string>
+    <string name="post_details_parent">Родитель: %1$s</string>
+    <string name="post_details_pending">Пост ожидает одобрения</string>
+    <string name="post_details_flagged">Пост отмечен к удалению</string>
+    
+    <!-- Посты - Ошибки -->
+    <string name="post_error">Не удалось загрузить пост\nПроверьте соединение и попробуйте снова</string>
+    <string name="post_error_deleted">Этот пост был удалён!</string>
+    <string name="post_error_with_message">Не удалось загрузить пост\nПроверьте соединение и попробуйте снова\n\nОшибка: %1$s</string>
+    <string name="post_error_not_logged_in">Войдите чтобы увидеть этот пост</string>
+    <string name="post_error_not_sfw">Вы в режиме SFW, а этот пост NSFW!</string>
+    <string name="post_video_error">Ошибка видео: %1$s</string>
+    <string name="post_reload_connection_error">Ошибка соединения. Попробуйте снова</string>
+    <string name="post_reload_done">Пост перезагружен</string>
+    <string name="post_reload_failed">Не удалось перезагрузить: %1$s</string>
+    <string name="post_reload_starting">Перезагрузка поста...</string>
+    
+    <!-- Посты - Меню -->
+    <string name="post_menu_copy_post">Копировать ссылку</string>
+    <string name="post_menu_edit_post">Редактировать пост</string>
+    <string name="post_menu_edit_post_not_logged_in">Войдите чтобы редактировать!</string>
+    <string name="post_menu_open_post">Открыть в браузере</string>
+    <string name="post_menu_open_post_title">Открыть пост?</string>
+    <string name="post_menu_open_post_message">Это откроет %1$s в браузере</string>
+    <string name="post_menu_share_post">Поделиться постом</string>
+    <string name="post_menu_share_post_as">Поделиться как</string>
+    <string name="post_menu_reload_post">Перезагрузить пост</string>
+    <string name="post_menu_add_to_set">Добавить в набор</string>
+    <string name="post_menu_check_notes">Проверить заметки</string>
+    <string name="post_menu_slideshow">Слайдшоу</string>
+    <string name="post_menu_view_json">Показать JSON</string>
+    <string name="post_back_button_desc">Кнопка назад</string>
+    <string name="post_image_desc">Изображение поста</string>
+    
+    <!-- Посты - Родитель/дочерние/пулы -->
+    <string name="post_parent">Родитель: %1$s</string>
+    <string name="post_child">Дочерний: %1$s</string>
+    <string name="post_has_children">Есть дочерние</string>
+    <string name="post_pool">Пул: %1$s</string>
+    <string name="post_select_child">Выбрать дочерний</string>
+    <string name="post_select_pool">Выбрать пул</string>
+    
+    <plurals name="post_children">
+        <item quantity="one">Дочерний: %1$s</item>
+        <item quantity="few">Дочерние: %1$s</item>
+        <item quantity="many">Дочерних: %1$s</item>
+        <item quantity="other">Дочерние: %1$s</item>
+    </plurals>
+    <plurals name="post_pools">
+        <item quantity="one">Пул: %1$s</item>
+        <item quantity="few">Пула: %1$s</item>
+        <item quantity="many">Пулов: %1$s</item>
+        <item quantity="other">Пулы: %1$s</item>
+    </plurals>
+    
+    <!-- Посты - Чёрный список -->
+    <string name="post_blacklisted_dialog_title">Этот пост в чёрном списке</string>
+    <string name="post_blacklisted_dialog_message">Этот пост содержит теги из вашего чёрного списка: \n\n%1$s \n\nВсё равно показать?</string>
+    
+    <!-- Фильтры -->
+    <string name="filter">Фильтровать</string>
+    <string name="filter_order">Сортировать по</string>
+    <string name="filter_order_by_newest">Новые (по умолчанию)</string>
+    <string name="filter_order_by_oldest">Старые</string>
+    <string name="filter_order_by_score">Лучшие очки</string>
+    <string name="filter_order_by_favs">Больше избранных</string>
+    <string name="filter_rating">Рейтинг</string>
+    <string name="filter_type">Тип поста</string>
+    <string name="filter_type_all">Показать все</string>
+    <string name="filter_type_only_images">Только изображения</string>
+    <string name="filter_type_only_videos">Только видео</string>
+    <string name="filter_type_only_gifs">Только GIF</string>
+    
+    <!-- Чёрный список -->
+    <string name="blacklist">Чёрный список</string>
+    <string name="blacklist_saved">Чёрный список сохранён</string>
+    <string name="blacklist_menu_save">Сохранить</string>
+    <string name="blacklist_menu_help">Помощь</string>
+    <string name="blacklist_menu_import">Импорт</string>
+    <string name="blacklist_menu_export">Экспорт</string>
+    
+    <!-- Сохранённые поиски -->
+    <string name="saved_title">Сохранённые поиски</string>
+    <string name="saved_save_current">Сохранить текущий поиск</string>
+    <string name="saved_item_added">Новый поиск создан</string>
+    <string name="saved_item_deleted">Поиск удалён</string>
+    <string name="saved_tab_text_1">Поиски</string>
+    <string name="saved_tab_text_2">Пулы</string>
+    
+    <!-- Комментарии -->
+    <string name="comments_title">Комментарии</string>
+    <string name="comments_create">Добавить комментарий</string>
+    <string name="comment_reply">Ответить</string>
+    <string name="comment_vote_up">Плюс</string>
+    <string name="comment_vote_down">Минус</string>
+    
+    <!-- Меню тегов -->
+    <string name="tag_menu_search">Поиск</string>
+    <string name="tag_menu_add_to_saved">Добавить в поиски</string>
+    <string name="tag_menu_add_to_blacklist">В чёрный список</string>
+    <string name="tag_menu_follow">Отслеживать тег</string>
+    <string name="tag_menu_unfollow">Не отслеживать</string>
+    <string name="tag_menu_add_to_search">Добавить в поиск</string>
+    <string name="tag_menu_remove_from_search">Убрать из поиска</string>
+    <string name="tag_menu_view_wiki">Показать вики</string>
+    <string name="tag_menu_copy">Копировать</string>
+    
+    <!-- Обратная связь по тегам -->
+    <string name="tag_copied">Тег скопирован</string>
+    <string name="tag_added_to_search">Тег добавлен в поиск</string>
+    <string name="tag_removed_from_search">Тег убран из поиска</string>
+    <string name="tag_added_to_saved">Тег добавлен в поиски</string>
+    <string name="tag_added_to_blacklist">Тег добавлен в чёрный список</string>
+    <string name="tag_following">Теперь вы отслеживаете этот тег</string>
+    <string name="tag_unfollowed">Вы больше не отслеживаете этот тег</string>
+    
+    <!-- Настройки - Общие -->
+    <string name="pref_general">Общие</string>
+    <string name="pref_general_summary">e621/e926, язык, тема, качество, чёрный список, PIN и т.д.</string>
+    <string name="pref_general_language_title">Язык</string>
+    <string name="pref_general_language_summary">Изменить язык</string>
+    <string name="pref_general_dark_mode_title">Изменить тему</string>
+    <string name="pref_general_dark_mode_summary">Тёмная</string>
+    <string name="pref_general_blacklist_title">Управление чёрным списком</string>
+    <string name="pref_general_blacklist_enable_title">Чёрный список включён</string>
+    <string name="pref_general_blacklist_enable_summary">Отключить чтобы показать все посты</string>
+    
+    <!-- Настройки - Хранилище -->
+    <string name="pref_storage">Хранилище и загрузки</string>
+    <string name="pref_storage_summary">Расположение, кэш, имена файлов и т.д.</string>
+    
+    <!-- Настройки - Поиски -->
+    <string name="pref_searching">Поиски и теги</string>
+    <string name="pref_searching_summary">История, подсказки, постов на страницу и т.д.</string>
+    
+    <!-- Настройки - Просмотр постов -->
+    <string name="pref_post_view">Настроить просмотр постов</string>
+    <string name="pref_post_view_summary">Теги, экономия данных, кнопка назад и т.д.</string>
+    
+    <!-- Вход -->
+    <string name="login_success_toast">Вы вошли как %1$s</string>
+    <string name="login_error_title">Ошибка входа</string>
+    
+    <!-- Пулы -->
+    <string name="browse_pools_title">Пулы</string>
+    <string name="pool_title">Пул #%1$d</string>
+    
+    <!-- Теги -->
+    <string name="browse_tags_title">Теги</string>
+    <string name="tags">Теги</string>
+    <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
+    
+    <!-- Разрешения -->
+    <string name="permission_required">Требуется разрешение</string>
+    <string name="notifications_permission_title">Разрешить уведомления?</string>
+    <string name="notifications_permission_confirm">Разрешить</string>
+    <string name="notifications_permission_decline">Не разрешать</string>
+    
+    <!-- Языки -->
+    <string name="arrays_language_russian">Русский (Russian)</string>
+    <string name="arrays_language_english">Английский (English)</string>
+    <string name="arrays_language_spanish">Испанский (Spanish)</string>
+    
+    <!-- Качество -->
+    <string name="arrays_qualities_high">Высокое</string>
+    <string name="arrays_qualities_medium">Среднее</string>
+    <string name="arrays_qualities_low">Низкое</string>
+    
+    <!-- Темы -->
+    <string name="arrays_theme_entries_dark">Тёмная</string>
+    <string name="arrays_theme_entries_light">Светлая</string>
+    <string name="arrays_theme_entries_system_default">Системная (Android 10+)</string>
+    
+    <!-- Управление видео -->
+    <string name="unmute_the_audio">Включить звук</string>
+    <string name="exo_controls_play_description">Воспроизвести</string>
+    <string name="exo_controls_pause_description">Пауза</string>
+    <string name="exo_controls_stop_description">Стоп</string>
+    <string name="exo_controls_fullscreen_enter_description">Полный экран</string>
+    <string name="exo_controls_fullscreen_exit_description">Выйти из полного экрана</string>
+    
+    <!-- Прочее -->
+    <string name="sources">Источники</string>
+    <string name="details">Детали</string>
+    <string name="restart_app_for_changes">Перезапустите приложение для применения изменений</string>
+    
+    <!-- Настройки - Сеть -->
+    <string name="pref_network">Сеть</string>
+    <string name="pref_network_proxy_title">Настройка прокси</string>
+    <string name="pref_network_proxy_summary">Использовать прокси-сервер</string>
+    
+    <!-- Настройки - Следование -->
+    <string name="pref_following_enabled_title">Следование включено</string>
+    <string name="pref_following_enabled_summary">Получать уведомления о новых постах</string>
+    <string name="pref_following_manage_title">Управление отслеживаемыми тегами</string>
+    
+    <!-- Настройки - Экспорт -->
+    <string name="pref_export">Экспорт и импорт</string>
+    <string name="pref_export_export_title">Экспорт данных приложения</string>
+    <string name="pref_export_import_title">Импорт данных приложения</string>
+    <string name="encrypt">Зашифровать</string>
+    <string name="export_success">Файл экспортирован в %s</string>
+    <string name="import_success">Данные импортированы, приложение перезапускается</string>
+    
+    <!-- Менеджер загрузок -->
+    <string name="download_manager_title">Очередь загрузок</string>
+    <string name="download_manager_start">Запустить</string>
+    <string name="download_manager_stop">Остановить</string>
+    <string name="download_manager_empty">Нет загрузок в очереди</string>
+    
+    <!-- Пулы расширенные -->
+    <string name="pool_menu_refresh">Обновить</string>
+    <string name="pool_menu_download">Скачать</string>
+    <string name="pool_empty">В этом пуле нет постов</string>
+    
+    <!-- Наборы -->
+    <string name="browse_sets_title">Наборы</string>
+    <string name="menu_my_sets">Мои наборы</string>
+    
+    <!-- Меню "О программе" -->
+    <string name="menu_about_changelog">История изменений</string>
+    <string name="menu_about_licenses">Лицензии</string>
+    <string name="licenses_title">Лицензии открытого ПО</string>
+    <string name="menu_about_news">Новости</string>
+    <string name="menu_about_donate">Поддержать</string>
+    
+    <!-- Обновления -->
+    <string name="update_checking">Проверка обновлений…</string>
+    <string name="update_available_title">Доступна новая версия</string>
+    <string name="update_download">Скачать и установить</string>
+    <string name="update_no_update">У вас последняя версия</string>
+    
+    <!-- Wiki -->
+    <string name="wiki_show_title">%1$s - Вики</string>
+    <string name="menu_browse_wiki">Вики</string>
+    
+    <!-- Донаты -->
+    <string name="donate_title">Поддержать</string>
+    <string name="donate_sub_title">Поддержите разработку этого приложения!</string>
+    
+    <!-- Редактирование поста -->
+    <string name="edit_post_title">Редактирование поста #%1$d</string>
+    <string name="edit_post_rating">Рейтинг</string>
+    <string name="edit_post_rating_s">Безопасный</string>
+    <string name="edit_post_rating_q">Сомнительный</string>
+    <string name="edit_post_rating_e">Explicit</string>
+    
+    <!-- Слайдшоу -->
+    <string name="ss_title">Настройки слайдшоу</string>
+    <string name="ss_start">Запустить</string>
+    
+    <!-- Следование постам -->
+    <string name="following_post_title">Отслеживаемые теги</string>
+</resources>

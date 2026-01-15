@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Acciones principales -->
+    <string name="abc_action_bar_home_description">Accueil</string>
+    <string name="abc_action_bar_up_description">Remonter</string>
+    <string name="abc_action_menu_overflow_description">Plus d\'options</string>
+    <string name="abc_action_mode_done">Terminé</string>
+    <string name="abc_search_hint">Rechercher…</string>
+    <string name="abc_searchview_description_search">Rechercher</string>
+    
+    <!-- Acciones de favoritos y votos -->
+    <string name="action_favourite_added">Ajouté aux favoris</string>
+    <string name="action_favourite_already_added">Déjà dans tes favoris !</string>
+    <string name="action_favourite_removed">Retiré des favoris</string>
+    <string name="action_forbidden">403 Accès refusé. Es-tu connecté ?</string>
+    <string name="action_voted_down">Vote négatif ajouté</string>
+    <string name="action_voted_up">Vote positif ajouté</string>
+    <string name="action_voted_removed_down">Vote négatif retiré</string>
+    <string name="action_voted_removed_up">Vote positif retiré</string>
+    
+    <!-- Botones básicos -->
+    <string name="add">Ajouter</string>
+    <string name="cancel">Annuler</string>
+    <string name="clear">Effacer</string>
+    <string name="copy">Copier</string>
+    <string name="delete">Supprimer</string>
+    <string name="done">Terminé</string>
+    <string name="download">Télécharger</string>
+    <string name="downloading">Téléchargement...</string>
+    <string name="edit">Modifier</string>
+    <string name="error">Erreur</string>
+    <string name="go">Aller</string>
+    <string name="later">Plus tard</string>
+    <string name="loading">Chargement…</string>
+    <string name="login">Connexion</string>
+    <string name="no">Non</string>
+    <string name="ok">OK</string>
+    <string name="open">Ouvrir</string>
+    <string name="save">Enregistrer</string>
+    <string name="search">Rechercher</string>
+    <string name="settings">Paramètres</string>
+    <string name="view">Voir</string>
+    <string name="yes">Oui</string>
+    
+    <!-- Menú principal -->
+    <string name="menu_about">À propos</string>
+    <string name="menu_browse">Parcourir</string>
+    <string name="menu_browse_pools">Listes</string>
+    <string name="menu_browse_sets">Sets</string>
+    <string name="menu_browse_tags">Tags</string>
+    <string name="menu_browse_artists">Artistes</string>
+    <string name="menu_browse_comments">Commentaires</string>
+    <string name="menu_browse_wiki">Wiki</string>
+    <string name="menu_downloads">File de téléchargement</string>
+    <string name="menu_filter">Filtres et tri</string>
+    <string name="menu_following_tags">Posts des tags suivis</string>
+    <string name="menu_go_to">Aller à</string>
+    <string name="menu_go_to_page">Page</string>
+    <string name="menu_go_to_random_post">Post aléatoire</string>
+    <string name="menu_go_to_user">Utilisateur</string>
+    <string name="menu_login">Connexion</string>
+    <string name="menu_my_account">Mon compte</string>
+    <string name="menu_my_favourites">Favoris</string>
+    <string name="menu_my_log_out">Déconnexion</string>
+    <string name="menu_my_profile">Mon profil</string>
+    <string name="menu_my_posts">Posts</string>
+    <string name="menu_my_comments">Commentaires</string>
+    <string name="menu_my_upvotes">Votes positifs</string>
+    <string name="menu_my_sets">Sets</string>
+    <string name="menu_popular">Populaire</string>
+    <string name="menu_popular_by_day">Populaire du jour</string>
+    <string name="menu_popular_by_month">Populaire du mois</string>
+    <string name="menu_popular_by_week">Populaire de la semaine</string>
+    <string name="menu_settings">Paramètres</string>
+    <string name="menu_about_about">À propos</string>
+    <string name="menu_about_changelog">Changelog</string>
+    <string name="menu_about_donate">Faire un don</string>
+    <string name="menu_about_help">Aide</string>
+    <string name="menu_about_licenses">Licences</string>
+    <string name="menu_about_news">Actualités</string>
+    
+    <!-- Búsqueda -->
+    <string name="main_search_hint">Rechercher par tags</string>
+    <string name="main_btn_next">Suivant</string>
+    <string name="main_btn_previous">Précédent</string>
+    <string name="main_btn_search">Rechercher</string>
+    <string name="main_back_again_to_exit">Appuie encore pour quitter</string>
+    <string name="main_dialog_go_to_page_title">Aller à la page</string>
+    <string name="main_dialog_go_to_page_message">Entre la page à atteindre (1–750)\nActuelle : %1$d\nDernière : %2$d</string>
+    <string name="main_page_number_help">Page %1$d sur %2$d\n\n%3$d posts sur liste noire\n%4$d posts cachés</string>
+    
+    <!-- Páginas y errores -->
+    <string name="page_empty">Page vide, aucun post trouvé</string>
+    <string name="page_error">Échec du chargement\nVérifie ta connexion et réessaie</string>
+    <string name="page_error_with_message">Échec du chargement\nVérifie ta connexion et réessaie\n\nErreur : %1$s</string>
+    <string name="default_error_msg">Erreur inconnue</string>
+    <string name="error_try_again_error">Erreur, réessaie. Message : %1$s</string>
+    
+    <!-- Posts - Información básica -->
+    <string name="post_description">Description</string>
+    <string name="post_details_title">Détails du post</string>
+    <string name="post_info_title">Post #%1$d</string>
+    <string name="post_info_artist">Artistes : %1$s</string>
+    <string name="post_info_favourites">Favoris : %1$d</string>
+    <string name="post_info_score">Points : %1$d (%2$d pos. %3$d nég.)</string>
+    <string name="post_info_children">A des enfants</string>
+    <string name="post_info_parent">Est parent</string>
+    <string name="post_info_pool">Listes : %1$s</string>
+    <string name="post_info_rating">Classification : %1$s</string>
+    <string name="post_info_comments">A %1$d commentaires</string>
+    <string name="post_desc_more">Plus …</string>
+    <string name="post_desc_less">Moins …</string>
+    
+    <!-- Posts - Tags -->
+    <string name="post_tags_title">Tags (%1$d)</string>
+    <string name="post_tags_artist">Artiste</string>
+    <string name="post_tags_character">Personnage</string>
+    <string name="post_tags_copyright">Copyright</string>
+    <string name="post_tags_general">Général</string>
+    <string name="post_tags_species">Espèce</string>
+    <string name="post_tags_meta">Méta</string>
+    <string name="post_tags_lore">Lore</string>
+    
+    <!-- Posts - Detalles técnicos -->
+    <string name="post_details_created_at">Créé le : %1$s</string>
+    <string name="post_details_dimensions">Dimensions : %1$dx%2$d</string>
+    <string name="post_details_file_size">Taille du fichier : %1$d octets ou %2$s Mo</string>
+    <string name="post_details_file_type">Type de fichier : %1$s</string>
+    <string name="post_details_author">Auteur : %1$d</string>
+    <string name="post_details_approver">Approbateur : %1$d</string>
+    <string name="post_details_parent">Parent : %1$s</string>
+    <string name="post_details_pending">Post en attente d\'approbation</string>
+    <string name="post_details_flagged">Post signalé pour suppression</string>
+    
+    <!-- Posts - Errores -->
+    <string name="post_error">Échec du chargement du post\nVérifie ta connexion et réessaie</string>
+    <string name="post_error_deleted">Ce post a été supprimé !</string>
+    <string name="post_error_with_message">Échec du chargement du post\nVérifie ta connexion et réessaie\n\nErreur : %1$s</string>
+    <string name="post_error_not_logged_in">Tu dois être connecté pour voir ce post</string>
+    <string name="post_error_not_sfw">Tu es en mode SFW et ce post est NSFW !</string>
+    <string name="post_video_error">Erreur vidéo : %1$s</string>
+    
+    <!-- Posts - Menú -->
+    <string name="post_menu_copy_post">Copier le lien</string>
+    <string name="post_menu_edit_post">Modifier le post</string>
+    <string name="post_menu_edit_post_not_logged_in">Tu dois être connecté pour modifier les posts !</string>
+    <string name="post_menu_open_post">Ouvrir dans le navigateur</string>
+    <string name="post_menu_open_post_disabled">Tu as désactivé cette option</string>
+    <string name="post_menu_open_post_title">Ouvrir le post ?</string>
+    <string name="post_menu_open_post_message">Cela ouvrira %1$s dans le navigateur</string>
+    <string name="post_menu_open_post_in_vp">Ouvrir dans le lecteur vidéo</string>
+    <string name="post_menu_open_post_in_vp_error">Erreur : aucun lecteur vidéo trouvé !</string>
+    <string name="post_menu_open_post_in_fp">Ouvrir dans Flash Player</string>
+    <string name="post_menu_open_post_in_fp_error">Erreur : aucun Flash Player trouvé !</string>
+    <string name="post_menu_share_post">Partager le post</string>
+    <string name="post_menu_share_post_as">Partager comme</string>
+    <string name="post_menu_reload_post">Recharger le post</string>
+    <string name="post_menu_add_to_set">Ajouter au set</string>
+    <string name="post_menu_check_notes">Vérifier les notes</string>
+    <string name="post_menu_slideshow">Diaporama</string>
+    <string name="post_menu_view_json">Voir info JSON</string>
+    <string name="post_back_button_desc">Bouton retour</string>
+    <string name="post_image_desc">Image du post</string>
+    
+    <!-- Posts - Recargar -->
+    <string name="post_reload_connection_error">Erreur de connexion. Réessaie</string>
+    <string name="post_reload_done">Post rechargé</string>
+    <string name="post_reload_failed">Échec du rechargement : %1$s</string>
+    <string name="post_reload_starting">Rechargement du post...</string>
+    
+    <!-- Posts - Blacklist dialog -->
+    <string name="post_blacklisted_dialog_title">Ce post est sur la liste noire</string>
+    <string name="post_blacklisted_dialog_message">Ce post contient des tags sur ta liste noire : \n\n%1$s \n\nVeux-tu quand même voir ce post ?</string>
+    
+    <!-- Posts - Descargas -->
+    <string name="post_download_first_title">Choisir la méthode de téléchargement</string>
+    <string name="post_download_first_message">Tu peux télécharger avec le gestionnaire de l\'app (où tu peux choisir un dossier) ou avec le gestionnaire Android (téléchargé dans /Downloads).\n\nTu peux changer cela dans les paramètres</string>
+    <string name="post_download_first_app">App</string>
+    <string name="post_download_error_no_location">Choisis un nouvel emplacement !</string>
+    
+    <!-- Posts - Editar post -->
+    <string name="edit_post_title">Modifier post #%1$d</string>
+    <string name="edit_post_tags">Tags du post</string>
+    <string name="edit_post_help">Avant de modifier, lis le guide : https://e926.net/help/tags .\nSépare les tags avec un espace ou retour à la ligne.</string>
+    <string name="edit_post_et_artist">Artiste(s)</string>
+    <string name="edit_post_et_character">Personnage(s)</string>
+    <string name="edit_post_et_copyright">Copyright</string>
+    <string name="edit_post_et_species">Espèces</string>
+    <string name="edit_post_et_general">Général et méta</string>
+    <string name="edit_post_rating">Classification du post</string>
+    <string name="edit_post_rating_s">Sûr</string>
+    <string name="edit_post_rating_q">Douteux</string>
+    <string name="edit_post_rating_e">Explicite</string>
+    <string name="edit_post_reason">Raison (optionnel)</string>
+    <string name="edit_post_reason_hint">Raison de la modification (optionnel)</string>
+    <string name="edit_post_done_no_changes">Aucun changement</string>
+    <string name="edit_post_done_confirm">Tes changements seront enregistrés.\n\nAjoutés : %1$s\n\nRetirés : %2$s\n\nClassification : %3$s → %4$s\n\nContinuer ?</string>
+    <string name="edit_post_done_confirm_submit">Enregistrer</string>
+    
+    <!-- Posts - Compartir opciones -->
+    <string name="arrays_share_post_url">URL du post (e621.net/posts/)</string>
+    <string name="arrays_share_post_file_url">URL du fichier (static.e621.net/)</string>
+    <string name="arrays_share_post_image_file">Fichier image (jpg/png)</string>
+    
+    <!-- Posts - Acciones largas -->
+    <string name="arrays_post_long_press_download">Télécharger</string>
+    <string name="arrays_post_long_press_favourite">Ajouter aux favoris</string>
+    <string name="arrays_post_long_press_vote_up">Vote positif</string>
+    <string name="arrays_post_long_press_vote_down">Vote négatif</string>
+    <string name="arrays_post_long_press_comment">Commenter</string>
+    
+    <!-- Posts - Content descriptions -->
+    <string name="cd_posts_comments">Commentaires</string>
+    <string name="cd_posts_download">Télécharger le post</string>
+    <string name="cd_posts_fav">Ajouter aux favoris</string>
+    <string name="cd_posts_more">Plus d\'options</string>
+    <string name="cd_posts_vote_up">Vote positif</string>
+    <string name="cd_posts_vote_down">Vote négatif</string>
+    
+    <!-- Posts - Notas -->
+    <string name="notes_only_images">Seuls les images et GIFs sont autorisés !</string>
+    
+    <!-- Video controles -->
+    <string name="unmute_the_audio">Activer le son</string>
+    <string name="exo_controls_play_description">Lecture</string>
+    <string name="exo_controls_pause_description">Pause</string>
+    <string name="exo_controls_stop_description">Arrêter</string>
+    <string name="exo_controls_next_description">Suivant</string>
+    <string name="exo_controls_previous_description">Précédent</string>
+    <string name="exo_controls_fastforward_description">Avance rapide</string>
+    <string name="exo_controls_rewind_description">Retour rapide</string>
+    <string name="exo_controls_repeat_all_description">Mode actuel : Répéter tout. Changer de mode.</string>
+    <string name="exo_controls_repeat_one_description">Mode actuel : Répéter un. Changer de mode.</string>
+    <string name="exo_controls_repeat_off_description">Mode actuel : Ne pas répéter. Changer de mode.</string>
+    <string name="exo_controls_shuffle_on_description">Désactiver la lecture aléatoire</string>
+    <string name="exo_controls_shuffle_off_description">Activer la lecture aléatoire</string>
+    <string name="exo_controls_fullscreen_enter_description">Activer plein écran</string>
+    <string name="exo_controls_fullscreen_exit_description">Quitter plein écran</string>
+    <string name="exo_controls_cc_enabled_description">Désactiver les sous-titres</string>
+    <string name="exo_controls_cc_disabled_description">Activer les sous-titres</string>
+    <string name="exo_controls_vr_description">Mode VR</string>
+    <string name="exo_controls_hide">Masquer les contrôles</string>
+    <string name="exo_controls_show">Afficher les contrôles</string>
+    <string name="exo_controls_settings_description">Paramètres</string>
+    <string name="exo_controls_playback_speed">Vitesse</string>
+    <string name="exo_controls_seek_bar_description">Progression</string>
+    <string name="exo_track_selection_auto">Automatique</string>
+    <string name="exo_track_selection_none">Aucun</string>
+    <string name="exo_track_selection_title_audio">Audio</string>
+    <string name="exo_track_stereo">Stéréo</string>
+    <string name="exo_track_mono">Mono</string>
+    <string name="exo_track_surround">Surround</string>
+    <string name="exo_track_unknown">Inconnu</string>
+    <string name="exo_download_completed">Téléchargement terminé</string>
+    <string name="exo_download_downloading">Téléchargement</string>
+    <string name="exo_download_failed">Échec du téléchargement</string>
+    <string name="exo_download_paused">Téléchargement en pause</string>
+    
+    <!-- Posts - Parent/child/pool -->
+    <string name="post_parent">Parent : %1$s</string>
+    <string name="post_child">Enfant : %1$s</string>
+    <string name="post_has_children">A des enfants</string>
+    <string name="post_pool">Liste : %1$s</string>
+    <string name="post_select_child">Sélectionner enfant</string>
+    <string name="post_select_pool">Sélectionner liste</string>
+    
+    <plurals name="post_children">
+        <item quantity="one">Enfant : %1$s</item>
+        <item quantity="other">Enfants : %1$s</item>
+    </plurals>
+    <plurals name="post_pools">
+        <item quantity="one">Liste : %1$s</item>
+        <item quantity="other">Listes : %1$s</item>
+    </plurals>
+    
+    <!-- Filtros -->
+    <string name="filter">Filtrer par</string>
+    <string name="filter_order">Trier par</string>
+    <string name="filter_order_by_newest">Plus récents (par défaut)</string>
+    <string name="filter_order_by_oldest">Plus anciens</string>
+    <string name="filter_order_by_score">Meilleur score</string>
+    <string name="filter_order_by_favs">Plus de favoris</string>
+    <string name="filter_order_by_date_faved">Date de favori</string>
+    <string name="filter_rating">Classification</string>
+    <string name="filter_rating_show_s">Afficher sûrs</string>
+    <string name="filter_rating_show_q">Afficher douteux</string>
+    <string name="filter_rating_show_e">Afficher explicites</string>
+    <string name="filter_type">Type de post</string>
+    <string name="filter_type_all">Tout afficher</string>
+    <string name="filter_type_only_images">Images seulement</string>
+    <string name="filter_type_only_videos">Vidéos seulement</string>
+    <string name="filter_type_only_gifs">GIFs seulement</string>
+    
+    <!-- Blacklist -->
+    <string name="blacklist">Liste noire</string>
+    <string name="blacklist_saved">Liste noire enregistrée</string>
+    <string name="blacklist_title">Les posts correspondant à la liste noire seront cachés.</string>
+    <string name="blacklist_menu_save">Enregistrer liste noire</string>
+    <string name="blacklist_menu_help">Aide</string>
+    <string name="blacklist_menu_import">Importer</string>
+    <string name="blacklist_menu_export">Exporter</string>
+    <string name="blacklist_import_title">Importer</string>
+    <string name="blacklist_export_title">Exporter</string>
+    
+    <!-- Búsquedas guardadas -->
+    <string name="saved_title">Recherches enregistrées</string>
+    <string name="saved_save_current">Enregistrer recherche actuelle</string>
+    <string name="saved_item_added">Nouvelle recherche créée</string>
+    <string name="saved_item_deleted">Recherche supprimée</string>
+    <string name="saved_item_updated">Recherche mise à jour</string>
+    <string name="saved_item_already_exists">Non ajouté, doublon</string>
+    <string name="saved_tab_text_1">Recherches</string>
+    <string name="saved_tab_text_2">Listes</string>
+    <string name="saved_sub_title">Enregistre des recherches pour plus tard, nomme-les, utilise le menu pour organiser et importer/exporter.</string>
+    <string name="saved_menu_add">Ajouter élément personnalisé</string>
+    <string name="saved_item_add_title">Ajouter recherche personnalisée</string>
+    <string name="saved_item_edit_title">Modifier recherche</string>
+    <string name="saved_item_edit_name">Nom (optionnel) :</string>
+    <string name="saved_item_edit_tags">Tags :</string>
+    <string name="saved_item_edit_page">Page :</string>
+    
+    <!-- Comentarios -->
+    <string name="comments_title">Commentaires</string>
+    <string name="comments_create">Ajouter un commentaire</string>
+    <string name="comment_reply">Répondre</string>
+    <string name="comment_vote_up">Vote positif</string>
+    <string name="comment_vote_down">Vote négatif</string>
+    <string name="comment_sort_by_new">Plus récents</string>
+    <string name="comment_sort_by_old">Plus anciens</string>
+    <string name="comment_sort_by_score">Populaires</string>
+    <string name="comment_order_by">Trier par</string>
+    <string name="comment_create_title">Commenter</string>
+    <string name="comment_create_hint">Écris un commentaire sympa</string>
+    <string name="comment_reply_title">Écrire une réponse</string>
+    <string name="comment_reply_hint">Écris une réponse sympa</string>
+    
+    <!-- Tag menu -->
+    <string name="tag_menu_search">Rechercher</string>
+    <string name="tag_menu_add_to_saved">Ajouter aux recherches</string>
+    <string name="tag_menu_add_to_blacklist">Ajouter à la liste noire</string>
+    <string name="tag_menu_follow">Suivre le tag</string>
+    <string name="tag_menu_unfollow">Ne plus suivre</string>
+    <string name="tag_menu_add_to_search">Ajouter à la recherche</string>
+    <string name="tag_menu_remove_from_search">Retirer de la recherche</string>
+    <string name="tag_menu_view_wiki">Voir le wiki</string>
+    <string name="tag_menu_copy">Copier</string>
+    
+    <!-- Tag feedback -->
+    <string name="tag_copied">Tag copié</string>
+    <string name="tag_added_to_search">Tag ajouté à la recherche</string>
+    <string name="tag_removed_from_search">Tag retiré de la recherche</string>
+    <string name="tag_added_to_saved">Tag ajouté aux recherches</string>
+    <string name="tag_already_in_saved">Tag déjà dans les recherches</string>
+    <string name="tag_added_to_blacklist">Tag ajouté à la liste noire</string>
+    <string name="tag_already_in_blacklist">Tag déjà sur la liste noire</string>
+    <string name="tag_following">Tu suis maintenant ce tag</string>
+    <string name="tag_unfollowed">Tu ne suis plus ce tag</string>
+    <string name="tag_already_following">Tu suis déjà ce tag</string>
+    <string name="tag_not_following">Tu ne suis pas ce tag</string>
+    <string name="tag_added_to_current_search">Tag %1$s ajouté à la recherche</string>
+    <string name="tag_removed_from_current_search">Tag %1$s retiré de la recherche</string>
+    
+    <!-- Arrays acciones -->
+    <string name="arrays_add_to_blacklist">Ajouter à la liste noire</string>
+    <string name="arrays_add_to_current_search">Ajouter à la recherche</string>
+    <string name="arrays_add_to_followed">Suivre le tag</string>
+    <string name="arrays_add_to_saved_searches">Ajouter aux recherches</string>
+    <string name="arrays_remove_from_current_search">Retirer de la recherche</string>
+    <string name="arrays_remove_from_followed">Ne plus suivre</string>
+    <string name="arrays_delete">Supprimer</string>
+    <string name="arrays_edit">Modifier</string>
+    <string name="arrays_search">Rechercher</string>
+    <string name="arrays_tag_clicked_copy_clipboard">Copier</string>
+    <string name="arrays_tag_view_wiki">Voir le wiki</string>
+    
+    <!-- Configuración - General -->
+    <string name="pref_general">Général</string>
+    <string name="pref_general_summary">e621/e926, langue, thème, qualité, liste noire, PIN, etc.</string>
+    <string name="pref_general_language_title">Langue</string>
+    <string name="pref_general_language_summary">Changer la langue</string>
+    <string name="pref_general_dark_mode_title">Changer le thème</string>
+    <string name="pref_general_dark_mode_summary">Sombre</string>
+    <string name="pref_general_blacklist_title">Gérer la liste noire</string>
+    <string name="pref_general_blacklist_enable_title">Liste noire activée</string>
+    <string name="pref_general_blacklist_enable_summary">Désactiver pour afficher tous les posts</string>
+    <string name="pref_general_post_quality_title">Qualité des posts</string>
+    <string name="pref_general_post_quality_summary">Moyenne (par défaut)</string>
+    <string name="pref_general_thumb_quality_title">Qualité des miniatures</string>
+    <string name="pref_general_thumb_quality_summary">Basse</string>
+    <string name="pref_general_disguise_title">Déguiser l\'app</string>
+    <string name="pref_general_disguise_summary">Déguise l\'app en calculatrice (change l\'icône et le nom).</string>
+    <string name="pref_general_hide_in_task_title">Cacher dans les tâches</string>
+    <string name="pref_general_hide_in_task_summary">Cache le contenu dans les apps récentes. Désactive aussi les captures d\'écran. Redémarrage requis !</string>
+    
+    <!-- Configuración - Privacidad -->
+    <string name="pref_privacy">Confidentialité</string>
+    <string name="pref_privacy_analytics_title">Envoyer les analyses</string>
+    <string name="pref_privacy_analytics_summary">Contribuer aux analyses pour améliorer l\'app (envoyé à Firebase)</string>
+    <string name="pref_privacy_crash_reports_title">Envoyer les rapports de crash</string>
+    <string name="pref_privacy_crash_reports_summary">Contribuer aux rapports de crash pour améliorer l\'app (envoyé à Firebase)</string>
+    
+    <!-- Configuración - PIN -->
+    <string name="pref_consent_pin_unlock_title">PIN au lancement</string>
+    <string name="pref_consent_pin_unlock_summary">Activer pour demander un PIN au lancement.</string>
+    <string name="pref_consent_biometrics_title">Activer la biométrie</string>
+    <string name="pref_consent_biometrics_summary">Se connecter avec la biométrie (empreinte, etc.) en plus du PIN</string>
+    <string name="pref_consent_above_18_title">Plus de 18 ans</string>
+    <string name="pref_consent_above_18_summary">J\'ai plus de 18 ans</string>
+    
+    <!-- Configuración - Almacenamiento -->
+    <string name="pref_storage">Stockage et téléchargements</string>
+    <string name="pref_storage_summary">Emplacement, cache, noms de fichiers, etc.</string>
+    <string name="pref_storage_custom_folder_title">Emplacement personnalisé</string>
+    <string name="pref_storage_custom_folder_summary">Changer l\'emplacement des téléchargements.</string>
+    <string name="pref_storage_overwrite_title">Écraser les téléchargements</string>
+    <string name="pref_storage_overwrite_summary">Écraser ou télécharger une nouvelle copie</string>
+    <string name="pref_storage_max_cache_title">Limiter le cache</string>
+    <string name="pref_storage_max_cache_summary">Limiter l\'espace maximum pour les posts en cache</string>
+    
+    <!-- Configuración - Búsquedas -->
+    <string name="pref_searching">Recherches et tags</string>
+    <string name="pref_searching_summary">Historique, suggestions, posts par page, etc.</string>
+    <string name="pref_search_history_title">Historique de recherche</string>
+    <string name="pref_search_history_summary">Désactiver supprime l\'historique</string>
+    <string name="pref_search_suggestions_title">Suggestions de recherche</string>
+    <string name="pref_search_suggestions_summary">Aucune suggestion si désactivé</string>
+    <string name="pref_search_posts_per_page_title">Posts par page</string>
+    <string name="pref_search_posts_per_page_summary">Nombre de posts par page. Clique pour défaut (75)</string>
+    
+    <!-- Configuración - Seguir tags -->
+    <string name="pref_following">Suivre les tags</string>
+    <string name="pref_following_summary">Suivre tags, artistes, etc.</string>
+    <string name="pref_following_enabled_title">Activer le suivi</string>
+    <string name="pref_following_enabled_summary">Être notifié des nouveaux posts des tags suivis</string>
+    <string name="pref_following_manage_title">Gérer les tags suivis</string>
+    
+    <!-- Configuración - Vista de cuadrícula -->
+    <string name="pref_grid_view">Personnaliser la grille</string>
+    <string name="pref_grid_view_summary">Stats, bouton info, posts par ligne, etc.</string>
+    <string name="pref_grid_stats_title">Statistiques</string>
+    <string name="pref_grid_stats_summary">Afficher points, favoris, commentaires et classification</string>
+    <string name="pref_grid_width_title">Posts par ligne</string>
+    <string name="pref_grid_width_summary">Nombre de posts par ligne. Par défaut : trois.</string>
+    <string name="pref_grid_gifs_title">Lire les GIFs</string>
+    <string name="pref_grid_gifs_summary">Anime les GIFs dans la grille. Peut réduire les performances.</string>
+    
+    <!-- Configuración - Vista de posts -->
+    <string name="pref_post_view">Personnaliser la vue post</string>
+    <string name="pref_post_view_summary">Tags, économie de données, bouton retour, etc.</string>
+    <string name="pref_post_expand_tags_title">Toujours étendre les tags</string>
+    <string name="pref_post_expand_tags_summary">Les tags et détails sont automatiquement étendus</string>
+    <string name="pref_post_data_saver_title">Mode économie de données</string>
+    <string name="pref_post_back_button_title">Bouton retour</string>
+    <string name="pref_post_back_button_summary">Afficher le bouton retour</string>
+    <string name="pref_post_load_hq_title">Charger en haute résolution</string>
+    <string name="pref_post_load_hq_summary">Charger les posts en résolution maximale. Désactiver pour économiser les données</string>
+    <string name="pref_post_video_autoplay_title">Lecture automatique</string>
+    <string name="pref_post_video_autoplay_summary">Lire les vidéos automatiquement</string>
+    <string name="pref_post_video_muted_title">Vidéos muettes</string>
+    <string name="pref_post_video_muted_summary">Couper le son des vidéos par défaut</string>
+    
+    <!-- Configuración - Red -->
+    <string name="pref_network">Réseau</string>
+    <string name="pref_network_proxy_title">Paramètres proxy</string>
+    <string name="pref_network_proxy_summary">Utiliser un proxy au lieu d\'une connexion directe</string>
+    
+    <!-- Configuración - Exportar -->
+    <string name="pref_export">Exporter et Importer</string>
+    <string name="pref_export_export_title">Exporter les données</string>
+    <string name="pref_export_export_summary">Exporter toutes les données vers un fichier de sauvegarde</string>
+    <string name="pref_export_import_title">Importer les données</string>
+    <string name="pref_export_import_summary">Importer les données depuis une sauvegarde.\n\nAttention ! Cela écrasera toutes les données !</string>
+    
+    <!-- Login -->
+    <string name="login_username_text">Entre ton nom d\'utilisateur</string>
+    <string name="login_api_key_text">Entre ta clé API</string>
+    <string name="login_api_key_empty">Clé API requise</string>
+    <string name="login_username_empty">Nom d\'utilisateur requis</string>
+    <string name="login_success_toast">Connecté en tant que %1$s</string>
+    <string name="login_error_title">Échec de connexion</string>
+    <string name="login_error_message">Erreur : %1$s</string>
+    <string name="login_subtitle">Entre ta clé API (pas ton mot de passe) pour te connecter à e621.</string>
+    
+    <!-- Pools -->
+    <string name="browse_pools_title">Listes</string>
+    <string name="browse_pools_subtitle">Parcours les listes existantes, triées par date de mise à jour.</string>
+    <string name="browse_pools_menu_search">Rechercher par titre</string>
+    <string name="pool_title">Liste #%1$d</string>
+    <string name="pool_subtitle">Liste #%1$d - %2$s\nPosts : %3$d, créée par utilisateur #%4$d le %5$s</string>
+    
+    <!-- Tags -->
+    <string name="browse_tags_title">Tags</string>
+    <string name="tags">Tags</string>
+    <string name="copied_to_clipboard">Copié dans le presse-papiers</string>
+    
+    <!-- Permisos -->
+    <string name="permission_required">Permission requise</string>
+    <string name="permission_required_storage">Permission de stockage requise !</string>
+    <string name="notifications_permission_title">Autoriser l\'app à envoyer des notifications ?</string>
+    <string name="notifications_permission_confirm">Autoriser</string>
+    <string name="notifications_permission_decline">Refuser</string>
+    
+    <!-- Idiomas -->
+    <string name="arrays_language_french">Français (French)</string>
+    <string name="arrays_language_english">Anglais (English)</string>
+    <string name="arrays_language_spanish">Espagnol (Spanish)</string>
+    <string name="arrays_language_german">Allemand (Deutsch)</string>
+    
+    <!-- Calidad -->
+    <string name="arrays_qualities_high">Haute</string>
+    <string name="arrays_qualities_medium">Moyenne</string>
+    <string name="arrays_qualities_low">Basse</string>
+    <string name="high_quality">Charger résolution originale</string>
+    
+    <!-- Temas -->
+    <string name="arrays_theme_entries_dark">Sombre</string>
+    <string name="arrays_theme_entries_light">Clair</string>
+    <string name="arrays_theme_entries_system_default">Par défaut système (Android 10+)</string>
+    
+    <!-- Descargas -->
+    <string name="worker_download_done">Terminé - %1$d posts téléchargés !</string>
+    <string name="worker_download_cancelled">Annulé - %1$d posts téléchargés !</string>
+    <string name="worker_download_start">Téléchargement commencé ! Vérifie la notification.</string>
+    <string name="worker_download_notification_title">Téléchargement (%1$d/%2$d), %3$sMo</string>
+    <string name="download_manager_text">Ici tu peux voir tous tes téléchargements en attente et actifs</string>
+    <string name="download_manager_clear_all">Effacer tous les téléchargements</string>
+    
+    <!-- Diashow -->
+    <string name="ss_title">Paramètres du diaporama</string>
+    <string name="ss_slider_text">Secondes par post : %1$d</string>
+    <string name="ss_cb_fullscreen">Plein écran</string>
+    <string name="ss_cb_backwards">En arrière</string>
+    <string name="ss_cb_repeat">Répéter cette page</string>
+    <string name="ss_start">Démarrer</string>
+    <string name="ss_toast_started">Diaporama démarré, appuie retour pour arrêter</string>
+    <string name="ss_toast_stopped">Diaporama arrêté</string>
+    
+    <!-- Misc -->
+    <string name="about_title">À propos</string>
+    <string name="changelog_title">Changelog</string>
+    <string name="donate_title">Faire un don</string>
+    <string name="privacy_policy">Politique de confidentialité</string>
+    <string name="terms_of_service">Conditions d\'utilisation</string>
+    <string name="restart_app_for_changes">Redémarre l\'app pour appliquer les changements</string>
+    <string name="calculator">Calculatrice</string>
+    <string name="details">Détails</string>
+    <string name="sources">Sources</string>
+    <string name="disable">Désactiver</string>
+    <string name="encrypt">Chiffrer</string>
+    <string name="report_title">Signaler</string>
+    <string name="report_post_message">Signaler ce post pour contenu inapproprié ?</string>
+    <string name="report_comment_message">Signaler ce commentaire pour contenu inapproprié ?</string>
+    <string name="wiki_show_title">%1$s - Wiki</string>
+    <string name="wiki_show_not_found">404 Non trouvé. Pas de wiki pour ce tag</string>
+    <string name="profile_title">Profil de %1$s</string>
+    <string name="profile_error">Échec du chargement du profil\nVérifie ta connexion et réessaie</string>
+    <string name="profile_menu_view_favourites">Voir les favoris</string>
+    <string name="profile_menu_view_uploads">Voir les uploads</string>
+</resources>

@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Acciones principales -->
+    <string name="abc_action_bar_home_description">Zur Startseite</string>
+    <string name="abc_action_bar_up_description">Nach oben</string>
+    <string name="abc_action_menu_overflow_description">Weitere Optionen</string>
+    <string name="abc_action_mode_done">Fertig</string>
+    <string name="abc_search_hint">Suchen…</string>
+    <string name="abc_searchview_description_search">Suchen</string>
+    
+    <!-- Acciones de favoritos y votos -->
+    <string name="action_favourite_added">Zu Favoriten hinzugefügt</string>
+    <string name="action_favourite_already_added">Bereits in deinen Favoriten!</string>
+    <string name="action_favourite_removed">Aus Favoriten entfernt</string>
+    <string name="action_forbidden">403 Zugriff verweigert. Bist du angemeldet?</string>
+    <string name="action_voted_down">Negative Bewertung hinzugefügt</string>
+    <string name="action_voted_up">Positive Bewertung hinzugefügt</string>
+    <string name="action_voted_removed_down">Negative Bewertung entfernt</string>
+    <string name="action_voted_removed_up">Positive Bewertung entfernt</string>
+    
+    <!-- Botones básicos -->
+    <string name="add">Hinzufügen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="clear">Löschen</string>
+    <string name="copy">Kopieren</string>
+    <string name="delete">Löschen</string>
+    <string name="done">Fertig</string>
+    <string name="download">Herunterladen</string>
+    <string name="downloading">Wird heruntergeladen...</string>
+    <string name="edit">Bearbeiten</string>
+    <string name="error">Fehler</string>
+    <string name="go">Los</string>
+    <string name="later">Später</string>
+    <string name="loading">Wird geladen…</string>
+    <string name="login">Anmelden</string>
+    <string name="no">Nein</string>
+    <string name="ok">OK</string>
+    <string name="open">Öffnen</string>
+    <string name="save">Speichern</string>
+    <string name="search">Suchen</string>
+    <string name="settings">Einstellungen</string>
+    <string name="view">Ansehen</string>
+    <string name="yes">Ja</string>
+    
+    <!-- Menú principal -->
+    <string name="menu_about">Über</string>
+    <string name="menu_browse">Durchsuchen</string>
+    <string name="menu_browse_pools">Listen</string>
+    <string name="menu_browse_sets">Sets</string>
+    <string name="menu_browse_tags">Tags</string>
+    <string name="menu_downloads">Download-Warteschlange</string>
+    <string name="menu_filter">Filter und Sortierung</string>
+    <string name="menu_following_tags">Gefolgte Tags Posts</string>
+    <string name="menu_go_to">Gehe zu</string>
+    <string name="menu_go_to_page">Seite</string>
+    <string name="menu_go_to_random_post">Zufälliger Post</string>
+    <string name="menu_login">Anmelden</string>
+    <string name="menu_my_account">Mein Konto</string>
+    <string name="menu_my_favourites">Favoriten</string>
+    <string name="menu_my_log_out">Abmelden</string>
+    <string name="menu_my_profile">Mein Profil</string>
+    <string name="menu_popular">Beliebt</string>
+    <string name="menu_popular_by_day">Beliebt heute</string>
+    <string name="menu_popular_by_month">Beliebt diesen Monat</string>
+    <string name="menu_popular_by_week">Beliebt diese Woche</string>
+    <string name="menu_settings">Einstellungen</string>
+    
+    <!-- Búsqueda -->
+    <string name="main_search_hint">Nach Tags suchen</string>
+    <string name="main_btn_next">Weiter</string>
+    <string name="main_btn_previous">Zurück</string>
+    <string name="main_btn_search">Suchen</string>
+    <string name="main_back_again_to_exit">Drücke erneut zurück zum Beenden</string>
+    
+    <!-- Páginas y errores -->
+    <string name="page_empty">Leere Seite, keine Posts gefunden</string>
+    <string name="page_error">Seite konnte nicht geladen werden\nÜberprüfe deine Verbindung und versuche es erneut</string>
+    <string name="default_error_msg">Unbekannter Fehler</string>
+    
+    <!-- Posts - Información básica -->
+    <string name="post_description">Beschreibung</string>
+    <string name="post_details_title">Post-Details</string>
+    <string name="post_info_title">Post #%1$d</string>
+    <string name="post_info_artist">Künstler: %1$s</string>
+    <string name="post_info_favourites">Favoriten: %1$d</string>
+    <string name="post_info_score">Punkte: %1$d (%2$d pos. %3$d neg.)</string>
+    <string name="post_info_children">Hat Kinder</string>
+    <string name="post_info_parent">Ist Elternteil</string>
+    <string name="post_info_pool">Listen: %1$s</string>
+    <string name="post_info_rating">Bewertung: %1$s</string>
+    <string name="post_info_comments">Hat %1$d Kommentare</string>
+    <string name="post_desc_more">Mehr …</string>
+    <string name="post_desc_less">Weniger …</string>
+    
+    <!-- Posts - Tags -->
+    <string name="post_tags_title">Tags (%1$d)</string>
+    <string name="post_tags_artist">Künstler</string>
+    <string name="post_tags_character">Charakter</string>
+    <string name="post_tags_copyright">Urheberrecht</string>
+    <string name="post_tags_general">Allgemein</string>
+    <string name="post_tags_species">Spezies</string>
+    <string name="post_tags_meta">Meta</string>
+    <string name="post_tags_lore">Lore</string>
+    
+    <!-- Posts - Detalles técnicos -->
+    <string name="post_details_created_at">Erstellt am: %1$s</string>
+    <string name="post_details_dimensions">Abmessungen: %1$dx%2$d</string>
+    <string name="post_details_file_size">Dateigröße: %1$d Bytes oder %2$s MB</string>
+    <string name="post_details_file_type">Dateityp: %1$s</string>
+    <string name="post_details_author">Autor: %1$d</string>
+    <string name="post_details_author_start">Autor:</string>
+    <string name="post_details_approver">Genehmiger: %1$d</string>
+    <string name="post_details_approver_start">Genehmiger:</string>
+    <string name="post_details_parent">Elternteil: %1$s</string>
+    <string name="post_details_pending">Post wartet auf Genehmigung</string>
+    <string name="post_details_flagged">Post zur Löschung markiert</string>
+    
+    <!-- Posts - Errores -->
+    <string name="post_error">Post konnte nicht geladen werden\nÜberprüfe deine Verbindung und versuche es erneut</string>
+    <string name="post_error_deleted">Dieser Post wurde gelöscht!</string>
+    <string name="post_error_with_message">Post konnte nicht geladen werden\nÜberprüfe deine Verbindung und versuche es erneut\n\nFehler: %1$s</string>
+    <string name="post_error_not_logged_in">Du musst angemeldet sein um diesen Post zu sehen</string>
+    <string name="post_error_not_sfw">Du bist im SFW-Modus und dieser Post ist NSFW!</string>
+    <string name="post_video_error">Videofehler: %1$s</string>
+    <string name="post_reload_connection_error">Verbindungsfehler. Versuche es erneut</string>
+    <string name="post_reload_done">Post neu geladen</string>
+    <string name="post_reload_failed">Post neu laden fehlgeschlagen: %1$s</string>
+    <string name="post_reload_starting">Post wird neu geladen...</string>
+    
+    <!-- Posts - Blacklist dialog -->
+    <string name="post_blacklisted_dialog_title">Dieser Post ist auf der schwarzen Liste</string>
+    <string name="post_blacklisted_dialog_message">Dieser Post enthält Tags auf deiner schwarzen Liste: \n\n%1$s \n\nMöchtest du diesen Post trotzdem sehen?</string>
+    
+    <!-- Posts - Menú -->
+    <string name="post_menu_copy_post">Post-Link kopieren</string>
+    <string name="post_menu_download">Herunterladen</string>
+    <string name="post_menu_edit_post">Post bearbeiten</string>
+    <string name="post_menu_edit_post_not_logged_in">Du musst angemeldet sein um Posts zu bearbeiten!</string>
+    <string name="post_menu_open_post">Im Browser öffnen</string>
+    <string name="post_menu_open_post_disabled">Du hast dies deaktiviert</string>
+    <string name="post_menu_open_post_title">Post öffnen?</string>
+    <string name="post_menu_open_post_message">Dies öffnet %1$s im Browser</string>
+    <string name="post_menu_open_post_in_vp">In Videoplayer öffnen</string>
+    <string name="post_menu_open_post_in_vp_error">Fehler: Kein Videoplayer gefunden der diese Datei unterstützt!</string>
+    <string name="post_menu_open_post_in_fp">In Flash Player öffnen</string>
+    <string name="post_menu_open_post_in_fp_error">Fehler: Kein Flash Player gefunden der diese Datei unterstützt!</string>
+    <string name="post_menu_share_post">Post teilen</string>
+    <string name="post_menu_share_post_as">Teilen als</string>
+    <string name="post_menu_reload_post">Post neu laden</string>
+    <string name="post_menu_add_to_set">Zum Set hinzufügen</string>
+    <string name="post_menu_check_notes">Nach Notizen suchen</string>
+    <string name="post_menu_slideshow">Diashow</string>
+    <string name="post_menu_view_json">JSON-Info anzeigen</string>
+    <string name="post_back_button_desc">Zurück-Button</string>
+    <string name="post_image_desc">Post-Bild</string>
+    
+    <!-- Posts - Descargas -->
+    <string name="post_download_first_title">Download-Methode wählen</string>
+    <string name="post_download_first_message">Du kannst Posts mit dem App-Download-Manager herunterladen (wo du einen Ordner wählen kannst) oder mit dem Android-Download-Manager (Posts werden in /Downloads heruntergeladen).\n\nDu kannst dies jederzeit in den App-Einstellungen ändern</string>
+    <string name="post_download_first_app">App</string>
+    <string name="post_download_error_no_location">Bitte wähle einen neuen Speicherort!</string>
+    
+    <!-- Posts - Editar post -->
+    <string name="edit_post_title">Post #%1$d bearbeiten</string>
+    <string name="edit_post_tags">Post-Tags</string>
+    <string name="edit_post_help">Vor dem Bearbeiten lies bitte die Tagging-Richtlinien: https://e926.net/help/tags .\nTrenne Tags mit Leerzeichen oder Zeilenumbruch und schreibe in das richtige Feld.</string>
+    <string name="edit_post_et_artist">Künstler</string>
+    <string name="edit_post_et_character">Charakter(e)</string>
+    <string name="edit_post_et_copyright">Urheberrecht</string>
+    <string name="edit_post_et_species">Spezies</string>
+    <string name="edit_post_et_general">Allgemein und Meta</string>
+    <string name="edit_post_rating">Post-Bewertung</string>
+    <string name="edit_post_rating_s">Sicher</string>
+    <string name="edit_post_rating_q">Fragwürdig</string>
+    <string name="edit_post_rating_e">Explizit</string>
+    <string name="edit_post_reason">Bearbeitungsgrund (optional)</string>
+    <string name="edit_post_reason_hint">Grund für Bearbeitung (optional)</string>
+    <string name="edit_post_done_no_changes">Keine Änderungen vorgenommen</string>
+    <string name="edit_post_done_confirm">Deine Änderungen werden gespeichert.\n\nHinzugefügt: %1$s\n\nEntfernt: %2$s\n\nBewertung: %3$s -&gt; %4$s\n\nFortfahren?</string>
+    <string name="edit_post_done_confirm_submit">Speichern</string>
+    
+    <!-- Posts - Compartir opciones -->
+    <string name="arrays_share_post_url">Post-URL (e621.net/posts/)</string>
+    <string name="arrays_share_post_file_url">Datei-URL (static.e621.net/)</string>
+    <string name="arrays_share_post_image_file">Bilddatei (jpg/png)</string>
+    
+    <!-- Posts - Acciones largas -->
+    <string name="arrays_post_long_press_download">Herunterladen</string>
+    <string name="arrays_post_long_press_favourite">Zu Favoriten hinzufügen</string>
+    <string name="arrays_post_long_press_vote_up">Positiv bewerten</string>
+    <string name="arrays_post_long_press_vote_down">Negativ bewerten</string>
+    <string name="arrays_post_long_press_comment">Kommentieren</string>
+    
+    <!-- Posts - Content descriptions -->
+    <string name="cd_posts_comments">Kommentare</string>
+    <string name="cd_posts_download">Post herunterladen</string>
+    <string name="cd_posts_fav">Zu Favoriten hinzufügen</string>
+    <string name="cd_posts_more">Mehr Optionen</string>
+    <string name="cd_posts_vote_up">Positiv bewerten</string>
+    <string name="cd_posts_vote_down">Negativ bewerten</string>
+    
+    <!-- Posts - Fuentes -->
+    <string name="sources">Quellen</string>
+    
+    <!-- Posts - Notas -->
+    <string name="notes_only_images">Nur Bilder und GIF-Posts sind erlaubt!</string>
+    
+    <!-- Posts - Diashow -->
+    <string name="ss_title">Diashow-Einstellungen</string>
+    <string name="ss_slider_text">Sekunden pro Post: %1$d</string>
+    <string name="ss_cb_fullscreen">Vollbild</string>
+    <string name="ss_cb_backwards">Rückwärts</string>
+    <string name="ss_cb_repeat">Diese Seite wiederholen</string>
+    <string name="ss_start">Starten</string>
+    <string name="ss_toast_started">Diashow gestartet, drücke Zurück zum Stoppen</string>
+    <string name="ss_toast_stopped">Diashow gestoppt</string>
+    
+    <!-- Video controles -->
+    <string name="unmute_the_audio">Audio einschalten</string>
+    <string name="exo_controls_play_description">Abspielen</string>
+    <string name="exo_controls_pause_description">Pausieren</string>
+    <string name="exo_controls_stop_description">Stoppen</string>
+    <string name="exo_controls_next_description">Weiter</string>
+    <string name="exo_controls_previous_description">Zurück</string>
+    <string name="exo_controls_fastforward_description">Vorspulen</string>
+    <string name="exo_controls_rewind_description">Zurückspulen</string>
+    <string name="exo_controls_repeat_all_description">Aktueller Modus: Alle wiederholen. Modus wechseln.</string>
+    <string name="exo_controls_repeat_one_description">Aktueller Modus: Einen wiederholen. Modus wechseln.</string>
+    <string name="exo_controls_repeat_off_description">Aktueller Modus: Nicht wiederholen. Modus wechseln.</string>
+    <string name="exo_controls_shuffle_on_description">Zufallsmodus deaktivieren</string>
+    <string name="exo_controls_shuffle_off_description">Zufallsmodus aktivieren</string>
+    <string name="exo_controls_fullscreen_enter_description">Vollbild aktivieren</string>
+    <string name="exo_controls_fullscreen_exit_description">Vollbild beenden</string>
+    <string name="exo_controls_cc_enabled_description">Untertitel deaktivieren</string>
+    <string name="exo_controls_cc_disabled_description">Untertitel aktivieren</string>
+    <string name="exo_controls_vr_description">VR-Modus</string>
+    <string name="exo_controls_hide">Player-Steuerung ausblenden</string>
+    <string name="exo_controls_show">Player-Steuerung einblenden</string>
+    <string name="exo_controls_settings_description">Einstellungen</string>
+    <string name="exo_controls_playback_speed">Geschwindigkeit</string>
+    <string name="exo_controls_seek_bar_description">Wiedergabefortschritt</string>
+    <string name="exo_track_selection_auto">Automatisch</string>
+    <string name="exo_track_selection_none">Keine</string>
+    <string name="exo_track_selection_title_audio">Audio</string>
+    <string name="exo_track_stereo">Stereo</string>
+    <string name="exo_track_mono">Mono</string>
+    <string name="exo_track_surround">Surround</string>
+    <string name="exo_track_unknown">Unbekannt</string>
+    
+    <!-- Filtros -->
+    <string name="filter">Filtern nach</string>
+    <string name="filter_order">Sortieren nach</string>
+    <string name="filter_order_by_newest">Neueste zuerst (Standard)</string>
+    <string name="filter_order_by_oldest">Älteste zuerst</string>
+    <string name="filter_order_by_score">Höchste Punktzahl</string>
+    <string name="filter_order_by_favs">Meiste Favoriten</string>
+    <string name="filter_rating">Bewertung</string>
+    <string name="filter_type">Post-Typ</string>
+    <string name="filter_type_all">Alle anzeigen</string>
+    <string name="filter_type_only_images">Nur Bilder</string>
+    <string name="filter_type_only_videos">Nur Videos</string>
+    <string name="filter_type_only_gifs">Nur GIFs</string>
+    
+    <!-- Blacklist -->
+    <string name="blacklist">Schwarze Liste</string>
+    <string name="blacklist_saved">Schwarze Liste gespeichert</string>
+    <string name="blacklist_menu_save">Schwarze Liste speichern</string>
+    <string name="blacklist_menu_help">Hilfe</string>
+    <string name="blacklist_menu_import">Importieren</string>
+    <string name="blacklist_menu_export">Exportieren</string>
+    
+    <!-- Búsquedas guardadas -->
+    <string name="saved_title">Gespeicherte Suchen</string>
+    <string name="saved_save_current">Aktuelle Suche speichern</string>
+    <string name="saved_item_added">Neue gespeicherte Suche erstellt</string>
+    <string name="saved_item_deleted">Gespeicherte Suche gelöscht</string>
+    <string name="saved_tab_text_1">Suchen</string>
+    <string name="saved_tab_text_2">Listen</string>
+    
+    <!-- Comentarios -->
+    <string name="comments_title">Kommentare</string>
+    <string name="comments_create">Kommentar hinzufügen</string>
+    <string name="comment_reply">Antworten</string>
+    <string name="comment_vote_up">Positiv bewerten</string>
+    <string name="comment_vote_down">Negativ bewerten</string>
+    
+    <!-- Configuración - General -->
+    <string name="pref_general">Allgemein</string>
+    <string name="pref_general_summary">e621/e926, Sprache, Theme, Miniaturqualität, Schwarze Liste, PIN, etc.</string>
+    <string name="pref_general_language_title">Sprache</string>
+    <string name="pref_general_language_summary">Sprache ändern</string>
+    <string name="pref_general_dark_mode_title">Theme ändern</string>
+    <string name="pref_general_dark_mode_summary">Dunkel</string>
+    <string name="pref_general_blacklist_title">Schwarze Liste verwalten</string>
+    <string name="pref_general_blacklist_enable_title">Schwarze Liste aktiviert</string>
+    <string name="pref_general_blacklist_enable_summary">Deaktivieren um alle Posts anzuzeigen, einschließlich der auf der schwarzen Liste</string>
+    <string name="pref_general_blacklist_pool_posts_title">Posts in Listen blockieren</string>
+    <string name="pref_general_blacklist_pool_posts_summary">Aktivieren um deine schwarze Liste auf Posts innerhalb einer Liste anzuwenden</string>
+    <string name="pref_general_post_quality_title">Post-Qualität</string>
+    <string name="pref_general_post_quality_summary">Mittel (Standard)</string>
+    <string name="pref_general_thumb_quality_title">Miniaturqualität</string>
+    <string name="pref_general_thumb_quality_summary">Niedrig</string>
+    <string name="pref_general_disguise_title">App tarnen</string>
+    <string name="pref_general_disguise_summary">Tarnt die App als Taschenrechner in der App-Übersicht (ändert Icon und Namen).</string>
+    <string name="pref_general_hide_in_task_title">In Taskansicht verstecken</string>
+    <string name="pref_general_hide_in_task_summary">Versteckt App-Inhalte in der Übersicht. Deaktiviert auch Screenshots. Hinweis: App-Neustart erforderlich!</string>
+    <string name="pref_general_start_in_saved_title">App in gespeicherten Suchen starten</string>
+    <string name="pref_general_start_in_saved_summary">Aktivieren um die App in gespeicherten Suchen statt im Suchraster zu starten.</string>
+    
+    <!-- Configuración - Privacidad -->
+    <string name="pref_privacy">Datenschutz</string>
+    <string name="pref_privacy_analytics_title">Analysen senden</string>
+    <string name="pref_privacy_analytics_summary">Aktivieren um Analysedaten zur App-Verbesserung beizutragen (wird an Firebase gesendet)</string>
+    <string name="pref_privacy_crash_reports_title">Absturzberichte senden</string>
+    <string name="pref_privacy_crash_reports_summary">Aktivieren um Absturzberichte zur App-Verbesserung beizutragen (wird an Firebase gesendet)</string>
+    
+    <!-- Configuración - PIN y seguridad -->
+    <string name="pref_consent_pin_unlock_title">PIN beim App-Start</string>
+    <string name="pref_consent_pin_unlock_summary">Aktivieren um einen PIN beim App-Start zu verlangen.</string>
+    <string name="pref_consent_pin_unlock_summary_pin">Aktivieren um einen PIN beim App-Start zu verlangen. PIN: %1$s</string>
+    <string name="pref_consent_pin_auto_lock_title">Automatische Sperre im Hintergrund</string>
+    <string name="pref_consent_pin_auto_lock_summary">Aktivieren um die App nach 10 Sekunden im Hintergrund zu sperren.</string>
+    <string name="pref_consent_pin_auto_lock_inst_title">Sofortige automatische Sperre</string>
+    <string name="pref_consent_pin_auto_lock_inst_summary">Aktivieren um die App sofort beim Wechsel in den Hintergrund zu sperren.</string>
+    <string name="pref_consent_pin_app_link_title">PIN für Links</string>
+    <string name="pref_consent_pin_app_link_summary">Erfordert einen PIN beim Öffnen von Links.</string>
+    <string name="pref_consent_biometrics_title">Biometrie aktivieren</string>
+    <string name="pref_consent_biometrics_summary">Aktivieren um sich zusätzlich zum PIN mit Biometrie (Fingerabdruck etc.) anzumelden</string>
+    <string name="pref_consent_above_18_title">Über 18 Jahre</string>
+    <string name="pref_consent_above_18_summary">Ich bin über 18 Jahre alt</string>
+    
+    <!-- Configuración - Almacenamiento -->
+    <string name="pref_storage">Speicher und Downloads</string>
+    <string name="pref_storage_summary">Download-Speicherort, Cache, Dateinamen, etc.</string>
+    <string name="pref_storage_custom_folder_enabled_title">Benutzerdefinierten Speicherort aktivieren</string>
+    <string name="pref_storage_custom_folder_enabled_summary">Deaktivieren um den Android Download-Manager zu verwenden</string>
+    <string name="pref_storage_custom_folder_title">Benutzerdefinierter Download-Speicherort</string>
+    <string name="pref_storage_custom_folder_summary">Download-Speicherort für heruntergeladene Dateien ändern.</string>
+    <string name="pref_storage_file_name_title">Benutzerdefinierte Dateinamen und Unterordner</string>
+    <string name="pref_storage_file_name_dialog_title">Dateinamen anpassen</string>
+    <string name="pref_storage_overwrite_title">Downloads überschreiben</string>
+    <string name="pref_storage_overwrite_summary">Ob ein Post überschrieben oder eine neue Kopie heruntergeladen werden soll</string>
+    <string name="pref_storage_hide_title">Heruntergeladene Posts verstecken</string>
+    <string name="pref_storage_hide_summary">Fügt einen Punkt \".\" vor dem Dateinamen hinzu, damit andere Apps sie nicht erkennen (möglicherweise auch die Galerie-App)</string>
+    <string name="pref_storage_max_cache_title">Cache-Größe begrenzen</string>
+    <string name="pref_storage_max_cache_summary">Aktivieren um den maximalen Speicherplatz für gecachte Posts zu begrenzen</string>
+    <string name="pref_storage_max_cache_slider_title">Cache-Limit (MB)</string>
+    <string name="pref_storage_max_cache_slider_summary">Cache wird beim Erreichen des Limits gelöscht</string>
+    
+    <!-- Configuración - Búsquedas y tags -->
+    <string name="pref_searching">Suchen und Tags</string>
+    <string name="pref_searching_summary">Suchverlauf, Vorschläge, Posts pro Seite, etc.</string>
+    <string name="pref_search_history_title">Suchverlauf</string>
+    <string name="pref_search_history_summary">Deaktivieren löscht den Suchverlauf</string>
+    <string name="pref_search_suggestions_title">Suchvorschläge</string>
+    <string name="pref_search_suggestions_summary">Keine Suchvorschläge werden angezeigt wenn deaktiviert</string>
+    <string name="pref_search_posts_per_page_title">Posts pro Seite</string>
+    <string name="pref_search_posts_per_page_summary">Wie viele Posts pro Seite angezeigt werden. Klicke für Standardwert (75)</string>
+    <string name="pref_search_last_on_start_title">Letzte Suche beim App-Start</string>
+    <string name="pref_search_last_on_start_summary">Öffnet die letzte Suche beim App-Start. Deaktivieren für neueste Posts</string>
+    <string name="pref_search_newest_first_title">Tag-Ergebnisse nach Neuesten sortieren</string>
+    <string name="pref_search_newest_first_summary">Aktivieren um bei Tag-Suchen immer neueste Posts zuerst anzuzeigen. Überschreibt deine Sortierung.</string>
+    <string name="pref_search_fav_order_title">Favoriten nach Datum sortieren</string>
+    <string name="pref_search_fav_order_summary">Wenn aktiviert, werden \"fav:xxx\"-Suchen immer nach Favorisierungsdatum sortiert. Deaktivieren für eigene Filtereinstellungen</string>
+    <string name="pref_search_include_flash_title">Flash-Posts einschließen</string>
+    <string name="pref_search_include_flash_summary">Deaktivieren versteckt Flash-Posts</string>
+    <string name="pref_search_in_new_task_title">Tags in neuer Aufgabe öffnen</string>
+    <string name="pref_search_in_new_task_summary">Öffnet eine neue Aufgabe bei Tag-Suchen für einfaches Wechseln zwischen Suchen</string>
+    <string name="pref_search_saved_new_window_title">Suche in neuem Fenster fortsetzen</string>
+    <string name="pref_search_saved_new_window_summary">Öffnet ein neues Fenster beim Klicken auf Fortsetzen bei gespeicherten Suchen</string>
+    
+    <!-- Configuración - Seguir tags -->
+    <string name="pref_following">Tag folgen</string>
+    <string name="pref_following_summary">Tags, Künstler folgen, etc.</string>
+    <string name="pref_following_enabled_title">Tag-Verfolgung aktivieren</string>
+    <string name="pref_following_enabled_summary">Aktivieren um bei neuen Posts von verfolgten Tags benachrichtigt zu werden</string>
+    <string name="pref_following_manage_title">Verfolgte Tags verwalten</string>
+    <string name="pref_following_period_title">Nach neuen Posts suchen alle</string>
+    <string name="pref_following_display_tag_title">Tag in Benachrichtigung anzeigen</string>
+    <string name="pref_following_display_tag_summary">Deaktivieren um Tags in der Benachrichtigung zu verstecken</string>
+    <string name="pref_following_only_unmetered_title">Nur ungemessene Netzwerke</string>
+    <string name="pref_following_only_unmetered_summary">Aktivieren um nur bei ungemessenen Netzwerken zu suchen</string>
+    <string name="pref_following_display_in_saved_search_title">Anzeige in gespeicherten Suchen</string>
+    <string name="pref_following_display_in_saved_search_summary">Aktivieren um einen Indikator für verfolgte Suchen anzuzeigen. Kann Leistung reduzieren bei vielen Tags</string>
+    <string name="pref_following_view_log_title">App-Logs anzeigen</string>
+    
+    <!-- Configuración - Vista de cuadrícula -->
+    <string name="pref_grid_view">Rasteransicht anpassen</string>
+    <string name="pref_grid_view_summary">Statistiken, Info-Button, Posts pro Reihe, etc.</string>
+    <string name="pref_grid_stats_title">Statistiken</string>
+    <string name="pref_grid_stats_summary">Zeigt Punkte, Favoriten, Kommentare und Bewertung</string>
+    <string name="pref_grid_info_title">Info-Button</string>
+    <string name="pref_grid_info_summary">Zeigt den Info-Button</string>
+    <string name="pref_grid_colours_title">Statusfarben</string>
+    <string name="pref_grid_colours_summary">Zeigt die Statusfarbe eines Posts (blau=ausstehend, rot=markiert)</string>
+    <string name="pref_grid_width_title">Posts pro Reihe</string>
+    <string name="pref_grid_width_summary">Anzahl der Posts pro Reihe. Standard ist drei.</string>
+    <string name="pref_grid_height_title">Post-Höhe</string>
+    <string name="pref_grid_height_summary">Höhe der Vorschaubilder relativ zur Breite. Klicke für Standardwert (110%)</string>
+    <string name="pref_grid_gifs_title">GIFs abspielen</string>
+    <string name="pref_grid_gifs_summary">Animiert GIFs in der Rasteransicht. Kann Leistung reduzieren.</string>
+    <string name="pref_grid_navigate_title">Vor/Zurück-Buttons</string>
+    <string name="pref_grid_navigate_summary">Zeigt Vor/Zurück-Buttons als Alternative zum Wischen. Deaktiviert Wischen zwischen Seiten</string>
+    <string name="pref_grid_refresh_title">Zum Aktualisieren ziehen aktivieren</string>
+    <string name="pref_grid_refresh_summary">Wenn aktiviert, wird die Suche wiederholt</string>
+    <string name="pref_grid_new_label_title">Neues Post-Icon</string>
+    <string name="pref_grid_new_label_summary">Zeigt ein Icon für neue Posts bei Tag-Suchen</string>
+    <string name="pref_grid_darken_viewed_title">Angesehene Posts abdunkeln</string>
+    <string name="pref_grid_darken_viewed_summary">Aktivieren um bereits angesehene Posts abzudunkeln</string>
+    <string name="pref_grid_hide_viewed_title">Angesehene Posts verstecken</string>
+    <string name="pref_grid_hide_viewed_summary">Aktivieren um angesehene Posts in Ergebnissen zu verstecken</string>
+    <string name="pref_grid_darken_clear_title">Angesehene Posts entfernen</string>
+    <string name="pref_grid_darken_clear_summary">Tippen um angesehene Posts zu entfernen</string>
+    <string name="pref_grid_darken_clear_count_summary">Tippen um alle %1$d angesehenen Posts zu entfernen</string>
+    
+    <!-- Configuración - Vista de posts -->
+    <string name="pref_post_view">Post-Ansicht anpassen</string>
+    <string name="pref_post_view_summary">Tags erweitern, Datensparmodus, Zurück-Button, etc.</string>
+    <string name="pref_post_expand_tags_title">Tag-Liste immer erweitern</string>
+    <string name="pref_post_expand_tags_summary">Wenn aktiviert, werden Tags und Post-Details automatisch erweitert</string>
+    <string name="pref_post_data_saver_title">Datensparmodus</string>
+    <string name="pref_post_data_saver_message">Aktivieren um nur den aktuellen Post zu laden (kein Vorladen)</string>
+    <string name="pref_post_back_button_title">Zurück-Button</string>
+    <string name="pref_post_back_button_summary">Zeigt den Zurück-Button</string>
+    <string name="pref_post_back_button_location_title">Zurück-Button Position</string>
+    <string name="pref_post_back_button_location_summary">Oben links</string>
+    <string name="pref_post_load_hq_title">Bilder in hoher Auflösung laden</string>
+    <string name="pref_post_load_hq_summary">Aktivieren um Posts in höchster Auflösung zu laden. Deaktivieren für niedrigere Qualität (schneller, spart Daten)</string>
+    <string name="pref_post_keep_screen_awake_title">Bildschirm eingeschaltet lassen</string>
+    <string name="pref_post_keep_screen_awake_summary">Hält den Bildschirm beim Ansehen eines Posts an</string>
+    <string name="pref_post_edge_navigation_title">Rand-Navigation</string>
+    <string name="pref_post_edge_navigation_summary">Tippe nahe der Bildschirmränder um zum nächsten/vorherigen Post zu navigieren</string>
+    <string name="pref_post_pull_to_close_title">Ziehen zum Schließen</string>
+    <string name="pref_post_pull_to_close_summary">Aktivieren um einen Post durch Ziehen von 45% des Bildschirms zu schließen</string>
+    <string name="pref_post_top_preview_title">Vorschau beim Wischen</string>
+    <string name="pref_post_top_preview_summary">Zeigt einen Teil des Bildes beim Nach-unten-Wischen</string>
+    <string name="pref_post_controls_fullscreen_title">Menü-Button im Vollbildmodus</string>
+    <string name="pref_post_controls_fullscreen_summary">Zeigt den Menü-Button im Vollbildmodus</string>
+    <string name="pref_post_hide_comments_title">Kommentar-Button verstecken</string>
+    <string name="pref_post_hide_comments_summary">Aktivieren um den Kommentar-Button zu verstecken</string>
+    <string name="pref_post_hide_score_title">Post-Punkte verstecken</string>
+    <string name="pref_post_hide_score_summary">Aktivieren um die Punkte der Posts zu verstecken</string>
+    <string name="pref_post_long_click_to_unfav_title">Halten zum Entfavorisieren</string>
+    <string name="pref_post_long_click_to_unfav_summary">Aktivieren um den Favoriten-Button gedrückt halten zu müssen zum Entfavorisieren</string>
+    <string name="pref_post_disable_share_title">Teilen-Optionen deaktivieren</string>
+    <string name="pref_post_disable_share_message">Deaktiviert Teilen und Im-Browser-öffnen</string>
+    
+    <!-- Configuración - Videos -->
+    <string name="pref_post_video_autoplay_title">Automatische Wiedergabe</string>
+    <string name="pref_post_video_autoplay_summary">Aktivieren um Videos automatisch abzuspielen</string>
+    <string name="pref_post_video_muted_title">Videos stummschalten</string>
+    <string name="pref_post_video_muted_summary">Aktivieren um Videos standardmäßig stummzuschalten.\nFür Audio tippe den Lautstärke-Button in den Video-Steuerelementen.</string>
+    <string name="pref_post_video_landscape_title">Vollbild-Videos im Querformat</string>
+    <string name="pref_post_video_landscape_summary">Aktivieren um bei Vollbild-Videos das Querformat zu erzwingen</string>
+    
+    <!-- Configuración - Acciones automáticas -->
+    <string name="pref_post_action_fav_on_download_title">Beim Download favorisieren</string>
+    <string name="pref_post_action_fav_on_download_summary">Fügt einen Post automatisch zu Favoriten hinzu beim Herunterladen</string>
+    <string name="pref_post_action_upvote_on_download_title">Beim Download positiv bewerten</string>
+    <string name="pref_post_action_upvote_on_download_summary">Bewertet einen Post automatisch positiv beim Herunterladen</string>
+    <string name="pref_post_action_upvote_on_fav_title">Beim Favorisieren positiv bewerten</string>
+    <string name="pref_post_action_upvote_on_fav_summary">Bewertet einen Post automatisch positiv beim Favorisieren</string>
+    
+    <!-- Configuración - Anuncios -->
+    <string name="pref_ads">Optionale Werbung</string>
+    <string name="pref_ads_interstitial_title">Interstitial-Werbung aktivieren</string>
+    <string name="pref_ads_interstitial_summary">Zeigt gelegentlich Vollbild-Werbung nach Verlassen eines Posts</string>
+    
+    <!-- Configuración - Cloudflare -->
+    <string name="pref_cloudflare">Cookies und Cloudflare</string>
+    <string name="pref_cloudflare_self_title">Cookies/Cloudflare neu laden</string>
+    <string name="pref_cloudflare_self_summary">Posts oder Miniaturen laden nicht? API-Aufrufe können von CloudFlare blockiert werden. Captcha muss ausgefüllt werden. Klicke hier um e926 manuell zu öffnen.</string>
+    
+    <!-- Configuración - Red -->
+    <string name="pref_network">Netzwerk</string>
+    <string name="pref_network_proxy_title">Proxy-Einstellungen</string>
+    <string name="pref_network_proxy_summary">Aktivieren um einen Proxy statt direkter Verbindung zu e926/e621 zu verwenden.</string>
+    <string name="pref_network_proxy_summary_">Verbindung über %1$s:%2$d</string>
+    
+    <!-- Configuración - Exportar/Importar -->
+    <string name="pref_export">Exportieren und Importieren</string>
+    <string name="pref_export_export_title">App-Daten exportieren</string>
+    <string name="pref_export_export_summary">Alle Benutzerdaten und Einstellungen in eine Sicherungsdatei exportieren</string>
+    <string name="pref_export_import_title">App-Daten importieren</string>
+    <string name="pref_export_import_summary">Benutzerdaten, gespeicherte Suchen und Einstellungen aus Sicherungsdatei importieren.\n\nWarnung! Dies überschreibt alle App-Daten!</string>
+    
+    <!-- Login -->
+    <string name="login_username_text">Benutzername eingeben</string>
+    <string name="login_api_key_text">API-Schlüssel eingeben</string>
+    <string name="login_success_toast">Angemeldet als %1$s</string>
+    <string name="login_error_title">Anmeldung fehlgeschlagen</string>
+    
+    <!-- Pools -->
+    <string name="browse_pools_title">Listen</string>
+    <string name="pool_title">Liste #%1$d</string>
+    
+    <!-- Tags -->
+    <string name="browse_tags_title">Tags</string>
+    <string name="tags">Tags</string>
+    <string name="copied_to_clipboard">In Zwischenablage kopiert</string>
+    
+    <!-- Permisos -->
+    <string name="permission_required">Berechtigung erforderlich</string>
+    <string name="notifications_permission_title">Der App erlauben, Benachrichtigungen zu senden?</string>
+    <string name="notifications_permission_confirm">Erlauben</string>
+    <string name="notifications_permission_decline">Nicht erlauben</string>
+    
+    <!-- Idiomas -->
+    <string name="arrays_language_german">Deutsch (German)</string>
+    <string name="arrays_language_english">Englisch (English)</string>
+    <string name="arrays_language_spanish">Spanisch (Spanish)</string>
+    <string name="arrays_language_french">Französisch (français)</string>
+    
+    <!-- Calidad -->
+    <string name="arrays_qualities_high">Hoch</string>
+    <string name="arrays_qualities_medium">Mittel</string>
+    <string name="arrays_qualities_low">Niedrig</string>
+    <string name="high_quality">Originalauflösung laden</string>
+    
+    <!-- Temas -->
+    <string name="arrays_theme_entries_dark">Dunkel</string>
+    <string name="arrays_theme_entries_light">Hell</string>
+    <string name="arrays_theme_entries_system_default">Systemstandard (nur Android 10+)</string>
+    
+    <!-- Tag menu options (menú al tocar un tag en el post) -->
+    <string name="tag_menu_search">Suchen</string>
+    <string name="tag_menu_add_to_saved">Zu gespeicherten Suchen hinzufügen</string>
+    <string name="tag_menu_add_to_blacklist">Zur schwarzen Liste hinzufügen</string>
+    <string name="tag_menu_follow">Tag folgen</string>
+    <string name="tag_menu_unfollow">Tag entfolgen</string>
+    <string name="tag_menu_add_to_search">Zur aktuellen Suche hinzufügen</string>
+    <string name="tag_menu_remove_from_search">Aus aktueller Suche entfernen</string>
+    <string name="tag_menu_view_wiki">Wiki dieses Tags anzeigen</string>
+    <string name="tag_menu_copy">Kopieren</string>
+    
+    <!-- Tag feedback messages -->
+    <string name="tag_copied">Tag in Zwischenablage kopiert</string>
+    <string name="tag_added_to_search">Tag zur aktuellen Suche hinzugefügt</string>
+    <string name="tag_removed_from_search">Tag aus aktueller Suche entfernt</string>
+    <string name="tag_added_to_saved">Tag zu gespeicherten Suchen hinzugefügt</string>
+    <string name="tag_already_in_saved">Tag ist bereits in gespeicherten Suchen</string>
+    <string name="tag_added_to_blacklist">Tag zur schwarzen Liste hinzugefügt</string>
+    <string name="tag_already_in_blacklist">Tag ist bereits auf der schwarzen Liste</string>
+    <string name="tag_following">Du folgst jetzt diesem Tag</string>
+    <string name="tag_unfollowed">Du folgst diesem Tag nicht mehr</string>
+    <string name="tag_already_following">Du folgst diesem Tag bereits</string>
+    <string name="tag_not_following">Du folgst diesem Tag nicht</string>
+    
+    <!-- Post parent/child/pool buttons -->
+    <string name="post_parent">Eltern: %1$s</string>
+    <string name="post_child">Kind: %1$s</string>
+    <string name="post_has_children">Hat Kinder</string>
+    <string name="post_pool">Liste: %1$s</string>
+    <string name="post_select_child">Kind auswählen</string>
+    <string name="post_select_pool">Liste auswählen</string>
+    
+    <!-- Plurals for children and pools -->
+    <plurals name="post_children">
+        <item quantity="one">Kind: %1$s</item>
+        <item quantity="other">Kinder: %1$s</item>
+    </plurals>
+    <plurals name="post_pools">
+        <item quantity="one">Liste: %1$s</item>
+        <item quantity="other">Listen: %1$s</item>
+    </plurals>
+    
+    <!-- Acciones de arrays -->
+    <string name="arrays_add_to_blacklist">Zur schwarzen Liste hinzufügen</string>
+    <string name="arrays_add_to_current_search">Zur aktuellen Suche hinzufügen</string>
+    <string name="arrays_add_to_followed">Tag folgen</string>
+    <string name="arrays_add_to_saved_searches">Zu gespeicherten Suchen hinzufügen</string>
+    <string name="arrays_delete">Löschen</string>
+    <string name="arrays_edit">Bearbeiten</string>
+    <string name="arrays_remove_from_followed">Tag entfolgen</string>
+    <string name="arrays_search">Suchen</string>
+    <string name="arrays_tag_clicked_copy_clipboard">In Zwischenablage kopieren</string>
+    <string name="arrays_tag_view_wiki">Wiki dieses Tags anzeigen</string>
+</resources>
