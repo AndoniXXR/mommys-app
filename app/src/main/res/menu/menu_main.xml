@@ -28,6 +28,18 @@
                     android:id="@+id/my_posts"
                     android:title="@string/menu_my_posts"/>
                 <item
+                    android:id="@+id/my_comments"
+                    android:title="@string/menu_my_comments"/>
+                <item
+                    android:id="@+id/my_dmail"
+                    android:title="@string/menu_my_dmail"/>
+                <item
+                    android:id="@+id/my_sets"
+                    android:title="@string/menu_my_sets"/>
+                <item
+                    android:id="@+id/my_following"
+                    android:title="@string/menu_my_following"/>
+                <item
                     android:id="@+id/logout"
                     android:title="@string/menu_my_log_out"/>
             </menu>
@@ -68,11 +80,32 @@
     <item android:title="@string/menu_browse">
         <menu>
             <item
+                android:id="@+id/browse_following"
+                android:title="@string/menu_browse_following"/>
+            <item
                 android:id="@+id/browse_tags"
                 android:title="@string/menu_browse_tags"/>
             <item
                 android:id="@+id/browse_pools"
                 android:title="@string/menu_browse_pools"/>
+            <item
+                android:id="@+id/browse_artists"
+                android:title="@string/menu_browse_artists"/>
+            <item
+                android:id="@+id/browse_comments"
+                android:title="@string/menu_browse_comments"/>
+            <item
+                android:id="@+id/browse_sets"
+                android:title="@string/menu_browse_sets"/>
+            <item
+                android:id="@+id/browse_wiki"
+                android:title="@string/menu_browse_wiki"/>
+            <item
+                android:id="@+id/browse_blips"
+                android:title="@string/menu_browse_blips"/>
+            <item
+                android:id="@+id/browse_users"
+                android:title="@string/menu_browse_users"/>
         </menu>
     </item>
     
@@ -95,6 +128,27 @@
             <item
                 android:id="@+id/help"
                 android:title="@string/menu_about_help"/>
+            <item
+                android:id="@+id/changelog"
+                android:title="@string/menu_about_changelog"/>
+            <item
+                android:id="@+id/news"
+                android:title="@string/menu_about_news"/>
+            <item
+                android:id="@+id/donate"
+                android:title="@string/menu_about_donate"/>
+            <item
+                android:id="@+id/licenses"
+                android:title="@string/menu_about_licenses"/>
+            <item
+                android:id="@+id/translate"
+                android:title="@string/menu_about_translate"/>
+            <item
+                android:id="@+id/discord"
+                android:title="@string/menu_about_discord"/>
+            <item
+                android:id="@+id/send_feedback"
+                android:title="@string/menu_about_send_feedback"/>
         </menu>
     </item>
     

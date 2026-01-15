@@ -48,6 +48,8 @@
         android:layout_above="@android:id/text2"
         android:layout_centerVertical="true"
         android:maxLines="1"
+        android:textColor="@color/colorWhite"
+        android:textSize="14sp"
         android:text="TEXT1" />
     
     <TextView
@@ -62,6 +64,7 @@
         android:maxLines="1"
         android:text="TEXT2"
         android:textAppearance="?textAppearanceSearchResultSubtitle"
+        android:textColor="@color/colorDarkGrey"
         android:textSize="10sp"
         android:visibility="visible" />
         

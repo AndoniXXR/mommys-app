@@ -118,6 +118,21 @@
             android:textSize="12sp"
             android:visibility="gone" />
 
+        <!-- Network Status Banner (like original app - shows when offline) -->
+        <TextView
+            android:id="@+id/txtNetworkStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/holo_red_dark"
+            android:drawableStart="@drawable/ic_wifi_off"
+            android:drawablePadding="8dp"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="@string/network_offline"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
         <!-- Banner Ad Container (exactly like original app) -->
         <include
             layout="@layout/banner_ad"
@@ -167,8 +182,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="@color/darkColorToolbar"
-        app:itemIconTint="@color/colorWhite"
-        app:itemTextColor="@color/colorWhite"
+        app:itemIconTint="@color/bottom_nav_item_color"
+        app:itemTextColor="@color/bottom_nav_item_color"
+        app:itemActiveIndicatorStyle="@null"
         app:labelVisibilityMode="labeled"
         app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
         app:menu="@menu/bottom_nav_menu" />

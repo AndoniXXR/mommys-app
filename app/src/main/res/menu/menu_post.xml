@@ -10,6 +10,12 @@
         android:id="@+id/add_to_set"
         android:title="@string/post_menu_add_to_set" />
     <item
+        android:id="@+id/view_wiki"
+        android:title="@string/post_menu_view_wiki" />
+    <item
+        android:id="@+id/flag_post"
+        android:title="@string/post_menu_flag_post" />
+    <item
         android:id="@+id/open_post"
         android:title="@string/post_menu_open_post" />
     <item

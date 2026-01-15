@@ -49,11 +49,15 @@ class ProfileActivity : AppCompatActivity() {
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
-        // Obtener username del intent o de las preferencias (usuario logueado)
-        username = intent.getStringExtra(EXTRA_USERNAME) 
-            ?: intent.data?.lastPathSegment 
-            ?: prefs.getUsername()
-            ?: ""
+        // Obtener username: primero de extras, luego de deep link, luego de prefs
+        val deepLinkUsername = handleDeepLink()
+        val extrasUsername = intent.getStringExtra(EXTRA_USERNAME)
+        
+        username = when {
+            extrasUsername != null && deepLinkUsername == null -> extrasUsername
+            deepLinkUsername != null -> deepLinkUsername
+            else -> prefs.getUsername() ?: ""
+        }
         
         // Si es "home", abrir navegador (como la app original)
         if (username.equals("home", ignoreCase = true)) {
@@ -323,5 +327,18 @@ class ProfileActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+    
+    /**
+     * Maneja deep links para /users/{username}
+     * Similar a F() en la app original (ProfileActivity.java línea 45-60)
+     */
+    private fun handleDeepLink(): String? {
+        if (intent.action != Intent.ACTION_VIEW) return null
+        
+        val data = intent.data ?: return null
+        
+        // El path es /users/{username} - extraemos el último segmento
+        return data.lastPathSegment
     }
 }

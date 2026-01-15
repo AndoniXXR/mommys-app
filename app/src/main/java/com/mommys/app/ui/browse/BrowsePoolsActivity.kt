@@ -16,6 +16,7 @@ import com.mommys.app.R
 import com.mommys.app.data.preferences.PreferencesManager
 import com.mommys.app.databinding.ActivityBrowsePoolsBinding
 import com.mommys.app.ui.main.MainActivity
+import com.mommys.app.ui.pool.PoolActivity
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import java.net.HttpURLConnection
@@ -48,6 +49,9 @@ class BrowsePoolsActivity : AppCompatActivity() {
         
         prefs = PreferencesManager(this)
         
+        // Handle deep links (e.g., https://e621.net/pools/12345)
+        val deepLinkPoolId = handleDeepLink()
+        
         // Setup toolbar
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -75,8 +79,35 @@ class BrowsePoolsActivity : AppCompatActivity() {
             }
         })
         
-        // Initial load
-        loadPools()
+        // If we have a deep link pool ID, open that pool directly
+        if (deepLinkPoolId != null) {
+            openPoolById(deepLinkPoolId)
+        } else {
+            // Initial load
+            loadPools()
+        }
+    }
+    
+    /**
+     * Handle deep links like https://e621.net/pools/12345
+     */
+    private fun handleDeepLink(): Int? {
+        if (intent?.action != Intent.ACTION_VIEW) return null
+        val data = intent.data ?: return null
+        
+        // Parse pool ID from path like /pools/12345
+        val path = data.path ?: return null
+        val poolIdMatch = Regex("/pools/(\\d+)").find(path)
+        return poolIdMatch?.groupValues?.get(1)?.toIntOrNull()
+    }
+    
+    /**
+     * Open a specific pool by ID - navigate to PoolActivity
+     */
+    private fun openPoolById(poolId: Int) {
+        val intent = PoolActivity.newIntent(this, poolId)
+        startActivity(intent)
+        finish()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -224,13 +255,9 @@ class BrowsePoolsActivity : AppCompatActivity() {
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> {
-                        // Open pool posts
-                        val intent = Intent(this, MainActivity::class.java).apply {
-                            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                            putExtra("search_query", "pool:${pool.id}")
-                        }
+                        // Open pool in PoolActivity
+                        val intent = PoolActivity.newIntent(this, pool.id)
                         startActivity(intent)
-                        finish()
                     }
                     1 -> {
                         // Add pool:id to search

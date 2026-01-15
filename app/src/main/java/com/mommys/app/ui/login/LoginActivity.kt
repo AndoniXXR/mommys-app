@@ -2,8 +2,10 @@ package com.mommys.app.ui.login
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.autofill.AutofillManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +35,9 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var preferencesManager: PreferencesManager
     private val api: ApiService by lazy { ApiClient.apiService }
     
+    // AutofillManager para gestores de contraseñas
+    private var autofillManager: AutofillManager? = null
+    
     // Credenciales temporales durante validación
     private var pendingUsername: String? = null
     private var pendingApiKey: String? = null
@@ -43,6 +48,11 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
         
         preferencesManager = PreferencesManager(this)
+        
+        // Inicializar AutofillManager para soporte de gestores de contraseñas
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            autofillManager = getSystemService(AutofillManager::class.java)
+        }
         
         // Configurar subtítulo con instrucciones
         binding.txtLoginSubtitle.text = getString(R.string.login_subtitle_instructions)
@@ -66,6 +76,10 @@ class LoginActivity : AppCompatActivity() {
         }
         
         binding.btnCancel.setOnClickListener {
+            // Notificar al AutofillManager que se canceló
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                autofillManager?.cancel()
+            }
             setResult(RESULT_CANCELED)
             finish()
         }
@@ -224,6 +238,12 @@ class LoginActivity : AppCompatActivity() {
         // Guardar credenciales
         preferencesManager.setCredentials(username, apiKey)
         
+        // Notificar al AutofillManager que el login fue exitoso
+        // Esto permite que gestores como Samsung Pass, Google, etc. guarden las credenciales
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            autofillManager?.commit()
+        }
+        
         // Limpiar pendientes
         pendingUsername = null
         pendingApiKey = null
@@ -249,6 +269,11 @@ class LoginActivity : AppCompatActivity() {
         
         // Guardar credenciales de todas formas
         preferencesManager.setCredentials(username, apiKey)
+        
+        // Notificar al AutofillManager que el login fue exitoso
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            autofillManager?.commit()
+        }
         
         // Limpiar
         pendingUsername = null

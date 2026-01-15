@@ -899,4 +899,93 @@ class PreferencesManager(context: Context) {
             remove("cookies")
         }
     }
+    
+    // ==================== HELPER METHODS FOR POOL ACTIVITY ====================
+    
+    /**
+     * Get grid width (columns)
+     */
+    fun getGridWidth(): Int = userPrefs.getInt(KEY_GRID_COLUMNS, 3)
+    
+    /**
+     * Check if grid stats are enabled
+     */
+    fun isGridStatsEnabled(): Boolean = userPrefs.getBoolean("grid_stats", true)
+    
+    /**
+     * Check if grid info button is enabled
+     */
+    fun isGridInfoEnabled(): Boolean = userPrefs.getBoolean("grid_info", true)
+    
+    /**
+     * Check if grid rating colors are enabled
+     */
+    fun isGridColoursEnabled(): Boolean = userPrefs.getBoolean("grid_colours", true)
+    
+    /**
+     * Check if share is disabled in settings
+     */
+    fun isShareDisabled(): Boolean = userPrefs.getBoolean("post_disable_share", false)
+    
+    /**
+     * Check if explicit content (e621) is enabled
+     */
+    fun isExplicitEnabled(): Boolean = getHost() == "e621.net"
+    
+    /**
+     * Get followed tags list (same as getFollowingTagsList but different name)
+     */
+    fun getFollowedTags(): List<String> = getFollowingTagsList()
+    
+    /**
+     * Set followed tags list
+     */
+    fun setFollowedTags(tags: List<String>) = setFollowingTagsList(tags)
+    
+    // ==================== SAVED SEARCHES ====================
+    
+    private val savedSearchesKey = "saved_searches"
+    
+    /**
+     * Add a saved search
+     * Format: name|tags
+     */
+    fun addSavedSearch(name: String, tags: String) {
+        val searches = getSavedSearches().toMutableList()
+        searches.add(SavedSearch(name, tags, System.currentTimeMillis()))
+        saveSavedSearches(searches)
+    }
+    
+    /**
+     * Get all saved searches
+     */
+    fun getSavedSearches(): List<SavedSearch> {
+        val raw = userPrefs.getString(savedSearchesKey, "") ?: ""
+        if (raw.isEmpty()) return emptyList()
+        
+        return raw.split("\n").mapNotNull { line ->
+            val parts = line.split("|")
+            if (parts.size >= 2) {
+                SavedSearch(
+                    name = parts[0],
+                    tags = parts[1],
+                    lastUsed = parts.getOrNull(2)?.toLongOrNull() ?: 0L
+                )
+            } else null
+        }
+    }
+    
+    /**
+     * Save all saved searches
+     */
+    private fun saveSavedSearches(searches: List<SavedSearch>) {
+        val raw = searches.joinToString("\n") { "${it.name}|${it.tags}|${it.lastUsed}" }
+        userPrefs.edit { putString(savedSearchesKey, raw) }
+    }
+    
+    data class SavedSearch(
+        val name: String,
+        val tags: String,
+        val lastUsed: Long
+    )
 }

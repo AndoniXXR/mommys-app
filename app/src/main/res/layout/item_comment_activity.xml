@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    app:cardBackgroundColor="?attr/myCommentItemBackgroundColor"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Creator name (clickable) -->
+        <TextView
+            android:id="@+id/txtCreator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorTextImportant"
+            android:focusable="true"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackground"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true" />
+
+        <!-- Score -->
+        <TextView
+            android:id="@+id/txtScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="8dp"
+            android:layout_toStartOf="@+id/imgOptions" />
+
+        <!-- Options button (expand more) -->
+        <ImageView
+            android:id="@+id/imgOptions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:src="@drawable/ic_more_vert"
+            app:tint="?attr/myIconTintColor"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:contentDescription="@string/more_options" />
+
+        <!-- Details (date) -->
+        <TextView
+            android:id="@+id/txtDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/colorDarkGrey"
+            android:layout_below="@+id/txtCreator"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="2dp" />
+
+        <!-- Badges -->
+        <LinearLayout
+            android:id="@+id/badgesLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@+id/txtDetails"
+            android:layout_marginTop="4dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/badgeSticky"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/badge_sticky"
+                android:textSize="10sp"
+                android:textColor="@android:color/white"
+                android:background="@drawable/badge_background_sticky"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:layout_marginEnd="4dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/badgeHidden"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/badge_hidden"
+                android:textSize="10sp"
+                android:textColor="@android:color/white"
+                android:background="@drawable/badge_background_hidden"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:layout_marginEnd="4dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <!-- Comment body -->
+        <TextView
+            android:id="@+id/txtBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:lineSpacingMultiplier="1.2"
+            android:layout_below="@+id/badgesLayout"
+            android:layout_marginTop="8dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true" />
+
+        <!-- Action buttons bar -->
+        <LinearLayout
+            android:id="@+id/lLButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:weightSum="10"
+            android:layout_below="@+id/txtBody"
+            android:layout_marginTop="8dp"
+            style="?android:attr/buttonBarStyle">
+
+            <!-- Reply button -->
+            <Button
+                android:id="@+id/btnReply"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:text="@string/comment_reply"
+                android:textColor="@color/colorTextImportant"
+                android:textSize="12sp" />
+
+            <!-- Vote Down button -->
+            <Button
+                android:id="@+id/btnVoteDown"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:text="@string/comment_vote_down"
+                android:textColor="@color/colorDownvote"
+                android:textSize="12sp" />
+
+            <!-- Vote Up button -->
+            <Button
+                android:id="@+id/btnVoteUp"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:text="@string/comment_vote_up"
+                android:textColor="@color/colorUpvote"
+                android:textSize="12sp" />
+
+            <!-- Report button -->
+            <ImageButton
+                android:id="@+id/imgReport"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/ic_warning"
+                app:tint="@color/colorOrange"
+                android:contentDescription="@string/report" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

@@ -27,6 +27,15 @@ class CommentsViewModel : ViewModel() {
 
     private val _commentPosted = MutableLiveData<Boolean?>()
     val commentPosted: LiveData<Boolean?> = _commentPosted
+    
+    private val _commentEdited = MutableLiveData<Boolean?>()
+    val commentEdited: LiveData<Boolean?> = _commentEdited
+    
+    private val _commentDeleted = MutableLiveData<Boolean?>()
+    val commentDeleted: LiveData<Boolean?> = _commentDeleted
+    
+    private val _voteResult = MutableLiveData<VoteResult?>()
+    val voteResult: LiveData<VoteResult?> = _voteResult
 
     private var currentPage = 1
     private var hasMorePages = true
@@ -130,6 +139,149 @@ class CommentsViewModel : ViewModel() {
             }
         }
     }
+    
+    /**
+     * Editar un comentario existente
+     * PATCH /comments/{id}.json
+     */
+    fun editComment(commentId: Int, newBody: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            _commentEdited.value = null
+
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    ApiClient.apiService.editComment(
+                        commentId = commentId,
+                        body = newBody
+                    )
+                }
+
+                if (response.isSuccessful) {
+                    _commentEdited.value = true
+                    // Actualizar el comentario en la lista local
+                    val updatedComment = response.body()
+                    if (updatedComment != null) {
+                        val currentList = _comments.value?.toMutableList() ?: mutableListOf()
+                        val index = currentList.indexOfFirst { it.id == commentId }
+                        if (index >= 0) {
+                            currentList[index] = updatedComment
+                            _comments.value = currentList
+                        }
+                    }
+                } else {
+                    val errorCode = response.code()
+                    _error.value = when (errorCode) {
+                        403, 401 -> "Not authorized to edit this comment"
+                        404 -> "Comment not found"
+                        422 -> "Invalid comment"
+                        else -> "Error: $errorCode"
+                    }
+                    _commentEdited.value = false
+                }
+            } catch (e: Exception) {
+                _error.value = e.message
+                _commentEdited.value = false
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+    
+    /**
+     * Eliminar (ocultar) un comentario
+     * DELETE /comments/{id}.json
+     */
+    fun deleteComment(commentId: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            _commentDeleted.value = null
+
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    ApiClient.apiService.deleteComment(commentId)
+                }
+
+                if (response.isSuccessful) {
+                    _commentDeleted.value = true
+                    // Remover el comentario de la lista local
+                    val currentList = _comments.value?.toMutableList() ?: mutableListOf()
+                    currentList.removeAll { it.id == commentId }
+                    _comments.value = currentList
+                } else {
+                    val errorCode = response.code()
+                    _error.value = when (errorCode) {
+                        403, 401 -> "Not authorized to delete this comment"
+                        404 -> "Comment not found"
+                        else -> "Error: $errorCode"
+                    }
+                    _commentDeleted.value = false
+                }
+            } catch (e: Exception) {
+                _error.value = e.message
+                _commentDeleted.value = false
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+    
+    /**
+     * Votar un comentario
+     * POST /comments/{id}/votes.json
+     * @param score 1 = upvote, -1 = downvote
+     */
+    fun voteComment(commentId: Int, score: Int) {
+        viewModelScope.launch {
+            _error.value = null
+            _voteResult.value = null
+
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    ApiClient.apiService.voteComment(
+                        commentId = commentId,
+                        score = score,
+                        noUnvote = false
+                    )
+                }
+
+                if (response.isSuccessful) {
+                    val voteResponse = response.body()
+                    if (voteResponse != null) {
+                        // Actualizar el score del comentario en la lista local
+                        val currentList = _comments.value?.toMutableList() ?: mutableListOf()
+                        val index = currentList.indexOfFirst { it.id == commentId }
+                        if (index >= 0) {
+                            val oldComment = currentList[index]
+                            // Crear copia con nuevo score
+                            currentList[index] = oldComment.copy(score = voteResponse.score)
+                            _comments.value = currentList
+                        }
+                        
+                        _voteResult.value = VoteResult(
+                            commentId = commentId,
+                            newScore = voteResponse.score,
+                            ourScore = voteResponse.our_score,
+                            success = true
+                        )
+                    }
+                } else {
+                    val errorCode = response.code()
+                    _error.value = when (errorCode) {
+                        403, 401 -> "Login required to vote"
+                        422 -> "You cannot vote on your own comment"
+                        else -> "Error: $errorCode"
+                    }
+                    _voteResult.value = VoteResult(commentId = commentId, success = false)
+                }
+            } catch (e: Exception) {
+                _error.value = e.message
+                _voteResult.value = VoteResult(commentId = commentId, success = false)
+            }
+        }
+    }
 
     /**
      * Cargar más comentarios (paginación)
@@ -139,4 +291,19 @@ class CommentsViewModel : ViewModel() {
             loadComments(currentPostId, loadMore = true)
         }
     }
+    
+    /**
+     * Obtener el postId actual
+     */
+    fun getCurrentPostId(): Int = currentPostId
+    
+    /**
+     * Resultado de votación
+     */
+    data class VoteResult(
+        val commentId: Int,
+        val newScore: Int = 0,
+        val ourScore: Int = 0,
+        val success: Boolean
+    )
 }

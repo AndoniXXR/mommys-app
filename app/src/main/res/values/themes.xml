@@ -3,13 +3,17 @@
     <!-- Dark Theme (Default) - Exactly like AppThemeDark from original -->
     <style name="Theme.Mommys.Dark" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/colorBlack</item>
+        <item name="android:colorBackground">@color/darkColorBg</item>
         <item name="android:statusBarColor">@color/darkColorBg</item>
         <item name="android:navigationBarColor">@color/darkColorBg</item>
         <item name="android:textColorLink">@color/colorTextImportant</item>
+        <item name="android:textColorPrimary">@color/colorWhite</item>
+        <item name="android:textColorSecondary">@color/colorDarkGrey</item>
         <item name="colorPrimary">@color/darkColorPrimary</item>
         <item name="colorPrimaryDark">@color/darkColorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorSecondary">@color/colorAccent</item>
+        <item name="colorSurface">@color/darkColorSurface</item>
         <!-- Custom theme attributes (exact from original) -->
         <item name="myToolbarBackgroundColor">@color/darkColorToolbar</item>
         <item name="mySearchHintTextColor">@color/darkSearchTextColor</item>
@@ -88,5 +92,21 @@
         <item name="android:textColorSecondary">@color/colorWhite</item>
         <item name="popupMenuStyle">@style/PopupMenu</item>
         <item name="android:popupMenuStyle">@style/PopupMenu</item>
+    </style>
+    
+    <!-- Dark AlertDialog Style para tag options menu -->
+    <style name="DarkAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="android:background">@color/darkColorSurface</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:textColorPrimary">@color/colorWhite</item>
+        <item name="android:textColorSecondary">@color/colorWhite</item>
+        <item name="colorSurface">@color/darkColorSurface</item>
+        <item name="colorOnSurface">@color/colorWhite</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/DarkAlertDialogTitle</item>
+    </style>
+    
+    <style name="DarkAlertDialogTitle" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:textAlignment">center</item>
     </style>
 </resources>

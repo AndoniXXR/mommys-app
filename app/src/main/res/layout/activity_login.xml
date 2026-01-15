@@ -2,10 +2,12 @@
 <androidx.constraintlayout.widget.ConstraintLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground">
+    android:background="?android:attr/colorBackground"
+    android:importantForAutofill="yes">
     
     <ScrollView
         android:id="@+id/scrollView"
@@ -58,6 +60,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:hint="@string/login_username_hint"
+                android:importantForAutofill="yes"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/txtLoginSubtitle">
@@ -68,8 +71,9 @@
                     android:layout_height="wrap_content"
                     android:maxLines="1"
                     android:maxLength="30"
-                    android:inputType="textPersonName"
-                    android:imeOptions="flagNoPersonalizedLearning"
+                    android:inputType="textPersonName|textNoSuggestions"
+                    android:imeOptions="actionNext|flagNoPersonalizedLearning"
+                    android:importantForAutofill="yes"
                     android:autofillHints="username"
                     android:textColor="?android:attr/textColorPrimary"/>
                     
@@ -85,6 +89,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:hint="@string/login_api_key_hint"
+                android:importantForAutofill="yes"
                 app:endIconMode="password_toggle"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -97,7 +102,8 @@
                     android:maxLines="1"
                     android:maxLength="200"
                     android:inputType="textPassword"
-                    android:imeOptions="flagNoPersonalizedLearning"
+                    android:imeOptions="actionDone|flagNoPersonalizedLearning"
+                    android:importantForAutofill="yes"
                     android:autofillHints="password"
                     android:textColor="?android:attr/textColorPrimary"/>
                     

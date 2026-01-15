@@ -148,7 +148,27 @@ object UpdateManager {
             
             if (!response.isSuccessful) {
                 Log.e(TAG, "GitHub API error: ${response.code}")
-                return@withContext UpdateResult.Error("Error al conectar con GitHub: ${response.code}")
+                
+                // Manejar diferentes códigos de error
+                return@withContext when (response.code) {
+                    404 -> {
+                        // No hay releases publicadas todavía - esto NO es un error
+                        Log.d(TAG, "No releases found (404) - treating as no update available")
+                        saveLastCheckTime(context) // Guardar para no reintentar inmediatamente
+                        UpdateResult.NoUpdateAvailable
+                    }
+                    403 -> {
+                        // Rate limit o acceso denegado
+                        UpdateResult.Error("Límite de peticiones alcanzado. Intenta más tarde.")
+                    }
+                    500, 502, 503 -> {
+                        // Error del servidor de GitHub
+                        UpdateResult.Error("GitHub no está disponible temporalmente.")
+                    }
+                    else -> {
+                        UpdateResult.Error("Error al conectar con GitHub: ${response.code}")
+                    }
+                }
             }
             
             val body = response.body?.string() ?: return@withContext UpdateResult.Error("Respuesta vacía")
@@ -209,6 +229,18 @@ object UpdateManager {
             Log.d(TAG, "No update available")
             return@withContext UpdateResult.NoUpdateAvailable
             
+        } catch (e: java.net.UnknownHostException) {
+            Log.e(TAG, "No internet connection", e)
+            return@withContext UpdateResult.Error("Sin conexión a internet")
+        } catch (e: java.net.SocketTimeoutException) {
+            Log.e(TAG, "Connection timeout", e)
+            return@withContext UpdateResult.Error("Tiempo de conexión agotado")
+        } catch (e: java.io.IOException) {
+            Log.e(TAG, "Network error", e)
+            return@withContext UpdateResult.Error("Error de red: ${e.message}")
+        } catch (e: org.json.JSONException) {
+            Log.e(TAG, "JSON parsing error", e)
+            return@withContext UpdateResult.Error("Error al procesar respuesta")
         } catch (e: Exception) {
             Log.e(TAG, "Error checking for updates", e)
             return@withContext UpdateResult.Error("Error: ${e.message}")

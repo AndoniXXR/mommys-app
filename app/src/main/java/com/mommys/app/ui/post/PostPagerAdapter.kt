@@ -56,6 +56,8 @@ sealed class PostMenuAction {
     data class AddToSet(val post: Post) : PostMenuAction()
     data class ReloadPost(val post: Post, val position: Int) : PostMenuAction()
     data class CheckNotes(val post: Post) : PostMenuAction()
+    data class ViewWiki(val post: Post) : PostMenuAction()
+    data class FlagPost(val post: Post) : PostMenuAction()
 }
 
 /**
@@ -79,7 +81,8 @@ class PostPagerAdapter(
     private val onMoreOptions: (Post) -> Unit = {},
     private val onMenuAction: (PostMenuAction) -> Unit = {},
     private val onNavigateToPost: (Int) -> Unit = {},    // Navegar a post por ID (para parent/children)
-    private val onNavigateToPool: (Int) -> Unit = {}     // Navegar a pool por ID
+    private val onNavigateToPool: (Int) -> Unit = {},    // Navegar a pool por ID
+    private val onNetworkError: (Int) -> Unit = {}       // Notificar error de red en posición (para retry automático)
 ) : RecyclerView.Adapter<PostPagerAdapter.PostViewHolder>() {
 
     private val posts = mutableListOf<Post>()
@@ -106,6 +109,24 @@ class PostPagerAdapter(
     // ==================== SHARE/OPEN PREFERENCES ====================
     private var disableShare = false         // post_disable_share
     private var useE621 = false              // use e621 instead of e926
+
+    /**
+     * Verifica si un error de Glide es un error de red
+     * Basado en GlideException que contiene causas raíz
+     */
+    private fun isNetworkError(e: GlideException?): Boolean {
+        if (e == null) return false
+        
+        // Buscar en las causas si hay error de red
+        val causes = e.rootCauses
+        return causes.any { cause ->
+            cause is java.net.UnknownHostException ||
+            cause is java.net.SocketTimeoutException ||
+            cause is java.net.ConnectException ||
+            cause is java.io.IOException ||
+            cause is javax.net.ssl.SSLException
+        }
+    }
 
     fun submitList(newPosts: List<Post>) {
         posts.clear()
@@ -160,6 +181,17 @@ class PostPagerAdapter(
     ) {
         disableShare = disableShareOption
         useE621 = useE621Host
+    }
+    
+    /**
+     * Indica si el SlidingPanel está siendo arrastrado
+     * Como PostActivity.E.C = (state == 1) en la app original (si.c.o línea 303)
+     * Se usa para deshabilitar el scroll del ViewPager mientras se arrastra el panel
+     */
+    private var isDragging = false
+    
+    fun setDragging(dragging: Boolean) {
+        isDragging = dragging
     }
     
     /**
@@ -823,7 +855,7 @@ class PostPagerAdapter(
                 context.getString(R.string.tag_menu_copy)                     // 8
             )
 
-            AlertDialog.Builder(context)
+            AlertDialog.Builder(context, R.style.DarkAlertDialog)
                 .setTitle(tagName)
                 .setItems(options) { _, which ->
                     when (which) {
@@ -1171,6 +1203,11 @@ class PostPagerAdapter(
                         binding.loadingLayout.visibility = View.GONE
                         binding.errorLayout.visibility = View.VISIBLE
                         binding.txtError.text = e?.message ?: "Error loading GIF"
+                        
+                        // Notificar error de red para retry automático
+                        if (isNetworkError(e)) {
+                            onNetworkError(bindingAdapterPosition)
+                        }
                         return false
                     }
 
@@ -1307,6 +1344,11 @@ class PostPagerAdapter(
                         binding.loadingLayout.visibility = View.GONE
                         binding.errorLayout.visibility = View.VISIBLE
                         binding.txtError.text = e?.message ?: "Error loading image"
+                        
+                        // Notificar error de red para retry automático
+                        if (isNetworkError(e)) {
+                            onNetworkError(bindingAdapterPosition)
+                        }
                         return false
                     }
 
@@ -1450,6 +1492,15 @@ class PostPagerAdapter(
                             binding.loadingLayout.visibility = View.GONE
                             binding.errorLayout.visibility = View.VISIBLE
                             binding.txtError.text = "Video error: ${error.message}"
+                            
+                            // Notificar error de red para retry automático
+                            // ExoPlayer usa ERROR_CODE_IO_* para errores de red
+                            val errorCode = error.errorCode
+                            if (errorCode == androidx.media3.common.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED ||
+                                errorCode == androidx.media3.common.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT ||
+                                errorCode == androidx.media3.common.PlaybackException.ERROR_CODE_IO_UNSPECIFIED) {
+                                onNetworkError(bindingAdapterPosition)
+                            }
                         }
                         
                         override fun onIsLoadingChanged(isLoading: Boolean) {
@@ -1817,6 +1868,16 @@ class PostPagerAdapter(
                         } else {
                             Toast.makeText(context, R.string.notes_only_images, Toast.LENGTH_SHORT).show()
                         }
+                        true
+                    }
+                    R.id.view_wiki -> {
+                        // View wiki - delegate to Activity to show tag selection dialog
+                        onMenuAction(PostMenuAction.ViewWiki(post))
+                        true
+                    }
+                    R.id.flag_post -> {
+                        // Flag post - delegate to Activity
+                        onMenuAction(PostMenuAction.FlagPost(post))
                         true
                     }
                     R.id.view_json -> {

@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
@@ -22,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.snackbar.Snackbar
 import com.mommys.app.MommysApplication
 import com.mommys.app.R
 import com.mommys.app.data.api.ApiClient
@@ -44,10 +46,14 @@ import com.mommys.app.ui.views.MySearchView
 import com.mommys.app.ui.views.SearchSuggestionsAdapter
 import com.mommys.app.util.AdManager
 import com.mommys.app.util.UpdateManager
+import com.mommys.app.util.network.NetworkAwareDispatcher
+import com.mommys.app.util.network.NetworkMonitor
+import com.mommys.app.util.network.NetworkState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.LinkedHashSet
@@ -60,8 +66,10 @@ import java.util.concurrent.atomic.AtomicInteger
  * 
  * Usa un sistema de PageHandlers donde cada página mantiene su propio estado.
  * Implementa SelectionCallback para manejar selección múltiple de posts.
+ * Implementa NetworkAwareDispatcher.PageRefreshCallback para auto-refresh cuando vuelve la red.
  */
-class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, SelectionCallback {
+class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, SelectionCallback,
+    NetworkAwareDispatcher.PageRefreshCallback {
     
     companion object {
         const val EXTRA_SEARCH_QUERY = "search_query"
@@ -144,6 +152,16 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     // Cuando cambia el host en Settings, necesitamos recargar los posts
     private var currentHost: String = ""
     
+    // ===== NETWORK MONITORING (como ff/b.java en app original) =====
+    // NetworkMonitor para detectar cambios de conectividad
+    private val networkMonitor by lazy { MommysApplication.getInstance().networkMonitor }
+    // NetworkAwareDispatcher para retry de acciones fallidas
+    private val networkDispatcher by lazy { MommysApplication.getInstance().networkDispatcher }
+    // Flag para detectar reconexión (si estaba offline y ahora online)
+    private var wasOffline = false
+    // Job para cancelar la observación cuando se destruye la activity
+    private var networkObserverJob: Job? = null
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -184,6 +202,9 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
         
         // Check for updates on startup (once per day)
         checkForUpdatesOnStartup()
+        
+        // Configurar monitoreo de red (como ff/b.java en app original)
+        setupNetworkMonitoring()
     }
     
     /**
@@ -283,9 +304,12 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
      * Maneja intent entrante (desde SavedSearchesActivity, PostActivity u otro lugar)
      */
     private fun handleIncomingIntent(intent: Intent?) {
+        // Handle deep links first (e.g., https://e621.net/posts?tags=wolf)
+        val deepLinkTags = handleDeepLink(intent)
+        
         // Primero verificar search_query (usado desde PostActivity para pools)
         val searchQuery = intent?.getStringExtra(EXTRA_SEARCH_QUERY)
-        val tags = intent?.getStringExtra("tags")
+        val tags = deepLinkTags ?: intent?.getStringExtra("tags")
         val page = intent?.getIntExtra("page", 1) ?: 1
         
         when {
@@ -306,6 +330,18 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                 startNewSearch(emptyList())
             }
         }
+    }
+    
+    /**
+     * Handle deep links like https://e621.net/posts?tags=wolf
+     * Returns the tags query parameter if present
+     */
+    private fun handleDeepLink(intent: Intent?): String? {
+        if (intent?.action != Intent.ACTION_VIEW) return null
+        val data = intent.data ?: return null
+        
+        // Get tags from query parameter
+        return data.getQueryParameter("tags")
     }
     
     /**
@@ -592,16 +628,26 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     }
     
     private fun setupBottomNavigation() {
+        // No tener ningún item seleccionado por defecto
+        binding.bottomNav.menu.setGroupCheckable(0, true, false)
+        for (i in 0 until binding.bottomNav.menu.size()) {
+            binding.bottomNav.menu.getItem(i).isChecked = false
+        }
+        
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_saved_searches -> {
                     // Abrir actividad de búsquedas guardadas (como la app original)
                     startActivity(Intent(this, SavedSearchesActivity::class.java))
+                    // Deseleccionar el item inmediatamente
+                    item.isChecked = false
                     false
                 }
                 R.id.nav_filter -> {
                     // Mostrar menú de filtros anclado al btnMenu (esquina superior derecha)
                     showFilterMenu()
+                    // Deseleccionar el item inmediatamente
+                    item.isChecked = false
                     false
                 }
                 R.id.nav_favourites -> {
@@ -612,6 +658,8 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                         // Mostrar mensaje que requiere login
                         Toast.makeText(this, R.string.favourites_login_required, Toast.LENGTH_SHORT).show()
                     }
+                    // Deseleccionar el item inmediatamente
+                    item.isChecked = false
                     false
                 }
                 else -> false
@@ -895,11 +943,29 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val tagsString = currentTags.joinToString(" ")
-                val response = api.getPosts(
-                    tags = tagsString.ifEmpty { null },
-                    page = pageNumber,
-                    limit = postsPerPage
-                )
+                
+                // Detectar si es búsqueda de favoritos propios
+                // Si es "fav:username" del usuario actual y gridFavOrder está activo,
+                // usar el endpoint /favorites.json que ordena por fecha de favorito
+                val username = prefs.getUsername()
+                val isOwnFavorites = username != null && 
+                    currentTags.size == 1 && 
+                    currentTags[0].equals("fav:$username", ignoreCase = true) &&
+                    prefs.gridFavOrder
+                
+                val response = if (isOwnFavorites) {
+                    // Usar endpoint de favoritos que ordena por fecha de favorito (más recientes primero)
+                    api.getFavorites(
+                        page = pageNumber,
+                        limit = postsPerPage
+                    )
+                } else {
+                    api.getPosts(
+                        tags = tagsString.ifEmpty { null },
+                        page = pageNumber,
+                        limit = postsPerPage
+                    )
+                }
                 
                 withContext(Dispatchers.Main) {
                     binding.progressBar.visibility = View.GONE
@@ -1106,34 +1172,73 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                 
                 // My Account submenu
                 R.id.my_profile -> {
-                    Toast.makeText(this, "My Profile - Coming soon", Toast.LENGTH_SHORT).show()
+                    // Abrir ProfileActivity con el usuario logueado
+                    startActivity(Intent(this, com.mommys.app.ui.profile.ProfileActivity::class.java))
                     true
                 }
                 R.id.my_favourites -> {
-                    // Buscar favoritos del usuario
+                    // Abrir nueva activity con favoritos (como app original)
                     val username = prefs.getUsername()
                     if (username != null) {
-                        performSearch("fav:$username")
+                        openNewSearch("fav:$username")
                     }
                     true
                 }
                 R.id.my_upvotes -> {
+                    // Abrir nueva activity con upvotes (como app original)
                     val username = prefs.getUsername()
                     if (username != null) {
-                        performSearch("votedup:$username")
+                        openNewSearch("votedup:$username")
                     }
                     true
                 }
                 R.id.my_posts -> {
+                    // Abrir nueva activity con posts del usuario (como app original)
                     val username = prefs.getUsername()
                     if (username != null) {
-                        performSearch("user:$username")
+                        openNewSearch("user:$username")
                     }
                     true
                 }
                 R.id.logout -> {
                     prefs.logout()
                     Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                R.id.my_comments -> {
+                    // Open user's comments - search using commenter:username
+                    val username = prefs.getUsername()
+                    if (username != null) {
+                        // Open WebViewActivity pointing to user's comments page
+                        val host = prefs.getHost()
+                        val url = "https://$host/comments?group_by=comment&search[creator_name]=$username"
+                        val intent = Intent(this, com.mommys.app.ui.webview.WebViewActivity::class.java)
+                        intent.putExtra(com.mommys.app.ui.webview.WebViewActivity.EXTRA_URL, url)
+                        startActivity(intent)
+                    }
+                    true
+                }
+                R.id.my_dmail -> {
+                    // Open user's DMail
+                    val host = prefs.getHost()
+                    val url = "https://$host/dmails"
+                    val intent = Intent(this, com.mommys.app.ui.webview.WebViewActivity::class.java)
+                    intent.putExtra(com.mommys.app.ui.webview.WebViewActivity.EXTRA_URL, url)
+                    startActivity(intent)
+                    true
+                }
+                R.id.my_sets -> {
+                    // Open user's sets using BrowseSetsActivity in my_sets mode
+                    val intent = Intent(this, com.mommys.app.ui.sets.BrowseSetsActivity::class.java)
+                    intent.putExtra(com.mommys.app.ui.sets.BrowseSetsActivity.EXTRA_MY_SETS, true)
+                    startActivity(intent)
+                    true
+                }
+                R.id.my_following -> {
+                    // Open user's followed tags (settings following page)
+                    startActivity(Intent(this, SettingsActivity::class.java).apply {
+                        putExtra("open_following", true)
+                    })
                     true
                 }
                 
@@ -1166,12 +1271,57 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                 }
                 
                 // Browse submenu
+                R.id.browse_following -> {
+                    // Open FollowingPostActivity (posts from followed tags)
+                    startActivity(Intent(this, FollowingPostActivity::class.java))
+                    true
+                }
                 R.id.browse_tags -> {
                     startActivity(Intent(this, BrowseTagsActivity::class.java))
                     true
                 }
                 R.id.browse_pools -> {
                     startActivity(Intent(this, BrowsePoolsActivity::class.java))
+                    true
+                }
+                R.id.browse_sets -> {
+                    startActivity(Intent(this, com.mommys.app.ui.sets.BrowseSetsActivity::class.java))
+                    true
+                }
+                R.id.browse_wiki -> {
+                    showWikiSearchDialog()
+                    true
+                }
+                R.id.browse_artists -> {
+                    // Open WebView with artists page
+                    val intent = Intent(this, com.mommys.app.ui.webview.WebViewActivity::class.java)
+                    intent.putExtra(com.mommys.app.ui.webview.WebViewActivity.EXTRA_URL, 
+                        "https://${prefs.getHost()}/artists")
+                    startActivity(intent)
+                    true
+                }
+                R.id.browse_comments -> {
+                    // Open WebView with comments page
+                    val intent = Intent(this, com.mommys.app.ui.webview.WebViewActivity::class.java)
+                    intent.putExtra(com.mommys.app.ui.webview.WebViewActivity.EXTRA_URL, 
+                        "https://${prefs.getHost()}/comments")
+                    startActivity(intent)
+                    true
+                }
+                R.id.browse_blips -> {
+                    // Open WebView with blips page
+                    val intent = Intent(this, com.mommys.app.ui.webview.WebViewActivity::class.java)
+                    intent.putExtra(com.mommys.app.ui.webview.WebViewActivity.EXTRA_URL, 
+                        "https://${prefs.getHost()}/blips")
+                    startActivity(intent)
+                    true
+                }
+                R.id.browse_users -> {
+                    // Open WebView with users page
+                    val intent = Intent(this, com.mommys.app.ui.webview.WebViewActivity::class.java)
+                    intent.putExtra(com.mommys.app.ui.webview.WebViewActivity.EXTRA_URL, 
+                        "https://${prefs.getHost()}/users")
+                    startActivity(intent)
                     true
                 }
                 
@@ -1194,6 +1344,60 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                 }
                 R.id.help -> {
                     showHelpDialog()
+                    true
+                }
+                R.id.changelog -> {
+                    startActivity(Intent(this, com.mommys.app.ui.changelog.ChangelogActivity::class.java))
+                    true
+                }
+                R.id.news -> {
+                    startActivity(Intent(this, com.mommys.app.ui.news.NewsActivity::class.java))
+                    true
+                }
+                R.id.donate -> {
+                    startActivity(Intent(this, com.mommys.app.ui.donate.DonateActivity::class.java))
+                    true
+                }
+                R.id.licenses -> {
+                    // Open licenses using ScrollViewTextActivity
+                    val intent = Intent(this, com.mommys.app.ui.webview.ScrollViewTextActivity::class.java)
+                    intent.putExtra(com.mommys.app.ui.webview.ScrollViewTextActivity.EXTRA_TYPE, 
+                        com.mommys.app.ui.webview.ScrollViewTextActivity.TYPE_LICENSES)
+                    startActivity(intent)
+                    true
+                }
+                R.id.translate -> {
+                    // Open Crowdin or translation URL
+                    val url = "https://crowdin.com/project/mommys"
+                    try {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "Could not open browser", Toast.LENGTH_SHORT).show()
+                    }
+                    true
+                }
+                R.id.discord -> {
+                    // Open Discord invite
+                    val url = "https://discord.gg/mommys"
+                    try {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "Could not open browser", Toast.LENGTH_SHORT).show()
+                    }
+                    true
+                }
+                R.id.send_feedback -> {
+                    // Open email intent for feedback
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:")
+                        putExtra(Intent.EXTRA_EMAIL, arrayOf("feedback@mommys.app"))
+                        putExtra(Intent.EXTRA_SUBJECT, "Mommys App Feedback")
+                    }
+                    try {
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        Toast.makeText(this, R.string.no_email_app, Toast.LENGTH_SHORT).show()
+                    }
                     true
                 }
                 
@@ -1331,6 +1535,31 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
             .setTitle(R.string.menu_about_help)
             .setMessage("Search tips:\n\n• Use spaces to search multiple tags\n• Use - prefix to exclude tags\n• Use order:score to sort by score\n• Use order:favcount to sort by favorites\n• Use rating:s, rating:q, rating:e for ratings")
             .setPositiveButton(R.string.ok, null)
+            .show()
+    }
+    
+    /**
+     * Mostrar diálogo de búsqueda de Wiki
+     */
+    private fun showWikiSearchDialog() {
+        val editText = android.widget.EditText(this).apply {
+            hint = getString(R.string.wiki_search_hint)
+            inputType = android.text.InputType.TYPE_CLASS_TEXT
+            setPadding(48, 32, 48, 32)
+        }
+        
+        AlertDialog.Builder(this)
+            .setTitle(R.string.wiki_search_title)
+            .setView(editText)
+            .setPositiveButton(R.string.search) { _, _ ->
+                val query = editText.text.toString().trim()
+                if (query.isNotEmpty()) {
+                    val intent = Intent(this, com.mommys.app.ui.wiki.WikiShowActivity::class.java)
+                    intent.putExtra(com.mommys.app.ui.wiki.WikiShowActivity.EXTRA_WIKI_TITLE, query.replace(" ", "_"))
+                    startActivity(intent)
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -1496,6 +1725,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     override fun onDestroy() {
         super.onDestroy()
         suggestionJob?.cancel()
+        networkObserverJob?.cancel() // Cancelar observación de red
         searchHelper.cleanup()
         suggestionsAdapter.changeCursor(null)
     }
@@ -1815,5 +2045,143 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                 showUpdateDialog(result.release, result.currentVersion)
             }
         }
+    }
+    
+    // ==================== NETWORK MONITORING ====================
+    // Similar a ff/b.java (NetworkConnectivityListener) en la app original
+    
+    /**
+     * Configura el monitoreo de red usando StateFlow para observar cambios
+     * Similar a cómo la app original registra NetworkCallback en ff/b.java
+     * 
+     * Observa el networkState del NetworkMonitor y:
+     * - Actualiza el banner de estado de red (txtNetworkStatus)
+     * - Detecta reconexiones para mostrar Snackbar
+     * - Marca wasOffline para saber si debemos hacer auto-refresh
+     */
+    private fun setupNetworkMonitoring() {
+        networkObserverJob = lifecycleScope.launch {
+            networkMonitor.networkState.collectLatest { state ->
+                updateNetworkStatusUI(state)
+            }
+        }
+    }
+    
+    /**
+     * Actualiza la UI del banner de estado de red
+     * Similar a cómo la app original muestra/oculta el banner en MainActivity
+     * 
+     * Comportamiento:
+     * - Sin conexión: Mostrar banner rojo con icono wifi_off
+     * - Conexión lenta (2G/3G): Mostrar banner amarillo de advertencia
+     * - Reconexión después de estar offline: Mostrar Snackbar verde
+     * - Conexión normal: Ocultar banner
+     * 
+     * @param state Estado actual de la red desde NetworkMonitor
+     */
+    private fun updateNetworkStatusUI(state: NetworkState) {
+        val txtNetworkStatus = binding.root.findViewById<android.widget.TextView>(R.id.txtNetworkStatus)
+            ?: return
+        
+        when {
+            // Sin conexión - mostrar banner rojo
+            !state.isOnline -> {
+                txtNetworkStatus.visibility = View.VISIBLE
+                txtNetworkStatus.text = getString(R.string.network_offline)
+                txtNetworkStatus.setBackgroundColor(
+                    ContextCompat.getColor(this, R.color.error_background)
+                )
+                txtNetworkStatus.setCompoundDrawablesWithIntrinsicBounds(
+                    R.drawable.ic_wifi_off, 0, 0, 0
+                )
+                txtNetworkStatus.compoundDrawablePadding = 16
+                
+                // Marcar que estamos offline para detectar reconexión
+                wasOffline = true
+            }
+            
+            // Conexión lenta (2G/3G) - mostrar advertencia amarilla
+            state.isSlow -> {
+                txtNetworkStatus.visibility = View.VISIBLE
+                txtNetworkStatus.text = getString(R.string.network_slow)
+                txtNetworkStatus.setBackgroundColor(
+                    ContextCompat.getColor(this, R.color.warning_background)
+                )
+                txtNetworkStatus.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+                
+                // Si estábamos offline y ahora tenemos conexión (aunque lenta)
+                if (wasOffline) {
+                    wasOffline = false
+                    showReconnectedSnackbar()
+                }
+            }
+            
+            // Conexión normal - ocultar banner
+            else -> {
+                txtNetworkStatus.visibility = View.GONE
+                
+                // Si estábamos offline, mostrar Snackbar de reconexión
+                if (wasOffline) {
+                    wasOffline = false
+                    showReconnectedSnackbar()
+                }
+            }
+        }
+    }
+    
+    /**
+     * Muestra un Snackbar indicando que la conexión se ha restablecido
+     * Similar a cómo la app original muestra feedback visual al reconectar
+     * 
+     * El Snackbar incluye acción para refrescar la página actual
+     */
+    private fun showReconnectedSnackbar() {
+        Snackbar.make(
+            binding.root,
+            R.string.network_reconnected,
+            Snackbar.LENGTH_LONG
+        ).setAction(R.string.refresh) {
+            // Refrescar la página actual
+            onRefresh()
+        }.setBackgroundTint(
+            ContextCompat.getColor(this, R.color.success_background)
+        ).show()
+        
+        // Flush acciones pendientes del dispatcher
+        // Esto reintenta automáticamente las cargas fallidas
+        networkDispatcher.flushFailedActions()
+    }
+    
+    /**
+     * Implementación de NetworkAwareDispatcher.PageRefreshCallback
+     * Llamado cuando el dispatcher detecta que hay acciones pendientes
+     * y la conexión se ha restablecido
+     * 
+     * Refresca la página actual para recargar contenido fallido
+     */
+    override fun onRefreshRequested() {
+        runOnUiThread {
+            // Refrescar la página actual como si el usuario hubiera hecho pull-to-refresh
+            val currentPosition = binding.viewPager.currentItem
+            if (currentPosition < pageHandlers.size) {
+                val handler = pageHandlers[currentPosition]
+                // Solo refrescar si la página tuvo errores o está vacía
+                if (handler.hasError || (handler.posts.isEmpty() && !handler.isLoading)) {
+                    handler.retry()
+                }
+            }
+        }
+    }
+    
+    override fun onStart() {
+        super.onStart()
+        // Registrar este Activity como callback para auto-refresh cuando vuelve la red
+        networkDispatcher.registerPageRefreshCallback(this)
+    }
+    
+    override fun onStop() {
+        super.onStop()
+        // Desregistrar callback para evitar leaks y refreshes cuando no está visible
+        networkDispatcher.unregisterPageRefreshCallback(this)
     }
 }

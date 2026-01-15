@@ -46,6 +46,26 @@ interface ApiService {
     ): Response<VoteResponse>
     
     /**
+     * Actualizar/editar un post (tags, rating)
+     * Como la app original di/k.java: PATCH /posts/{id}.json
+     * 
+     * @param tagStringDiff Tags añadidos (sin prefijo) y eliminados (con prefijo "-")
+     *                      Ejemplo: "tag1 tag2 -removed_tag"
+     * @param rating Nueva rating (s, q, e)
+     * @param oldRating Rating anterior (requerido si se cambia)
+     * @param editReason Razón del cambio (opcional)
+     */
+    @FormUrlEncoded
+    @PATCH("posts/{id}.json")
+    suspend fun updatePost(
+        @Path("id") postId: Int,
+        @Field("post[tag_string_diff]") tagStringDiff: String? = null,
+        @Field("post[rating]") rating: String? = null,
+        @Field("post[old_rating]") oldRating: String? = null,
+        @Field("post[edit_reason]") editReason: String? = null
+    ): Response<SinglePostResponse>
+    
+    /**
      * Validar credenciales de login
      * Usa el mismo endpoint de votar con score=0 (neutral vote)
      * Si las credenciales son correctas devuelve 200 o 422 (ya votó)
@@ -110,6 +130,14 @@ interface ApiService {
     ): Response<List<Comment>>
     
     /**
+     * Obtener un comentario específico por ID
+     */
+    @GET("comments/{id}.json")
+    suspend fun getComment(
+        @Path("id") id: Int
+    ): Response<Comment>
+    
+    /**
      * Crear comentario
      */
     @FormUrlEncoded
@@ -119,6 +147,37 @@ interface ApiService {
         @Field("comment[body]") body: String,
         @Field("comment[do_not_bump_post]") doNotBump: Boolean = false
     ): Response<Comment>
+    
+    /**
+     * Editar comentario
+     * PATCH /comments/{id}.json
+     */
+    @FormUrlEncoded
+    @PATCH("comments/{id}.json")
+    suspend fun editComment(
+        @Path("id") commentId: Int,
+        @Field("comment[body]") body: String
+    ): Response<Comment>
+    
+    /**
+     * Eliminar comentario (hide)
+     * DELETE /comments/{id}.json
+     */
+    @DELETE("comments/{id}.json")
+    suspend fun deleteComment(
+        @Path("id") commentId: Int
+    ): Response<Unit>
+    
+    /**
+     * Votar comentario
+     * POST /comments/{id}/votes.json
+     */
+    @POST("comments/{id}/votes.json")
+    suspend fun voteComment(
+        @Path("id") commentId: Int,
+        @Query("score") score: Int,  // 1 = upvote, -1 = downvote
+        @Query("no_unvote") noUnvote: Boolean = false
+    ): Response<VoteResponse>
     
     // ==================== USERS ====================
     
@@ -191,6 +250,91 @@ interface ApiService {
     suspend fun getNotes(
         @Query("search[post_id]") postId: Int
     ): Response<List<Note>>
+    
+    // ==================== FAVORITES LIST ====================
+    
+    /**
+     * Obtener lista de favoritos del usuario actual
+     * Este endpoint devuelve los favoritos ordenados por fecha de favorito (más reciente primero)
+     * A diferencia de usar "fav:username" en posts.json que ordena por ID del post.
+     * Como la app original vi/a0.java: GET /favorites.json
+     * 
+     * NOTA: Según la documentación de e621, el parámetro user_id es necesario
+     * para especificar de qué usuario obtener los favoritos.
+     * Si el usuario tiene favoritos ocultos, debes ser ese usuario o Moderator+.
+     */
+    @GET("favorites.json")
+    suspend fun getFavorites(
+        @Query("user_id") userId: Int? = null,
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 75
+    ): Response<PostsResponse>
+    
+    // ==================== WIKI ====================
+    
+    /**
+     * Obtener una página wiki por su título
+     * Como la app original vi/e0.java: GET /wiki_pages/{title}.json
+     */
+    @GET("wiki_pages/{title}.json")
+    suspend fun getWikiPage(
+        @Path("title") title: String
+    ): Response<WikiPage>
+    
+    /**
+     * Buscar páginas wiki
+     */
+    @GET("wiki_pages.json")
+    suspend fun searchWikiPages(
+        @Query("search[title]") title: String? = null,
+        @Query("search[body_matches]") bodyMatches: String? = null,
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 75
+    ): Response<List<WikiPage>>
+    
+    // ==================== POST SETS ====================
+    
+    /**
+     * Buscar sets de posts
+     * Como la app original: GET /post_sets.json
+     */
+    @GET("post_sets.json")
+    suspend fun getPostSets(
+        @Query("search[name]") name: String? = null,
+        @Query("search[shortname]") shortname: String? = null,
+        @Query("search[creator_name]") creatorName: String? = null,
+        @Query("search[order]") order: String = "updated_at",
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 75
+    ): Response<List<PostSet>>
+    
+    /**
+     * Obtener un set específico
+     */
+    @GET("post_sets/{id}.json")
+    suspend fun getPostSet(
+        @Path("id") id: Int
+    ): Response<PostSet>
+    
+    /**
+     * Añadir post a un set
+     */
+    @FormUrlEncoded
+    @POST("post_sets/{id}/add_posts.json")
+    suspend fun addPostToSet(
+        @Path("id") setId: Int,
+        @Field("post_ids[]") postIds: List<Int>
+    ): Response<Unit>
+    
+    /**
+     * Quitar post de un set
+     */
+    @FormUrlEncoded
+    @POST("post_sets/{id}/remove_posts.json")
+    suspend fun removePostFromSet(
+        @Path("id") setId: Int,
+        @Field("post_ids[]") postIds: List<Int>
+    ): Response<Unit>
 }
 
 // Response classes adicionales

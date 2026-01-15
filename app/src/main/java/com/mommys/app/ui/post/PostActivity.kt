@@ -8,19 +8,25 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.customview.widget.ViewDragHelper
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import android.widget.FrameLayout
+import com.google.android.material.snackbar.Snackbar
+import com.mommys.app.ui.views.SlidingPanelLayout
 import com.applovin.mediation.MaxAd
 import com.applovin.mediation.MaxAdListener
 import com.applovin.mediation.MaxError
 import com.applovin.mediation.ads.MaxInterstitialAd
+import com.mommys.app.MommysApplication
 import com.mommys.app.R
 import com.mommys.app.data.model.Post
 import com.mommys.app.data.preferences.PreferencesManager
@@ -29,6 +35,11 @@ import com.mommys.app.ui.main.MainActivity
 import com.mommys.app.ui.notes.NotesActivity
 import com.mommys.app.util.AdManager
 import com.mommys.app.util.BlacklistHelper
+import com.mommys.app.util.network.NetworkAwareDispatcher
+import com.mommys.app.util.network.NetworkState
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 /**
  * PostActivity - Vista del post individual
@@ -39,8 +50,9 @@ import com.mommys.app.util.BlacklistHelper
  * - Botones back flotantes (izquierda/derecha configurables)
  * - Mini preview de imagen al scrollear
  * - Barra inferior con 6 botones: upvote, downvote, favorite, comments, download, more
+ * - Retry automático de cargas cuando vuelve la red (NetworkAwareDispatcher.PageRefreshCallback)
  */
-class PostActivity : AppCompatActivity(), MaxAdListener {
+class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.PageRefreshCallback {
 
     private lateinit var binding: ActivityPostBinding
     private lateinit var viewModel: PostViewModel
@@ -61,6 +73,21 @@ class PostActivity : AppCompatActivity(), MaxAdListener {
     
     // Post pendiente de descargar (después de obtener permiso)
     private var pendingDownloadPost: Post? = null
+    
+    // Pull-to-close sliding panel (como la app original PostActivity.java líneas 360-376)
+    private var slidingPanel: SlidingPanelLayout? = null
+    
+    // ===== NETWORK MONITORING (como ff/b.java en app original) =====
+    // NetworkMonitor para detectar cambios de conectividad
+    private val networkMonitor by lazy { MommysApplication.getInstance().networkMonitor }
+    // NetworkAwareDispatcher para retry de acciones fallidas
+    private val networkDispatcher by lazy { MommysApplication.getInstance().networkDispatcher }
+    // Flag para detectar reconexión (si estaba offline y ahora online)
+    private var wasOffline = false
+    // Job para cancelar la observación cuando se destruye la activity
+    private var networkObserverJob: Job? = null
+    // Posición del último post que falló por error de red (para retry)
+    private var lastFailedPosition: Int = -1
     
     companion object {
         private const val TAG = "PostActivity"
@@ -124,12 +151,18 @@ class PostActivity : AppCompatActivity(), MaxAdListener {
         binding = ActivityPostBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
+        // Setup pull-to-close functionality (como PostActivity.java líneas 360-376)
+        setupPullToClose()
+        
         Log.d(TAG, "onCreate started")
         
         viewModel = ViewModelProvider(this)[PostViewModel::class.java]
         
+        // Handle deep links (e.g., https://e621.net/posts/12345)
+        val deepLinkPostId = handleDeepLink()
+        
         // Obtener datos del intent
-        initialPostId = intent.getIntExtra(EXTRA_POST_ID, -1)
+        initialPostId = deepLinkPostId ?: intent.getIntExtra(EXTRA_POST_ID, -1)
         initialPosition = intent.getIntExtra(EXTRA_INITIAL_POSITION, 0)
         
         // Obtener posts pre-cargados (como la app original)
@@ -149,6 +182,7 @@ class PostActivity : AppCompatActivity(), MaxAdListener {
         setupBackButtons()
         setupViewPager()
         setupObservers()
+        setupNetworkMonitoring()
         
         // Si tenemos posts pre-cargados, usarlos directamente
         if (posts.isNotEmpty()) {
@@ -160,6 +194,21 @@ class PostActivity : AppCompatActivity(), MaxAdListener {
             binding.loadingLayout.visibility = View.VISIBLE
             viewModel.loadPost(initialPostId)
         }
+    }
+    
+    /**
+     * Handle deep links from URLs like https://e621.net/posts/12345
+     * Returns the post ID if found, null otherwise
+     */
+    private fun handleDeepLink(): Int? {
+        val data = intent.data ?: return null
+        
+        if (intent.action != Intent.ACTION_VIEW) return null
+        
+        // Parse post ID from path like /posts/12345
+        val path = data.path ?: return null
+        val postIdMatch = Regex("/posts/(\\d+)").find(path)
+        return postIdMatch?.groupValues?.get(1)?.toIntOrNull()
     }
 
     /**
@@ -243,6 +292,79 @@ class PostActivity : AppCompatActivity(), MaxAdListener {
             onBackPressedDispatcher.onBackPressed()
         }
     }
+    
+    /**
+     * Configurar pull-to-close - Como PostActivity.java líneas 360-376
+     * Permite cerrar el post arrastrando hacia abajo en el 45% superior de la pantalla
+     */
+    private fun setupPullToClose() {
+        // Solo habilitar si la preferencia está activada
+        if (!preferencesManager.postPullToClose) {
+            return
+        }
+        
+        // Crear configuración del panel (como bf.a en la app original)
+        // f2333c = 3 (DIRECTION_BOTTOM)
+        // f2331a = true (touchEnabled)
+        // f2332b = 0.45f (threshold 45%)
+        val config = SlidingPanelLayout.PanelConfig(
+            touchEnabled = true,
+            touchThreshold = 0.45f,
+            direction = SlidingPanelLayout.DIRECTION_BOTTOM
+        )
+        
+        // Obtener el decorView y su primer hijo (el contenido)
+        val decorView = window.decorView as ViewGroup
+        val contentView = decorView.getChildAt(0)
+        
+        // Remover el contenido del decorView
+        decorView.removeViewAt(0)
+        
+        // Crear el SlidingPanelLayout y añadir el contenido
+        val panel = SlidingPanelLayout(this)
+        panel.id = R.id.slidable_panel
+        panel.configure(config)
+        
+        // Establecer ID al contenido
+        contentView.id = R.id.slidable_content
+        
+        // Añadir el contenido al panel
+        panel.addView(contentView)
+        panel.setContentView(contentView)
+        
+        // Añadir el panel al decorView
+        decorView.addView(panel, 0)
+        
+        // Configurar listener para eventos del panel
+        panel.setOnPanelSlideListener(object : SlidingPanelLayout.OnPanelSlideListener {
+            override fun onPanelSlide(slideOffset: Float) {
+                // slideOffset: 1.0 = cerrado, 0.0 = completamente abierto
+                // Como si.c.n() en la app original - no hace nada especial
+            }
+            
+            override fun onPanelOpened() {
+                // Panel volvió a posición original
+                // Como si.c.m() en la app original
+            }
+            
+            override fun onPanelClosed() {
+                // Panel cerrado - finalizar activity
+                // Como si.c.l() en la app original (líneas 278-287)
+                finish()
+                @Suppress("DEPRECATION")
+                overridePendingTransition(0, 0)
+            }
+            
+            override fun onDragStateChanged(state: Int) {
+                // Como si.c.o() en la app original (líneas 300-305)
+                // state == 1 significa que está siendo arrastrado
+                pagerAdapter.setDragging(state == ViewDragHelper.STATE_DRAGGING)
+            }
+        })
+        
+        // Guardar referencia
+        slidingPanel = panel
+    }
 
     /**
      * Configurar ViewPager2 para swipe horizontal entre posts
@@ -286,6 +408,10 @@ class PostActivity : AppCompatActivity(), MaxAdListener {
             onNavigateToPool = { poolId ->
                 // Navegar a pool por ID
                 navigateToPool(poolId)
+            },
+            onNetworkError = { position ->
+                // Marcar post como fallido para retry automático cuando vuelva la red
+                markPostAsFailed(position)
             }
         )
         
@@ -550,11 +676,11 @@ class PostActivity : AppCompatActivity(), MaxAdListener {
 
     /**
      * Abrir comentarios del post
-     * Muestra un BottomSheet con los comentarios
+     * Abre CommentsActivity con los comentarios del post
      */
     private fun openComments(post: Post) {
-        val bottomSheet = CommentsBottomSheet.newInstance(post.id, post.commentCount)
-        bottomSheet.show(supportFragmentManager, "comments")
+        val intent = com.mommys.app.ui.comments.CommentsActivity.newIntent(this, post)
+        startActivity(intent)
     }
 
     /**
@@ -716,23 +842,29 @@ class PostActivity : AppCompatActivity(), MaxAdListener {
         when (action) {
             is PostMenuAction.Slideshow -> showSlideshowDialog()
             is PostMenuAction.EditPost -> {
-                // Como la app original: EditPostActivity.O = mVar;
-                // postActivity.startActivityForResult(...)
-                // La app original no verifica login aquí, pero como no tenemos
-                // EditPostActivity, abrimos en navegador (que pedirá login)
-                val url = "${getBaseUrl()}/posts/${action.post.id}/edit"
-                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+                // Verificar si está logueado
+                if (!preferencesManager.isLoggedIn()) {
+                    Toast.makeText(this, R.string.post_menu_edit_post_not_logged_in, Toast.LENGTH_SHORT).show()
+                    return
+                }
+                // Set current post and open EditPostActivity
+                com.mommys.app.ui.edit.EditPostActivity.currentPost = action.post
+                val intent = Intent(this, com.mommys.app.ui.edit.EditPostActivity::class.java)
+                intent.putExtra(com.mommys.app.ui.edit.EditPostActivity.EXTRA_POST_ID, action.post.id)
                 startActivity(intent)
             }
             is PostMenuAction.AddToSet -> {
-                // Como la app original: abre BrowseSetsActivity con el post ID
-                // postActivity.startActivity(new Intent(...).putExtra("p", i10));
-                // r2.p.o(postActivity).z(getString(R.string.set_choose_set_to_add_post_to), true);
-                // La app original no verifica login, simplemente abre la activity
-                val url = "${getBaseUrl()}/post_sets?post_id=${action.post.id}"
-                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+                // Verificar si está logueado
+                if (!preferencesManager.isLoggedIn()) {
+                    Toast.makeText(this, R.string.set_not_logged_in, Toast.LENGTH_SHORT).show()
+                    return
+                }
+                // Abrir BrowseSetsActivity en modo selección
+                val intent = Intent(this, com.mommys.app.ui.sets.BrowseSetsActivity::class.java)
+                intent.putExtra(com.mommys.app.ui.sets.BrowseSetsActivity.EXTRA_SELECT_MODE, true)
+                intent.putExtra(com.mommys.app.ui.sets.BrowseSetsActivity.EXTRA_POST_ID, action.post.id)
                 startActivity(intent)
-                Toast.makeText(this, R.string.set_choose_set_to_add_post_to, Toast.LENGTH_LONG).show()
+                Toast.makeText(this, R.string.set_choose_set_to_add_post_to, Toast.LENGTH_SHORT).show()
             }
             is PostMenuAction.ReloadPost -> reloadPost(action.post, action.position)
             is PostMenuAction.CheckNotes -> {
@@ -742,7 +874,60 @@ class PostActivity : AppCompatActivity(), MaxAdListener {
                 val intent = Intent(this, NotesActivity::class.java)
                 startActivity(intent)
             }
+            is PostMenuAction.ViewWiki -> {
+                // Show dialog to select which tag to view wiki for
+                showWikiTagSelectionDialog(action.post)
+            }
+            is PostMenuAction.FlagPost -> {
+                // Verificar si está logueado
+                if (!preferencesManager.isLoggedIn()) {
+                    Toast.makeText(this, R.string.action_not_logged_in, Toast.LENGTH_SHORT).show()
+                    return
+                }
+                // Open flag page in WebView
+                val host = preferencesManager.getHost()
+                val url = "https://$host/posts/${action.post.id}/flag"
+                val intent = Intent(this, com.mommys.app.ui.webview.WebViewActivity::class.java)
+                intent.putExtra(com.mommys.app.ui.webview.WebViewActivity.EXTRA_URL, url)
+                startActivity(intent)
+            }
         }
+    }
+    
+    /**
+     * Muestra diálogo para seleccionar tag y ver su wiki
+     */
+    private fun showWikiTagSelectionDialog(post: Post) {
+        val allTags = mutableListOf<String>()
+        post.tags?.let { tags ->
+            tags.artist?.let { allTags.addAll(it) }
+            tags.character?.let { allTags.addAll(it) }
+            tags.copyright?.let { allTags.addAll(it) }
+            tags.species?.let { allTags.addAll(it) }
+            tags.general?.let { allTags.addAll(it) }
+            tags.lore?.let { allTags.addAll(it) }
+            tags.meta?.let { allTags.addAll(it) }
+        }
+        
+        if (allTags.isEmpty()) {
+            Toast.makeText(this, "No tags available", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // Sort alphabetically
+        allTags.sort()
+        
+        AlertDialog.Builder(this)
+            .setTitle(R.string.post_menu_view_wiki)
+            .setItems(allTags.toTypedArray()) { _, which ->
+                val selectedTag = allTags[which]
+                // Open WikiShowActivity
+                val intent = Intent(this, com.mommys.app.ui.wiki.WikiShowActivity::class.java)
+                intent.putExtra(com.mommys.app.ui.wiki.WikiShowActivity.EXTRA_TAG, selectedTag)
+                startActivity(intent)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
     
     /**
@@ -960,6 +1145,9 @@ class PostActivity : AppCompatActivity(), MaxAdListener {
      * y mostrar interstitial si está listo (como la app original)
      */
     override fun onDestroy() {
+        // Cancelar observación de red
+        networkObserverJob?.cancel()
+        
         // Mostrar interstitial si está habilitado y listo
         // Exactamente como PostActivity.java líneas 560-580
         if (interstitialEnabled && interstitialAd != null) {
@@ -1016,5 +1204,122 @@ class PostActivity : AppCompatActivity(), MaxAdListener {
         }
         startActivity(intent)
         Toast.makeText(this, getString(R.string.loading_pool, poolId), Toast.LENGTH_SHORT).show()
+    }
+    
+    // ==================== NETWORK MONITORING ====================
+    // Similar a ff/b.java (NetworkConnectivityListener) en la app original
+    
+    /**
+     * Configura el monitoreo de red usando StateFlow para observar cambios
+     * Cuando se detecta desconexión, marca wasOffline = true
+     * Cuando se reconecta, muestra Snackbar y reintenta la carga del post actual si falló
+     */
+    private fun setupNetworkMonitoring() {
+        networkObserverJob = lifecycleScope.launch {
+            networkMonitor.networkState.collectLatest { state ->
+                updateNetworkStatusUI(state)
+            }
+        }
+    }
+    
+    /**
+     * Actualiza la UI según el estado de red
+     * - Sin conexión: Marca wasOffline y muestra Snackbar informativo
+     * - Reconexión: Muestra Snackbar verde y reintenta carga fallida
+     */
+    private fun updateNetworkStatusUI(state: NetworkState) {
+        when {
+            // Sin conexión
+            !state.isOnline -> {
+                wasOffline = true
+                // Guardar la posición actual como potencialmente fallida
+                lastFailedPosition = binding.viewPager.currentItem
+            }
+            
+            // Conexión restaurada
+            else -> {
+                if (wasOffline) {
+                    wasOffline = false
+                    showReconnectedSnackbar()
+                }
+            }
+        }
+    }
+    
+    /**
+     * Muestra un Snackbar indicando que la conexión se ha restablecido
+     * Incluye acción para reintentar la carga del post actual
+     */
+    private fun showReconnectedSnackbar() {
+        Snackbar.make(
+            binding.root,
+            R.string.network_reconnected,
+            Snackbar.LENGTH_LONG
+        ).setAction(R.string.refresh) {
+            // Reintentar carga del post actual
+            retryCurrentPost()
+        }.setBackgroundTint(
+            ContextCompat.getColor(this, R.color.success_background)
+        ).show()
+        
+        // Flush acciones pendientes del dispatcher
+        networkDispatcher.flushFailedActions()
+    }
+    
+    /**
+     * Reintenta la carga del post actual
+     * Notifica al adapter que debe recargar la vista en la posición actual
+     */
+    private fun retryCurrentPost() {
+        val currentPosition = binding.viewPager.currentItem
+        if (currentPosition >= 0 && currentPosition < posts.size) {
+            // Notificar al adapter que recargue esta posición
+            pagerAdapter.notifyItemChanged(currentPosition)
+            Log.d(TAG, "Retrying load for position: $currentPosition")
+        }
+    }
+    
+    /**
+     * Marca que el post en la posición dada falló por error de red
+     * Para ser llamado desde PostPagerAdapter cuando detecta error de red
+     */
+    fun markPostAsFailed(position: Int) {
+        lastFailedPosition = position
+        // Marcar para replay en el dispatcher
+        val post = posts.getOrNull(position)
+        if (post != null) {
+            networkDispatcher.markForReplay(
+                id = "post_${post.id}",
+                action = { retryCurrentPost() },
+                supportsReplay = true
+            )
+        }
+    }
+    
+    /**
+     * Implementación de NetworkAwareDispatcher.PageRefreshCallback
+     * Llamado cuando el dispatcher detecta que hay acciones pendientes
+     * y la conexión se ha restablecido
+     */
+    override fun onRefreshRequested() {
+        runOnUiThread {
+            // Si hay un post que falló, reintentarlo
+            if (lastFailedPosition >= 0) {
+                retryCurrentPost()
+                lastFailedPosition = -1
+            }
+        }
+    }
+    
+    override fun onStart() {
+        super.onStart()
+        // Registrar este Activity como callback para auto-refresh cuando vuelve la red
+        networkDispatcher.registerPageRefreshCallback(this)
+    }
+    
+    override fun onStop() {
+        super.onStop()
+        // Desregistrar callback para evitar leaks y refreshes cuando no está visible
+        networkDispatcher.unregisterPageRefreshCallback(this)
     }
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- menu_pool_bottom.xml - Bottom navigation menu for PoolActivity -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- Selection group - visible when posts are selected -->
+    <group
+        android:id="@+id/selected_group"
+        android:visible="false">
+        
+        <item
+            android:icon="@drawable/ic_download"
+            android:id="@+id/select_download"
+            android:title="@string/pool_menu_download"/>
+            
+        <item
+            android:icon="@drawable/ic_select_all"
+            android:id="@+id/select_all"
+            android:title="@string/pool_menu_select_all"/>
+            
+        <item
+            android:icon="@drawable/ic_clear"
+            android:id="@+id/select_clear"
+            android:title="@string/pool_menu_clear"/>
+            
+    </group>
+    
+    <!-- Always visible items -->
+    <item
+        android:icon="@drawable/ic_save"
+        android:id="@+id/save"
+        android:title="@string/pool_menu_save"/>
+        
+    <item
+        android:icon="@drawable/ic_follow"
+        android:id="@+id/follow_pool"
+        android:title="@string/pool_menu_follow"/>
+        
+</menu>

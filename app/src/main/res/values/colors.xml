@@ -95,4 +95,19 @@
     
     <!-- Parent/Children relation color (exact from original app) -->
     <color name="colorParentChild">#ffffa500</color>
+    
+    <!-- Donation button colors -->
+    <color name="colorPayPal">#FF003087</color>
+    <color name="colorPatreon">#FF052D49</color>
+    <color name="colorKofi">#FF29ABE0</color>
+    <color name="colorGitHub">#FF24292E</color>
+    <color name="colorFurAffinity">#FFFAAF3A</color>
+    
+    <!-- Network status colors (for offline/reconnected banners) -->
+    <color name="error_background">#FFB71C1C</color>
+    <color name="warning_background">#FFF57C00</color>
+    <color name="success_background">#FF2E7D32</color>
+    
+    <!-- Launcher icon background -->
+    <color name="ic_launcher_background">#FF1976D2</color>
 </resources>

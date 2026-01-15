@@ -71,6 +71,21 @@
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
+            <!-- Deep links for tag search -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e621.net" android:path="/posts" />
+                <data android:scheme="https" android:host="e621.net" android:pathPrefix="/posts?" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e926.net" android:path="/posts" />
+                <data android:scheme="https" android:host="e926.net" android:pathPrefix="/posts?" />
+            </intent-filter>
         </activity>
         
         <!-- Search Suggestions Provider -->
@@ -82,7 +97,22 @@
         <!-- Post Activity -->
         <activity
             android:name=".ui.post.PostActivity"
-            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+            android:configChanges="orientation|screenLayout|screenSize|uiMode"
+            android:exported="true">
+            <!-- Deep links for posts -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e621.net" android:pathPattern="/posts/.*" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e926.net" android:pathPattern="/posts/.*" />
+            </intent-filter>
+        </activity>
 
         <!-- Notes Activity -->
         <activity
@@ -114,7 +144,22 @@
         <!-- Profile Activity -->
         <activity
             android:name=".ui.profile.ProfileActivity"
-            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+            android:configChanges="orientation|screenLayout|screenSize|uiMode"
+            android:exported="true">
+            <!-- Deep links for user profiles -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e621.net" android:pathPattern="/users/.*" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e926.net" android:pathPattern="/users/.*" />
+            </intent-filter>
+        </activity>
 
         <!-- Popular Activity -->
         <activity
@@ -131,30 +176,80 @@
             android:name=".ui.browse.BrowseTagsActivity"
             android:configChanges="orientation|screenLayout|screenSize|uiMode" />
 
-        <!-- Browse Pools Activity -->
-        <activity
-            android:name=".ui.browse.BrowsePoolsActivity"
-            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
-
         <!-- About Activity -->
         <activity
             android:name=".ui.about.AboutActivity"
             android:configChanges="orientation|screenLayout|screenSize|uiMode" />
 
-        <!-- Pool Activity -->
+        <!-- Changelog Activity -->
+        <activity
+            android:name=".ui.changelog.ChangelogActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Wiki Activity -->
+        <activity
+            android:name=".ui.wiki.WikiShowActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode"
+            android:exported="true">
+            <!-- Deep links for wiki pages -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e621.net" android:pathPrefix="/wiki_pages/" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e926.net" android:pathPrefix="/wiki_pages/" />
+            </intent-filter>
+        </activity>
+
+        <!-- Browse Sets Activity -->
+        <activity
+            android:name=".ui.sets.BrowseSetsActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode"
+            android:exported="true">
+            <!-- Deep links for sets -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e621.net" android:pathPattern="/post_sets/.*" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e926.net" android:pathPattern="/post_sets/.*" />
+            </intent-filter>
+        </activity>
+
+        <!-- Browse Pools Activity (list of pools) -->
+        <activity
+            android:name=".ui.browse.BrowsePoolsActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Pool Activity (single pool view with grid) -->
         <activity
             android:name=".ui.pool.PoolActivity"
-            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
-
-        <!-- Comments Activity -->
-        <activity
-            android:name=".ui.comments.CommentsActivity"
-            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
-
-        <!-- Downloads Activity -->
-        <activity
-            android:name=".ui.downloads.DownloadsActivity"
-            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+            android:configChanges="orientation|screenLayout|screenSize|uiMode"
+            android:exported="true">
+            <!-- Deep links for pools -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e621.net" android:pathPattern="/pools/.*" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e926.net" android:pathPattern="/pools/.*" />
+            </intent-filter>
+        </activity>
 
         <!-- Download Manager Activity (Queue) -->
         <activity
@@ -175,6 +270,51 @@
         <activity
             android:name=".ui.LogActivity"
             android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- WebView Activity (generic) -->
+        <activity
+            android:name=".ui.webview.WebViewActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- ScrollViewText Activity (Terms/Privacy) -->
+        <activity
+            android:name=".ui.webview.ScrollViewTextActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- News Activity -->
+        <activity
+            android:name=".ui.news.NewsActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Donate Activity -->
+        <activity
+            android:name=".ui.donate.DonateActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Edit Post Activity -->
+        <activity
+            android:name=".ui.edit.EditPostActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode" />
+
+        <!-- Comments Activity -->
+        <activity
+            android:name=".ui.comments.CommentsActivity"
+            android:configChanges="orientation|screenLayout|screenSize|uiMode"
+            android:exported="true">
+            <!-- Deep links for comments -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e621.net" android:pathPattern="/comments/.*" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="e926.net" android:pathPattern="/comments/.*" />
+            </intent-filter>
+        </activity>
 
         <!-- Following Job Service -->
         <service
