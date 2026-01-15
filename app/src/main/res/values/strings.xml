@@ -1259,4 +1259,17 @@
     <string name="action_copy">Copy text</string>
     <string name="report">Report</string>
     
+    <!-- Post Info Popup (grid info button) -->
+    <string name="post_info_title">Post #%1$d</string>
+    <string name="post_info_tags">%1$d tags</string>
+    <string name="post_info_artist">Artist: %1$s</string>
+    <string name="post_info_score">Score: %1$d (↑%2$d ↓%3$d)</string>
+    <string name="post_info_favourites">Favourites: %1$d</string>
+    <string name="post_info_rating">Rating: %1$s</string>
+    <string name="post_info_comments">Comments: %1$d</string>
+    <string name="post_info_pool">In pool</string>
+    <string name="post_info_parent">Has parent</string>
+    <string name="post_info_children">Has children</string>
+    <string name="cd_close_info">Close info</string>
+    
 </resources>

@@ -177,6 +177,16 @@ class PostsAdapter(
                 }
                 true
             }
+            
+            // Click en botón de info (!) - mostrar popup de info
+            // Similar a qi.a.k() de la app original
+            binding.imgInfoBtn.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val post = getItem(position)
+                    onInfoClick?.invoke(post)
+                }
+            }
         }
         
         /**
@@ -237,7 +247,9 @@ class PostsAdapter(
             }
             
             // Overlay para posts vistos (darkenSeen)
-            if (darkenSeen && seenPostIds.contains(post.id)) {
+            // Usa post.isSeen (campo mutable) O seenPostIds (para posts cargados de DB al inicio)
+            val isPostSeen = post.isSeen || seenPostIds.contains(post.id)
+            if (darkenSeen && isPostSeen) {
                 binding.fLOverlay.visibility = android.view.View.VISIBLE
                 binding.fLOverlay.setBackgroundColor(0x80000000.toInt()) // 50% negro
             } else {
@@ -251,8 +263,9 @@ class PostsAdapter(
                 View.GONE
             }
             
-            // Badge de nuevo (showNewLabel) - mostrar si NO está en seen
-            if (showNewLabel && !seenPostIds.contains(post.id)) {
+            // Badge de nuevo (showNewLabel) - mostrar si NO está visto
+            // Usa post.isSeen (campo mutable) O seenPostIds (para posts cargados de DB al inicio)
+            if (showNewLabel && !isPostSeen) {
                 binding.imgNewLabel.visibility = android.view.View.VISIBLE
             } else {
                 binding.imgNewLabel.visibility = android.view.View.GONE

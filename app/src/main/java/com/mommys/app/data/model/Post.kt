@@ -28,7 +28,16 @@ data class Post(
     @SerializedName("comment_count") val commentCount: Int = 0,
     @SerializedName("is_favorited") val isFavorited: Boolean = false,
     @SerializedName("has_notes") val hasNotes: Boolean = false
-)
+) {
+    /**
+     * Campo mutable para marcar si el post ha sido visto.
+     * Similar a f18022c en la app original (ii/m.java).
+     * Se marca como true cuando el usuario ve el post en PostActivity.
+     * NO se serializa/deserializa con Gson.
+     */
+    @Transient
+    var isSeen: Boolean = false
+}
 
 data class FileInfo(
     @SerializedName("width") val width: Int,

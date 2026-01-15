@@ -2,9 +2,6 @@ package com.mommys.app.ui.launcher
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.mommys.app.MommysApplication
 import com.mommys.app.R
@@ -16,7 +13,7 @@ import com.mommys.app.ui.pincode.PinCodeActivity
  * LauncherActivity - Primera pantalla de la app
  * Basada en se.zepiwolf.tws.LauncherActivity
  * 
- * Muestra los términos de servicio y permite seleccionar idioma
+ * Muestra los términos de servicio y consentimiento
  */
 class LauncherActivity : AppCompatActivity() {
     
@@ -39,30 +36,6 @@ class LauncherActivity : AppCompatActivity() {
     }
     
     private fun setupViews() {
-        // Configurar spinner de idiomas
-        val languages = resources.getStringArray(R.array.languages)
-        val adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_item,
-            languages
-        )
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerLanguage.adapter = adapter
-        
-        binding.spinnerLanguage.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val langCode = when (position) {
-                    0 -> "en"
-                    1 -> "es"
-                    2 -> "pt"
-                    else -> "en"
-                }
-                prefs.setLanguage(langCode)
-            }
-            
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-        
         // Checkbox para aceptar términos
         binding.checkboxAccept.setOnCheckedChangeListener { _, isChecked ->
             binding.btnStart.isEnabled = isChecked

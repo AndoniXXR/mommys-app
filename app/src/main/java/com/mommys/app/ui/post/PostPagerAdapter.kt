@@ -278,6 +278,25 @@ class PostPagerAdapter(
         }
         players.remove(position)
     }
+    
+    /**
+     * Reinicializa el video en una posición específica
+     * Se usa cuando la app vuelve de segundo plano y el MediaCodec puede estar corrupto
+     */
+    fun reinitializeVideoAtPosition(position: Int) {
+        if (position < 0 || position >= posts.size) return
+        
+        val post = posts[position]
+        // Solo reinicializar si es un video
+        if (post.file.ext !in listOf("webm", "mp4")) return
+        
+        // Liberar player actual si existe
+        unregisterPlayer(position)
+        
+        // Obtener el ViewHolder por postId
+        val holder = viewHoldersByPostId[post.id]
+        holder?.reinitializeVideo(post, position)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = ItemPostPageBinding.inflate(
@@ -382,6 +401,24 @@ class PostPagerAdapter(
             binding.playerView.player = null
             binding.imgMute.visibility = View.GONE
             player = null
+        }
+        
+        /**
+         * Reinicializa el video para esta posición
+         * Se usa cuando la app vuelve de segundo plano y el MediaCodec puede estar corrupto
+         */
+        fun reinitializeVideo(post: Post, position: Int) {
+            // Limpiar player actual
+            binding.playerView.player = null
+            player?.release()
+            player = null
+            
+            // Ocultar error si estaba visible
+            binding.errorLayout.visibility = View.GONE
+            
+            // Reinicializar el video
+            currentPosition = position
+            setupVideo(post)
         }
         
         /**
@@ -1293,7 +1330,35 @@ class PostPagerAdapter(
                     
                     if (data != null) {
                         try {
-                            val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
+                            // Primero obtener dimensiones sin cargar el bitmap completo
+                            val options = BitmapFactory.Options().apply {
+                                inJustDecodeBounds = true
+                            }
+                            BitmapFactory.decodeByteArray(data, 0, data.size, options)
+                            
+                            // Calcular el tamaño del bitmap en bytes (width * height * 4 bytes por pixel ARGB)
+                            val bitmapSizeBytes = options.outWidth.toLong() * options.outHeight.toLong() * 4
+                            
+                            // Android tiene un límite máximo de ~100MB para Canvas.drawBitmap
+                            // Usamos 50MB como límite seguro para evitar crashes
+                            val maxBitmapSizeBytes = 50 * 1024 * 1024L // 50MB
+                            
+                            // Calcular sample size necesario para reducir la imagen
+                            var sampleSize = 1
+                            var currentSize = bitmapSizeBytes
+                            while (currentSize > maxBitmapSizeBytes) {
+                                sampleSize *= 2
+                                currentSize = bitmapSizeBytes / (sampleSize * sampleSize)
+                            }
+                            
+                            // Decodificar con el sample size calculado
+                            val decodeOptions = BitmapFactory.Options().apply {
+                                inSampleSize = sampleSize
+                                // Usar formato más eficiente si es posible
+                                inPreferredConfig = android.graphics.Bitmap.Config.RGB_565
+                            }
+                            
+                            val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size, decodeOptions)
                             if (bitmap != null) {
                                 binding.imgPreview.setImageBitmap(bitmap)
                                 binding.errorLayout.visibility = View.GONE
@@ -1301,6 +1366,9 @@ class PostPagerAdapter(
                                 // Fallback a Glide si no se puede decodificar
                                 loadImageWithGlide(imageUrl, context)
                             }
+                        } catch (e: OutOfMemoryError) {
+                            // Si aún hay OOM, usar Glide que maneja mejor la memoria
+                            loadImageWithGlide(imageUrl, context)
                         } catch (e: Exception) {
                             loadImageWithGlide(imageUrl, context)
                         }
@@ -1328,12 +1396,20 @@ class PostPagerAdapter(
         }
 
         /**
-         * Fallback para cargar imagen con Glide
-         */
+          * Fallback para cargar imagen con Glide con downsampling automático
+          * para evitar crashes por imágenes demasiado grandes
+          */
         private fun loadImageWithGlide(imageUrl: String, context: Context) {
+            // Obtener dimensiones de pantalla para limitar el tamaño máximo
+            val displayMetrics = context.resources.displayMetrics
+            val maxWidth = displayMetrics.widthPixels * 2  // 2x la pantalla máximo
+            val maxHeight = displayMetrics.heightPixels * 2
+            
             Glide.with(context)
                 .load(imageUrl)
                 .placeholder(R.drawable.placeholder_image)
+                .override(maxWidth, maxHeight)  // Limitar tamaño máximo
+                .downsample(com.bumptech.glide.load.resource.bitmap.DownsampleStrategy.AT_MOST)
                 .listener(object : RequestListener<Drawable> {
                     override fun onLoadFailed(
                         e: GlideException?,
@@ -1448,7 +1524,7 @@ class PostPagerAdapter(
                 .build().apply {
                     
                     binding.playerView.player = this
-                    binding.playerView.controllerShowTimeoutMs = 3000
+                    binding.playerView.controllerShowTimeoutMs = 2000
                     
                     // Configurar media item
                     setMediaItem(MediaItem.fromUri(videoUrl))
@@ -1489,13 +1565,39 @@ class PostPagerAdapter(
                         }
                         
                         override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                            val errorCode = error.errorCode
+                            
+                            // Detectar error de MediaCodec (ocurre cuando la app vuelve de segundo plano)
+                            // Estos errores se pueden recuperar reinicializando el player
+                            val isMediaCodecError = errorCode == androidx.media3.common.PlaybackException.ERROR_CODE_DECODER_INIT_FAILED ||
+                                errorCode == androidx.media3.common.PlaybackException.ERROR_CODE_DECODING_FAILED ||
+                                error.message?.contains("MediaCodec") == true
+                            
+                            if (isMediaCodecError) {
+                                // Auto-reintentar después de un breve delay para errores de MediaCodec
+                                binding.loadingLayout.visibility = View.VISIBLE
+                                binding.txtLoading.text = "Reiniciando video..."
+                                binding.errorLayout.visibility = View.GONE
+                                
+                                // Capturar posición actual antes de la lambda (usar this@PostViewHolder para evitar shadow del player)
+                                val positionToReinit = this@PostViewHolder.currentPosition
+                                binding.root.postDelayed({
+                                    // Reinicializar el video
+                                    unregisterPlayer(positionToReinit)
+                                    player = null
+                                    binding.playerView.player = null
+                                    setupVideo(post)
+                                }, 500L) // 500ms de delay
+                                return
+                            }
+                            
+                            // Para otros errores, mostrar el mensaje de error
                             binding.loadingLayout.visibility = View.GONE
                             binding.errorLayout.visibility = View.VISIBLE
                             binding.txtError.text = "Video error: ${error.message}"
                             
                             // Notificar error de red para retry automático
                             // ExoPlayer usa ERROR_CODE_IO_* para errores de red
-                            val errorCode = error.errorCode
                             if (errorCode == androidx.media3.common.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED ||
                                 errorCode == androidx.media3.common.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT ||
                                 errorCode == androidx.media3.common.PlaybackException.ERROR_CODE_IO_UNSPECIFIED) {
@@ -1554,7 +1656,7 @@ class PostPagerAdapter(
                 }
             }
 
-            // Click para play/pause
+            // Click para play/pause (botón inicial antes de que empiece el video)
             binding.imgPlay.setOnClickListener {
                 player?.let { p ->
                     // Pausar todos los otros players antes de reproducir este
@@ -1572,26 +1674,9 @@ class PostPagerAdapter(
                 }
             }
 
-            // Click en el playerView para toggle play/pause
-            binding.playerView.setOnClickListener {
-                player?.let { p ->
-                    if (p.isPlaying) {
-                        p.pause()
-                        // Si estaba en landscape, volver a portrait al pausar
-                        if (landscapeVideos) {
-                            (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                        }
-                    } else {
-                        // Pausar otros antes de reproducir este
-                        pauseAllPlayers()
-                        p.play()
-                        // Si la preferencia de landscape está activada, rotar a landscape
-                        if (landscapeVideos) {
-                            (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                        }
-                    }
-                }
-            }
+            // NO poner click listener en playerView - los controles nativos de ExoPlayer
+            // ya manejan play/pause. Poner un click listener aquí causa que cualquier
+            // toque en el video pause/reproduzca, lo cual es molesto para el usuario.
 
             // Retry button
             binding.btnRefresh.setOnClickListener {

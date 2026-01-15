@@ -100,28 +100,40 @@ class PostViewModel : ViewModel() {
      * Cargar un solo post por ID
      */
     fun loadPost(postId: Int) {
+        Log.d("PostViewModel", "=== loadPost START ===")
+        Log.d("PostViewModel", "Loading post with ID: $postId")
+        
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
             
             try {
+                Log.d("PostViewModel", "Making API call for post $postId")
                 val response = withContext(Dispatchers.IO) {
                     ApiClient.apiService.getPost(postId)
                 }
+                Log.d("PostViewModel", "API response received, success: ${response.isSuccessful}, code: ${response.code()}")
+                
                 if (response.isSuccessful) {
                     val post = response.body()?.post
+                    Log.d("PostViewModel", "Post from response: ${post?.id ?: "null"}")
                     _post.value = post
                     if (post != null) {
+                        Log.d("PostViewModel", "Setting _posts with single post")
                         _posts.value = listOf(post)
+                        Log.d("PostViewModel", "_posts.value set, size: ${_posts.value?.size}")
                     }
                     checkIfFavorite(postId)
                 } else {
+                    Log.e("PostViewModel", "API error: ${response.code()}")
                     _error.value = "Error: ${response.code()}"
                 }
             } catch (e: Exception) {
+                Log.e("PostViewModel", "Exception in loadPost: ${e.message}", e)
                 _error.value = e.message ?: "Error loading post"
             } finally {
                 _isLoading.value = false
+                Log.d("PostViewModel", "=== loadPost END ===")
             }
         }
     }

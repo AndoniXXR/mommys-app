@@ -31,7 +31,8 @@ class PageHandler(
     private val prefs: PreferencesManager,
     private val onPostClick: (Post) -> Unit,
     private val onLoadPage: (Int) -> Unit,
-    private val selectionCallback: SelectionCallback? = null
+    private val selectionCallback: SelectionCallback? = null,
+    private val onInfoClick: ((Post) -> Unit)? = null
 ) {
     // Lista de posts de esta página (original sin filtrar)
     private val originalPosts = mutableListOf<Post>()
@@ -87,7 +88,7 @@ class PageHandler(
         if (rv.adapter == null || postsAdapter == null) {
             postsAdapter = PostsAdapter(
                 onPostClick = { post -> onPostClick(post) },
-                onInfoClick = null,
+                onInfoClick = onInfoClick,
                 selectionCallback = selectionCallback
             ).apply {
                 // Configurar opciones del grid desde las preferencias

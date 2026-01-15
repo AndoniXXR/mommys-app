@@ -257,6 +257,13 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     private fun setupBackPressHandler() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                // Si el popup de info está visible, cerrarlo primero
+                val fLInfo = findViewById<FrameLayout>(R.id.fLInfo)
+                if (fLInfo != null && fLInfo.visibility == View.VISIBLE) {
+                    hidePostInfo()
+                    return
+                }
+                
                 // Si el SearchView tiene foco, quitarlo primero
                 if (binding.searchView.hasFocus()) {
                     binding.searchView.clearFocus()
@@ -605,6 +612,14 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                         binding.searchView.setQuery(query, true)
                     }
                 }
+                
+                // Como la app original: cuando el usuario presiona "Ir/Search" en el teclado,
+                // simular click en el botón de la lupa. Esto asegura que el comportamiento
+                // sea idéntico para query vacío (Android no llama onQueryTextSubmit si está vacío)
+                setOnEditorActionListener { _, _, _ ->
+                    binding.btnSearch.performClick()
+                    true
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -914,7 +929,10 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                 onLoadPage = { pageNum ->
                     loadPageData(pageNum)
                 },
-                selectionCallback = this  // Pasar this como SelectionCallback
+                selectionCallback = this,  // Pasar this como SelectionCallback
+                onInfoClick = { post ->
+                    showPostInfo(post)
+                }
             )
             pageHandlers.add(handler)
         }
@@ -1010,8 +1028,8 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     }
     
     private fun openPost(post: Post) {
-        // Marcar el post como visto en la base de datos
-        AppSeenDatabase.markSeen(this, post.id)
+        // NO marcar aquí como visto - ahora se hace en PostActivity.onPostChanged()
+        // cuando el usuario realmente VE el post (como la app original di/b1.java)
         
         // Obtener todos los posts de la página actual para permitir swipe entre ellos
         // (como la app original que pasa los posts via variable estática)
@@ -2213,5 +2231,132 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
         super.onStop()
         // Desregistrar callback para evitar leaks y refreshes cuando no está visible
         networkDispatcher.unregisterPageRefreshCallback(this)
+    }
+    
+    // ===== POST INFO POPUP (como MainActivity.K() en app original) =====
+    
+    /**
+     * Muestra el popup de información del post
+     * Similar a MainActivity.K(j jVar, ii.m mVar, FrameLayout frameLayout) en la app original
+     * 
+     * Se llama cuando el usuario toca el botón de info (!) en el grid
+     */
+    fun showPostInfo(post: Post) {
+        val fLInfo = findViewById<FrameLayout>(R.id.fLInfo) ?: return
+        
+        // Limpiar views anteriores
+        fLInfo.removeAllViews()
+        
+        // Inflar el contenido
+        val contentView = layoutInflater.inflate(R.layout.content_post_info, fLInfo, false)
+        
+        // Obtener referencias a los views
+        val txtPost = contentView.findViewById<android.widget.TextView>(R.id.txtPost)
+        val txtTags = contentView.findViewById<android.widget.TextView>(R.id.txtTags)
+        val txtArtist = contentView.findViewById<android.widget.TextView>(R.id.txtArtist)
+        val txtScore = contentView.findViewById<android.widget.TextView>(R.id.txtScore)
+        val txtFavourites = contentView.findViewById<android.widget.TextView>(R.id.txtFavourites)
+        val txtRating = contentView.findViewById<android.widget.TextView>(R.id.txtRating)
+        val txtComments = contentView.findViewById<android.widget.TextView>(R.id.txtComments)
+        val txtPool = contentView.findViewById<android.widget.TextView>(R.id.txtPool)
+        val txtParent = contentView.findViewById<android.widget.TextView>(R.id.txtParent)
+        val txtChildren = contentView.findViewById<android.widget.TextView>(R.id.txtChildren)
+        val imgPreview = contentView.findViewById<com.github.chrisbanes.photoview.PhotoView>(R.id.imgPreview)
+        val imgClose = contentView.findViewById<android.widget.ImageView>(R.id.imgClose)
+        
+        // Configurar título: Post #12345
+        txtPost.text = getString(R.string.post_info_title, post.id)
+        
+        // Contar total de tags
+        val totalTags = post.tags.general.size + post.tags.species.size + 
+                        post.tags.character.size + post.tags.artist.size + 
+                        post.tags.copyright.size + post.tags.meta.size + 
+                        post.tags.lore.size + post.tags.invalid.size
+        txtTags.text = getString(R.string.post_info_tags, totalTags)
+        
+        // Artista (puede haber múltiples)
+        val artistName = if (post.tags.artist.isNotEmpty()) {
+            post.tags.artist.joinToString(", ")
+        } else {
+            getString(R.string.unknown_artist)
+        }
+        txtArtist.text = getString(R.string.post_info_artist, artistName)
+        
+        // Score con desglose
+        txtScore.text = getString(R.string.post_info_score, post.score.total, post.score.up, kotlin.math.abs(post.score.down))
+        
+        // Favoritos
+        txtFavourites.text = getString(R.string.post_info_favourites, post.favCount)
+        
+        // Rating
+        txtRating.text = getString(R.string.post_info_rating, post.rating.uppercase())
+        
+        // Comentarios (solo si hay)
+        if (post.commentCount > 0) {
+            txtComments.visibility = View.VISIBLE
+            txtComments.text = getString(R.string.post_info_comments, post.commentCount)
+        } else {
+            txtComments.visibility = View.GONE
+        }
+        
+        // Pool (solo si hay)
+        if (post.pools.isNotEmpty()) {
+            txtPool.visibility = View.VISIBLE
+            txtPool.text = getString(R.string.post_info_pool)
+        } else {
+            txtPool.visibility = View.GONE
+        }
+        
+        // Parent (solo si hay)
+        val relationships = post.relationships
+        if (relationships.parentId != null && relationships.parentId > 0) {
+            txtParent.visibility = View.VISIBLE
+            txtParent.text = getString(R.string.post_info_parent)
+        } else {
+            txtParent.visibility = View.GONE
+        }
+        
+        // Children (solo si hay)
+        if (relationships.hasChildren) {
+            txtChildren.visibility = View.VISIBLE
+            txtChildren.text = getString(R.string.post_info_children)
+        } else {
+            txtChildren.visibility = View.GONE
+        }
+        
+        // Cargar imagen preview
+        val previewUrl = post.preview.url ?: post.sample?.url ?: post.file.url
+        com.bumptech.glide.Glide.with(this)
+            .load(previewUrl)
+            .into(imgPreview)
+        
+        // Click en imagen cierra el popup
+        imgPreview.setOnClickListener {
+            hidePostInfo()
+        }
+        
+        // Botón cerrar
+        imgClose.setOnClickListener {
+            hidePostInfo()
+        }
+        
+        // Click en el fondo también cierra
+        fLInfo.setOnClickListener {
+            hidePostInfo()
+        }
+        
+        // Agregar contenido al frame y mostrar
+        fLInfo.addView(contentView)
+        fLInfo.visibility = View.VISIBLE
+    }
+    
+    /**
+     * Oculta el popup de información del post
+     * Similar a MainActivity.g() en la app original (qi.e interface)
+     */
+    fun hidePostInfo() {
+        val fLInfo = findViewById<FrameLayout>(R.id.fLInfo) ?: return
+        fLInfo.visibility = View.GONE
+        fLInfo.removeAllViews()
     }
 }

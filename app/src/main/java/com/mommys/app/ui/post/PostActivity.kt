@@ -33,6 +33,7 @@ import com.mommys.app.data.preferences.PreferencesManager
 import com.mommys.app.databinding.ActivityPostBinding
 import com.mommys.app.ui.main.MainActivity
 import com.mommys.app.ui.notes.NotesActivity
+import com.mommys.app.data.db.seen.AppSeenDatabase
 import com.mommys.app.util.AdManager
 import com.mommys.app.util.BlacklistHelper
 import com.mommys.app.util.network.NetworkAwareDispatcher
@@ -138,6 +139,10 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
+        Log.d(TAG, "=== onCreate START ===")
+        Log.d(TAG, "Activity instance: ${this.hashCode()}")
+        Log.d(TAG, "savedInstanceState: ${savedInstanceState != null}")
+        
         preferencesManager = PreferencesManager(this)
         
         // Apply FLAG_SECURE if hideInTasks is enabled (matching original app)
@@ -157,13 +162,19 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         Log.d(TAG, "onCreate started")
         
         viewModel = ViewModelProvider(this)[PostViewModel::class.java]
+        Log.d(TAG, "ViewModel created: ${viewModel.hashCode()}")
         
         // Handle deep links (e.g., https://e621.net/posts/12345)
         val deepLinkPostId = handleDeepLink()
+        Log.d(TAG, "deepLinkPostId: $deepLinkPostId")
         
         // Obtener datos del intent
         initialPostId = deepLinkPostId ?: intent.getIntExtra(EXTRA_POST_ID, -1)
         initialPosition = intent.getIntExtra(EXTRA_INITIAL_POSITION, 0)
+        
+        Log.d(TAG, "initialPostId from intent: $initialPostId")
+        Log.d(TAG, "initialPosition from intent: $initialPosition")
+        Log.d(TAG, "pendingPosts at read time: ${pendingPosts?.size ?: "null"}")
         
         // Obtener posts pre-cargados (como la app original)
         posts = pendingPosts ?: emptyList()
@@ -178,10 +189,15 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
             return
         }
         
+        Log.d(TAG, "Setting up ads...")
         setupAds()
+        Log.d(TAG, "Setting up back buttons...")
         setupBackButtons()
+        Log.d(TAG, "Setting up ViewPager...")
         setupViewPager()
+        Log.d(TAG, "Setting up observers...")
         setupObservers()
+        Log.d(TAG, "Setting up network monitoring...")
         setupNetworkMonitoring()
         
         // Si tenemos posts pre-cargados, usarlos directamente
@@ -190,10 +206,12 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
             displayPosts(posts)
         } else if (initialPostId != -1) {
             // Solo fetch cuando viene un ID específico
-            Log.d(TAG, "Loading single post: $initialPostId")
+            Log.d(TAG, "Loading single post by ID: $initialPostId")
             binding.loadingLayout.visibility = View.VISIBLE
             viewModel.loadPost(initialPostId)
         }
+        
+        Log.d(TAG, "=== onCreate END ===")
     }
     
     /**
@@ -469,11 +487,27 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
     }
 
     private fun setupObservers() {
+        Log.d(TAG, "=== setupObservers START ===")
+        
         // Observar posts solo para el caso de carga de un solo post por ID
         viewModel.posts.observe(this) { fetchedPosts ->
+            Log.d(TAG, "=== viewModel.posts OBSERVER TRIGGERED ===")
+            Log.d(TAG, "fetchedPosts size: ${fetchedPosts.size}")
+            Log.d(TAG, "posts (instance variable) size: ${posts.size}")
+            Log.d(TAG, "posts.isEmpty(): ${posts.isEmpty()}")
+            Log.d(TAG, "fetchedPosts.isNotEmpty(): ${fetchedPosts.isNotEmpty()}")
+            Log.d(TAG, "Condition (fetchedPosts.isNotEmpty() && posts.isEmpty()): ${fetchedPosts.isNotEmpty() && posts.isEmpty()}")
+            
             if (fetchedPosts.isNotEmpty() && posts.isEmpty()) {
-                Log.d(TAG, "Received posts from ViewModel: ${fetchedPosts.size}")
-                displayPosts(fetchedPosts)
+                Log.d(TAG, "Condition passed - calling displayPosts")
+                try {
+                    displayPosts(fetchedPosts)
+                } catch (e: Exception) {
+                    Log.e(TAG, "ERROR in displayPosts from observer: ${e.message}", e)
+                    e.printStackTrace()
+                }
+            } else {
+                Log.d(TAG, "Condition NOT passed - NOT calling displayPosts")
             }
         }
         
@@ -554,7 +588,9 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
      * Like di/w0.java in the original app - checks blacklist before showing
      */
     private fun displayPosts(postsToDisplay: List<Post>) {
+        Log.d(TAG, "=== displayPosts START ===")
         Log.d(TAG, "displayPosts called with ${postsToDisplay.size} posts")
+        Log.d(TAG, "pagerAdapter initialized: ${::pagerAdapter.isInitialized}")
         
         if (postsToDisplay.isEmpty()) {
             Log.e(TAG, "No posts to display!")
@@ -567,15 +603,24 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         // Like di/w0.java - if opening a single post by ID, check blacklist and show dialog
         if (postsToDisplay.size == 1 && initialPostId != -1) {
             val post = postsToDisplay[0]
+            Log.d(TAG, "Single post mode, checking blacklist for post ${post.id}")
             if (preferencesManager.blacklistEnabled && BlacklistHelper.isPostBlacklisted(post, preferencesManager)) {
                 // Get matching blacklist entries to show in dialog
                 val matchingEntries = BlacklistHelper.getMatchingBlacklistEntries(post, preferencesManager)
+                Log.d(TAG, "Post is blacklisted, showing dialog")
                 showBlacklistDialog(post, matchingEntries)
                 return
             }
         }
         
-        showPostsInViewPager(postsToDisplay)
+        Log.d(TAG, "Calling showPostsInViewPager")
+        try {
+            showPostsInViewPager(postsToDisplay)
+        } catch (e: Exception) {
+            Log.e(TAG, "ERROR in showPostsInViewPager: ${e.message}", e)
+            e.printStackTrace()
+        }
+        Log.d(TAG, "=== displayPosts END ===")
     }
     
     /**
@@ -605,26 +650,58 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
      * Actually show posts in the ViewPager after any checks
      */
     private fun showPostsInViewPager(postsToDisplay: List<Post>) {
-        posts = postsToDisplay
-        pagerAdapter.submitList(postsToDisplay)
+        Log.d(TAG, "=== showPostsInViewPager START ===")
+        Log.d(TAG, "postsToDisplay size: ${postsToDisplay.size}")
+        Log.d(TAG, "pagerAdapter initialized: ${::pagerAdapter.isInitialized}")
         
-        // Ir a la posición inicial
-        val safePosition = initialPosition.coerceIn(0, postsToDisplay.size - 1)
-        if (safePosition > 0) {
-            binding.viewPager.setCurrentItem(safePosition, false)
+        try {
+            posts = postsToDisplay
+            Log.d(TAG, "posts assigned, size: ${posts.size}")
+            
+            pagerAdapter.submitList(postsToDisplay)
+            Log.d(TAG, "submitList called on pagerAdapter")
+            
+            // Ir a la posición inicial
+            val safePosition = initialPosition.coerceIn(0, postsToDisplay.size - 1)
+            Log.d(TAG, "safePosition: $safePosition (from initialPosition: $initialPosition)")
+            
+            if (safePosition > 0) {
+                binding.viewPager.setCurrentItem(safePosition, false)
+                Log.d(TAG, "setCurrentItem called with position: $safePosition")
+            }
+            
+            binding.loadingLayout.visibility = View.GONE
+            Log.d(TAG, "loadingLayout hidden")
+            
+            onPostChanged(binding.viewPager.currentItem)
+            Log.d(TAG, "onPostChanged called")
+            
+            Log.d(TAG, "Posts displayed successfully, current position: ${binding.viewPager.currentItem}")
+        } catch (e: Exception) {
+            Log.e(TAG, "ERROR in showPostsInViewPager: ${e.message}", e)
+            e.printStackTrace()
         }
         
-        binding.loadingLayout.visibility = View.GONE
-        onPostChanged(binding.viewPager.currentItem)
-        
-        Log.d(TAG, "Posts displayed successfully, current position: ${binding.viewPager.currentItem}")
+        Log.d(TAG, "=== showPostsInViewPager END ===")
     }
 
     /**
      * Cuando cambia el post actual (al hacer swipe)
+     * Como di/b1.java método c (onPageSelected) en la app original:
+     * - Marca el post como visto (post.isSeen = true)
+     * - Guarda en la base de datos para persistencia
      */
     private fun onPostChanged(position: Int) {
         val post = pagerAdapter.getPost(position) ?: return
+        
+        // Marcar el post como visto en el objeto (como mVar.f18022c = true en la app original)
+        // Esto es lo que permite que al volver al grid, el icono de "nuevo" desaparezca
+        // porque el objeto Post es el MISMO que está en el grid de MainActivity
+        post.isSeen = true
+        
+        // También guardar en la base de datos para persistencia entre sesiones
+        // (como new Thread(new w0(postActivity, mVar, 1)).start() en la app original)
+        AppSeenDatabase.markSeen(this, post.id)
         
         // Actualizar estado de favorito
         viewModel.checkFavoriteStatus(post.id)
@@ -1122,9 +1199,26 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
      */
     override fun onPause() {
         super.onPause()
-        pagerAdapter.pauseAllPlayers()
+        if (::pagerAdapter.isInitialized) {
+            pagerAdapter.pauseAllPlayers()
+        }
         // Restaurar orientación cuando la app pasa a segundo plano
         requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
+    
+    /**
+     * Reinicializar el video cuando la activity vuelve a primer plano
+     * Esto soluciona el error de MediaCodec que ocurre cuando Android libera
+     * recursos del codec mientras la app está en segundo plano
+     */
+    override fun onResume() {
+        super.onResume()
+        // Solo reinicializar si el pagerAdapter está inicializado
+        if (::pagerAdapter.isInitialized) {
+            val currentPosition = binding.viewPager.currentItem
+            // Reinicializar el video en la posición actual si es necesario
+            pagerAdapter.reinitializeVideoAtPosition(currentPosition)
+        }
     }
     
     /**
@@ -1170,7 +1264,11 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
             }
         }
         
-        pagerAdapter.releaseAllPlayers()
+        // Verificar si pagerAdapter está inicializado antes de acceder
+        // Esto previene crash si la Activity hace finish() antes de inicializar el adapter
+        if (::pagerAdapter.isInitialized) {
+            pagerAdapter.releaseAllPlayers()
+        }
         super.onDestroy()
     }
     
@@ -1180,11 +1278,28 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
      * postActivity.startActivity(new Intent(postActivity, PostActivity.class).putExtra("id", parentId))
      */
     private fun navigateToPost(postId: Int) {
+        Log.d(TAG, "=== NAVIGATE TO POST START ===")
         Log.d(TAG, "Navigating to post: $postId")
-        val intent = Intent(this, PostActivity::class.java).apply {
-            putExtra(EXTRA_POST_ID, postId)
+        Log.d(TAG, "Current activity: ${this.hashCode()}")
+        Log.d(TAG, "Current posts count: ${posts.size}")
+        Log.d(TAG, "pendingPosts before clear: ${pendingPosts?.size ?: "null"}")
+        
+        try {
+            // Limpiar pendingPosts explícitamente para evitar que la nueva Activity los use
+            pendingPosts = null
+            Log.d(TAG, "pendingPosts cleared to null")
+            
+            val intent = Intent(this, PostActivity::class.java).apply {
+                putExtra(EXTRA_POST_ID, postId)
+            }
+            Log.d(TAG, "Intent created with postId: $postId")
+            startActivity(intent)
+            Log.d(TAG, "startActivity called successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "ERROR in navigateToPost: ${e.message}", e)
+            e.printStackTrace()
         }
-        startActivity(intent)
+        Log.d(TAG, "=== NAVIGATE TO POST END ===")
     }
     
     /**
