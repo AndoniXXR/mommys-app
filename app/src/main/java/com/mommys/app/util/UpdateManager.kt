@@ -1,5 +1,6 @@
 package com.mommys.app.util
 
+import android.app.Activity
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -9,6 +10,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +21,7 @@ import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 
 /**
@@ -39,6 +43,13 @@ object UpdateManager {
     
     // Intervalo de verificación: 24 horas en milisegundos
     private const val CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000L
+    
+    // Handler para callbacks en el main thread
+    private val mainHandler = Handler(Looper.getMainLooper())
+    
+    // Referencia al receiver activo para poder desregistrarlo
+    private var activeReceiver: BroadcastReceiver? = null
+    private var activeDownloadId: Long = -1
     
     /**
      * Datos de una release de GitHub
@@ -196,7 +207,9 @@ object UpdateManager {
             
             if (downloadUrl.isEmpty()) {
                 Log.e(TAG, "No APK found in release assets")
-                return@withContext UpdateResult.Error("No se encontró APK en la release")
+                // Si no hay APK, no hay actualizacion disponible (no es error)
+                saveLastCheckTime(context)
+                return@withContext UpdateResult.NoUpdateAvailable
             }
             
             // Extraer version code del tag o usar un default
@@ -220,13 +233,16 @@ object UpdateManager {
             // Guardar tiempo de verificación
             saveLastCheckTime(context)
             
-            // Comparar versiones
-            if (isNewerVersion(tagName, currentVersion)) {
+            // Comparar versiones - solo mostrar si la nueva es ESTRICTAMENTE mayor
+            val comparisonResult = compareVersions(tagName, currentVersion)
+            Log.d(TAG, "Version comparison result: $comparisonResult (positive = update available)")
+            
+            if (comparisonResult > 0) {
                 Log.d(TAG, "Update available!")
                 return@withContext UpdateResult.UpdateAvailable(releaseInfo, currentVersion)
             }
             
-            Log.d(TAG, "No update available")
+            Log.d(TAG, "No update available (current version is same or newer)")
             return@withContext UpdateResult.NoUpdateAvailable
             
         } catch (e: java.net.UnknownHostException) {
@@ -253,7 +269,8 @@ object UpdateManager {
      */
     private fun extractVersionCode(versionName: String): Int {
         return try {
-            val parts = versionName.split(".")
+            val cleanVersion = versionName.removePrefix("v")
+            val parts = cleanVersion.split(".")
             when (parts.size) {
                 3 -> parts[0].toInt() * 10000 + parts[1].toInt() * 100 + parts[2].toInt()
                 2 -> parts[0].toInt() * 10000 + parts[1].toInt() * 100
@@ -261,44 +278,57 @@ object UpdateManager {
                 else -> 1
             }
         } catch (e: Exception) {
+            Log.e(TAG, "Error extracting version code from: $versionName", e)
             1
         }
     }
     
     /**
-     * Compara si la versión nueva es mayor que la actual
-     * Soporta formato semver: major.minor.patch
+     * Compara dos versiones semver
+     * @return positivo si newVersion > currentVersion, 
+     *         negativo si newVersion < currentVersion,
+     *         0 si son iguales
      */
-    fun isNewerVersion(newVersion: String, currentVersion: String): Boolean {
+    fun compareVersions(newVersion: String, currentVersion: String): Int {
         try {
-            val newParts = newVersion.removePrefix("v").split(".").map { it.toIntOrNull() ?: 0 }
-            val currentParts = currentVersion.removePrefix("v").split(".").map { it.toIntOrNull() ?: 0 }
+            val newParts = newVersion.removePrefix("v").split(".").map { 
+                it.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0 
+            }
+            val currentParts = currentVersion.removePrefix("v").split(".").map { 
+                it.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0 
+            }
             
             // Comparar major
             val newMajor = newParts.getOrElse(0) { 0 }
             val curMajor = currentParts.getOrElse(0) { 0 }
-            if (newMajor > curMajor) return true
-            if (newMajor < curMajor) return false
+            if (newMajor != curMajor) return newMajor - curMajor
             
             // Comparar minor
             val newMinor = newParts.getOrElse(1) { 0 }
             val curMinor = currentParts.getOrElse(1) { 0 }
-            if (newMinor > curMinor) return true
-            if (newMinor < curMinor) return false
+            if (newMinor != curMinor) return newMinor - curMinor
             
             // Comparar patch
             val newPatch = newParts.getOrElse(2) { 0 }
             val curPatch = currentParts.getOrElse(2) { 0 }
-            return newPatch > curPatch
+            return newPatch - curPatch
             
         } catch (e: Exception) {
-            Log.e(TAG, "Error comparing versions", e)
-            return false
+            Log.e(TAG, "Error comparing versions: $newVersion vs $currentVersion", e)
+            return 0
         }
     }
     
     /**
+     * Compara si la versión nueva es mayor que la actual (legacy method)
+     */
+    fun isNewerVersion(newVersion: String, currentVersion: String): Boolean {
+        return compareVersions(newVersion, currentVersion) > 0
+    }
+    
+    /**
      * Descarga e instala la actualización
+     * @param activity La activity que inicia la descarga (necesaria para el install intent)
      */
     fun downloadAndInstallUpdate(
         context: Context,
@@ -309,6 +339,9 @@ object UpdateManager {
     ) {
         try {
             val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            
+            // Cancelar descarga anterior si existe
+            cancelActiveDownload(context)
             
             // Limpiar APKs anteriores
             cleanOldApks(context)
@@ -330,54 +363,108 @@ object UpdateManager {
                 setAllowedNetworkTypes(
                     DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE
                 )
+                // Permitir que se descargue con datos moviles
+                setAllowedOverMetered(true)
+                setAllowedOverRoaming(false)
             }
             
-            val downloadId = downloadManager.enqueue(request)
+            activeDownloadId = downloadManager.enqueue(request)
+            Log.d(TAG, "Download started with ID: $activeDownloadId")
+            
+            // Guardar referencia weak al context para evitar memory leaks
+            val contextRef = WeakReference(context)
             
             // Registrar receiver para cuando complete la descarga
             val receiver = object : BroadcastReceiver() {
-                override fun onReceive(ctx: Context, intent: Intent) {
+                override fun onReceive(ctx: Context?, intent: Intent?) {
+                    if (intent == null) return
+                    
                     val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-                    if (id == downloadId) {
-                        try {
-                            context.unregisterReceiver(this)
-                        } catch (e: Exception) {
-                            // Ignorar
-                        }
+                    Log.d(TAG, "Download broadcast received for ID: $id (expected: $activeDownloadId)")
+                    
+                    if (id == activeDownloadId) {
+                        // Desregistrar este receiver de forma segura
+                        unregisterReceiverSafely(contextRef.get())
                         
                         // Verificar que el archivo se descargó correctamente
-                        val query = DownloadManager.Query().setFilterById(downloadId)
+                        val query = DownloadManager.Query().setFilterById(activeDownloadId)
                         val cursor = downloadManager.query(query)
-                        if (cursor.moveToFirst()) {
-                            val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-                            val status = cursor.getInt(statusIndex)
-                            
-                            if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                                onComplete()
-                                installApk(context, destinationFile)
+                        
+                        try {
+                            if (cursor != null && cursor.moveToFirst()) {
+                                val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+                                val status = if (statusIndex >= 0) cursor.getInt(statusIndex) else -1
+                                
+                                Log.d(TAG, "Download status: $status")
+                                
+                                when (status) {
+                                    DownloadManager.STATUS_SUCCESSFUL -> {
+                                        Log.d(TAG, "Download successful, file: ${destinationFile.absolutePath}")
+                                        
+                                        // Verificar que el archivo existe y tiene contenido
+                                        if (destinationFile.exists() && destinationFile.length() > 0) {
+                                            // Llamar onComplete en el main thread
+                                            mainHandler.post {
+                                                onComplete()
+                                            }
+                                            
+                                            // Instalar el APK con un pequeño delay para que el dialog se cierre
+                                            mainHandler.postDelayed({
+                                                val currentContext = contextRef.get()
+                                                if (currentContext != null) {
+                                                    installApk(currentContext, destinationFile)
+                                                }
+                                            }, 500)
+                                        } else {
+                                            Log.e(TAG, "Downloaded file is empty or doesn't exist")
+                                            mainHandler.post {
+                                                onError("El archivo descargado está vacío")
+                                            }
+                                        }
+                                    }
+                                    DownloadManager.STATUS_FAILED -> {
+                                        val reasonIndex = cursor.getColumnIndex(DownloadManager.COLUMN_REASON)
+                                        val reason = if (reasonIndex >= 0) cursor.getInt(reasonIndex) else -1
+                                        Log.e(TAG, "Download failed with reason: $reason")
+                                        mainHandler.post {
+                                            onError("Descarga fallida (código: $reason)")
+                                        }
+                                    }
+                                    else -> {
+                                        Log.e(TAG, "Unexpected download status: $status")
+                                        mainHandler.post {
+                                            onError("Estado de descarga inesperado")
+                                        }
+                                    }
+                                }
                             } else {
-                                onError("Descarga fallida")
+                                Log.e(TAG, "Could not query download status")
+                                mainHandler.post {
+                                    onError("No se pudo verificar la descarga")
+                                }
                             }
+                        } finally {
+                            cursor?.close()
                         }
-                        cursor.close()
+                        
+                        // Reset active download
+                        activeDownloadId = -1
                     }
                 }
             }
             
+            // Guardar referencia al receiver
+            activeReceiver = receiver
+            
+            // Registrar el receiver
+            val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                context.registerReceiver(
-                    receiver,
-                    IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-                    Context.RECEIVER_NOT_EXPORTED
-                )
+                context.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
             } else {
-                context.registerReceiver(
-                    receiver,
-                    IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-                )
+                context.registerReceiver(receiver, filter)
             }
             
-            Log.d(TAG, "Download started: $downloadId")
+            Log.d(TAG, "BroadcastReceiver registered for download completion")
             
         } catch (e: Exception) {
             Log.e(TAG, "Error starting download", e)
@@ -386,13 +473,55 @@ object UpdateManager {
     }
     
     /**
+     * Cancela la descarga activa si existe
+     */
+    private fun cancelActiveDownload(context: Context) {
+        try {
+            if (activeDownloadId != -1L) {
+                val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                downloadManager.remove(activeDownloadId)
+                Log.d(TAG, "Cancelled previous download: $activeDownloadId")
+            }
+            unregisterReceiverSafely(context)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error cancelling download", e)
+        }
+    }
+    
+    /**
+     * Desregistra el receiver de forma segura
+     */
+    private fun unregisterReceiverSafely(context: Context?) {
+        try {
+            activeReceiver?.let { receiver ->
+                context?.unregisterReceiver(receiver)
+                Log.d(TAG, "BroadcastReceiver unregistered")
+            }
+        } catch (e: IllegalArgumentException) {
+            // Receiver ya no estaba registrado
+            Log.d(TAG, "Receiver was already unregistered")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error unregistering receiver", e)
+        } finally {
+            activeReceiver = null
+        }
+    }
+    
+    /**
      * Instala el APK descargado
      */
     private fun installApk(context: Context, apkFile: File) {
         try {
+            Log.d(TAG, "Starting APK installation: ${apkFile.absolutePath}")
+            
+            if (!apkFile.exists()) {
+                Log.e(TAG, "APK file does not exist: ${apkFile.absolutePath}")
+                return
+            }
+            
             val intent = Intent(Intent.ACTION_VIEW)
             
-            val apkUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val apkUri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 FileProvider.getUriForFile(
                     context,
                     "${context.packageName}.fileprovider",
@@ -402,12 +531,26 @@ object UpdateManager {
                 Uri.fromFile(apkFile)
             }
             
+            Log.d(TAG, "APK URI: $apkUri")
+            
             intent.setDataAndType(apkUri, "application/vnd.android.package-archive")
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             
-            context.startActivity(intent)
-            
-            Log.d(TAG, "Install intent started for: ${apkFile.absolutePath}")
+            // En Android 7+ necesitamos asegurarnos de que el intent puede ser resuelto
+            if (intent.resolveActivity(context.packageManager) != null) {
+                context.startActivity(intent)
+                Log.d(TAG, "Install intent started successfully")
+            } else {
+                Log.e(TAG, "No activity found to handle install intent")
+                // Intentar con intent alternativo
+                val altIntent = Intent(Intent.ACTION_INSTALL_PACKAGE)
+                altIntent.data = apkUri
+                altIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                altIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                altIntent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+                context.startActivity(altIntent)
+            }
             
         } catch (e: Exception) {
             Log.e(TAG, "Error installing APK", e)
@@ -422,12 +565,20 @@ object UpdateManager {
             val downloadDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
             downloadDir?.listFiles()?.forEach { file ->
                 if (file.name.startsWith("mommys-update-") && file.name.endsWith(".apk")) {
-                    file.delete()
-                    Log.d(TAG, "Deleted old APK: ${file.name}")
+                    val deleted = file.delete()
+                    Log.d(TAG, "Deleted old APK: ${file.name} - success: $deleted")
                 }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error cleaning old APKs", e)
         }
+    }
+    
+    /**
+     * Limpia recursos cuando ya no se necesitan (llamar desde onDestroy de la Activity)
+     */
+    fun cleanup(context: Context) {
+        unregisterReceiverSafely(context)
+        activeDownloadId = -1
     }
 }

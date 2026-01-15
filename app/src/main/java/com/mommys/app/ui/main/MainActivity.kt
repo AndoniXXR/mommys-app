@@ -1728,6 +1728,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
         networkObserverJob?.cancel() // Cancelar observación de red
         searchHelper.cleanup()
         suggestionsAdapter.changeCursor(null)
+        UpdateManager.cleanup(this) // Limpiar recursos del UpdateManager
     }
     
     // ==================== IMPLEMENTACIÓN DE SelectionCallback ====================
@@ -1975,12 +1976,25 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
             txtReleaseNotes.text = release.releaseNotes
         }
         
+        // Variable para trackear si estamos descargando
+        var isDownloading = false
+        
         val dialog = AlertDialog.Builder(this)
             .setTitle(R.string.update_available_title)
             .setView(dialogView)
             .setPositiveButton(R.string.update_download, null) // Setear null para manejar manualmente
             .setNegativeButton(R.string.update_later, null)
+            .setCancelable(true) // Permitir cancelar inicialmente
             .create()
+        
+        // Prevenir que se cierre con back button mientras descarga
+        dialog.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == android.view.KeyEvent.KEYCODE_BACK && isDownloading) {
+                true // Consumir el evento, no cerrar
+            } else {
+                false
+            }
+        }
         
         dialog.show()
         
@@ -2000,6 +2014,10 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                 }
             }
             
+            // Marcar que estamos descargando
+            isDownloading = true
+            dialog.setCancelable(false) // No permitir cancelar mientras descarga
+            
             // Deshabilitar botones y mostrar progreso
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = false
@@ -2017,17 +2035,29 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                     // El progressBar ya está en modo indeterminate
                 },
                 onComplete = {
-                    runOnUiThread {
-                        txtDownloadStatus.text = getString(R.string.update_download_complete)
-                        dialog.dismiss()
+                    isDownloading = false
+                    if (!isFinishing && !isDestroyed) {
+                        runOnUiThread {
+                            txtDownloadStatus.text = getString(R.string.update_download_complete)
+                            // Cerrar el dialogo después de un breve delay
+                            dialog.window?.decorView?.postDelayed({
+                                if (dialog.isShowing) {
+                                    dialog.dismiss()
+                                }
+                            }, 300)
+                        }
                     }
                 },
                 onError = { error ->
-                    runOnUiThread {
-                        progressBar.visibility = View.GONE
-                        txtDownloadStatus.text = error
-                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
-                        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = true
+                    isDownloading = false
+                    dialog.setCancelable(true)
+                    if (!isFinishing && !isDestroyed) {
+                        runOnUiThread {
+                            progressBar.visibility = View.GONE
+                            txtDownloadStatus.text = error
+                            dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
+                            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = true
+                        }
                     }
                 }
             )
