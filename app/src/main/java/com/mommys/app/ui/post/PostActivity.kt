@@ -95,6 +95,10 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         const val EXTRA_POST_ID = "post_id"
         const val EXTRA_INITIAL_POSITION = "initial_position"
         
+        // Códigos de resultado para paginación (como app original 999/-999)
+        const val RESULT_NEXT_PAGE = 999
+        const val RESULT_PREV_PAGE = -999
+        
         // Código para request de permiso de almacenamiento
         private const val PERMISSION_REQUEST_STORAGE = 100
         private const val PERMISSION_REQUEST_NOTIFICATIONS = 101
@@ -464,6 +468,36 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
             // OnPageChangeCallback como en la app original (di/b1.java)
             // Cuando cambia de página, pausar todos los videos
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                // Para detección de overscroll
+                private var lastOffsetPixels = -1
+                private var isDragging = false
+                
+                override fun onPageScrollStateChanged(state: Int) {
+                    super.onPageScrollStateChanged(state)
+                    isDragging = state == ViewPager2.SCROLL_STATE_DRAGGING
+                }
+
+                override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+                    super.onPageScrolled(position, positionOffset, positionOffsetPixels)
+                    
+                    // Lógica de detección de "swipe past end" (overscroll)
+                    // Basado en di/b1.java de la app original
+                    if (isDragging && positionOffset == 0f && positionOffsetPixels == 0 && lastOffsetPixels == 0) {
+                        if (position == 0) {
+                            // Intento de ir a la página anterior
+                            setResult(RESULT_PREV_PAGE)
+                            finish()
+                            overridePendingTransition(0, 0)
+                        } else if (position == (adapter?.itemCount ?: 0) - 1) {
+                            // Intento de ir a la página siguiente
+                            setResult(RESULT_NEXT_PAGE)
+                            finish()
+                            overridePendingTransition(0, 0)
+                        }
+                    }
+                    lastOffsetPixels = positionOffsetPixels
+                }
+
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
                     // Pausar todos los players cuando se cambia de página

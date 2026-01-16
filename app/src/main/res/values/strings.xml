@@ -1016,6 +1016,8 @@
     <string name="ss_start">Start</string>
     <string name="ss_toast_started">Slideshow started, press the back button to stop it</string>
     <string name="ss_toast_stopped">Slideshow stopped</string>
+    <string name="ss_toast_next_page">Next page</string>
+    <string name="ss_toast_prev_page">Previous page</string>
     
     <!-- Notes -->
     <string name="notes_only_images">Only image and GIF posts are supported!</string>

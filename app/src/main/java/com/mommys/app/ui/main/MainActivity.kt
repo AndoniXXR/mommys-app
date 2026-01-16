@@ -162,6 +162,59 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     // Job para cancelar la observación cuando se destruye la activity
     private var networkObserverJob: Job? = null
     
+    // Launcher para PostActivity con manejo de resultados (paginación)
+    private val postActivityLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == PostActivity.RESULT_NEXT_PAGE || 
+            result.resultCode == PostActivity.RESULT_PREV_PAGE) {
+            
+            val direction = if (result.resultCode == PostActivity.RESULT_NEXT_PAGE) 1 else -1
+            handlePageNavigation(direction)
+        }
+    }
+    
+    /**
+     * Maneja la navegación de páginas desde PostActivity
+     * direction: 1 para siguiente, -1 para anterior
+     */
+    private fun handlePageNavigation(direction: Int) {
+        val currentItem = binding.viewPager.currentItem
+        val nextItem = currentItem + direction
+        
+        if (nextItem in 0 until pageHandlers.size) {
+            // Mover a la siguiente página
+            binding.viewPager.setCurrentItem(nextItem, false)
+            
+            // Obtener el handler de la nueva página
+            val handler = pageHandlers[nextItem]
+            val posts = handler.getCurrentPosts()
+            
+            // Si la página ya tiene posts cargados, abrir el PostActivity inmediatamente
+            if (posts.isNotEmpty()) {
+                val postIndex = if (direction > 0) 0 else posts.size - 1
+                
+                // Crear intent para el primer/último post de la nueva página
+                val intent = PostActivity.createIntent(this, posts, postIndex)
+                
+                // Lanzar PostActivity sin animación para que parezca continuo
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                postActivityLauncher.launch(intent)
+                
+                // Feedback visual
+                val msg = if (direction > 0) getString(R.string.ss_toast_next_page) else getString(R.string.ss_toast_prev_page)
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            } else {
+                // Si los posts no están cargados, solo movemos el pager y el usuario verá el loading
+                // Opcional: Podríamos esperar a que carguen, pero eso es más complejo
+                Toast.makeText(this, "Loading next page...", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            val msg = if (direction > 0) "No more pages" else "No previous page"
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        }
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -1043,11 +1096,11 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
             
             // Pasar posts pre-cargados como la app original
             val intent = PostActivity.createIntent(this, currentPosts, position)
-            startActivity(intent)
+            postActivityLauncher.launch(intent)
         } else {
             // Fallback: abrir solo ese post
             val intent = PostActivity.createIntent(this, post.id)
-            startActivity(intent)
+            postActivityLauncher.launch(intent)
         }
     }
     
@@ -1475,7 +1528,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                                 listOf(post),
                                 0
                             )
-                            startActivity(intent)
+                            postActivityLauncher.launch(intent)
                         } else {
                             Toast.makeText(this@MainActivity, R.string.no_results, Toast.LENGTH_SHORT).show()
                         }

@@ -25,6 +25,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.DefaultRenderersFactory
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -39,6 +41,7 @@ import com.mommys.app.data.model.supportsNotes
 import com.mommys.app.data.preferences.PreferencesManager
 import com.mommys.app.databinding.ItemPostPageBinding
 import com.mommys.app.service.FollowingJobService
+import com.mommys.app.util.ExoPlayerCacheManager
 import com.mommys.app.util.ProgressDownloader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -258,10 +261,10 @@ class PostPagerAdapter(
     
     /**
      * Registra un player para una posición específica
+     * Como la app original (ei/s.java), NO libera el anterior - se mantiene en caché
      */
     fun registerPlayer(position: Int, player: ExoPlayer) {
-        // Liberar player anterior en esa posición si existe
-        players[position]?.release()
+        // NO liberar el player anterior - mantenerlo en memoria como la app original
         players[position] = player
     }
     
@@ -322,7 +325,8 @@ class PostPagerAdapter(
         holder.getBoundPostId()?.let { postId ->
             viewHoldersByPostId.remove(postId)
         }
-        // Liberar y desregistrar el player como en la app original (ei/e0.java línea 1215)
+        // Liberar el player como en la app original (ei/e0.java línea 1349)
+        // Esto evita que se acumulen players en memoria y se agote el MediaCodec pool
         holder.getBoundPosition()?.let { position ->
             unregisterPlayer(position)
         }
@@ -381,6 +385,7 @@ class PostPagerAdapter(
         private var player: ExoPlayer? = null
         private var currentPosition: Int = -1
         private var currentPostId: Int = -1
+        private var hasTriedMp4Fallback = false  // Flag para evitar loop infinito en fallback
         
         // Estados actuales de los botones (para restaurar si hay error)
         private var currentVoteState: Int = 0  // -1, 0, 1
@@ -1190,7 +1195,7 @@ class PostPagerAdapter(
             val isGif = ext == "gif"
 
             when {
-                isVideo -> setupVideo(post)
+                isVideo -> setupVideoPreview(post)  // Solo preview, NO crear player
                 isGif -> setupGif(post)  // GIFs son manejados por Glide con animación
                 else -> setupImage(post)
             }
@@ -1326,6 +1331,11 @@ class PostPagerAdapter(
                 }
 
                 override fun onComplete(data: ByteArray?) {
+                    // Verificar si la vista ya fue reciclada para otro post
+                    if (currentPostId != post.id) {
+                        return
+                    }
+
                     binding.loadingLayout.visibility = View.GONE
                     
                     if (data != null) {
@@ -1444,14 +1454,68 @@ class PostPagerAdapter(
         }
 
         /**
-         * Configura el reproductor de video con buffering y controles mejorados
-         * Similar a la implementación de la app original
+         * Muestra el preview del video con botón play (como app original)
+         * NO crea el player - solo muestra preview e icono play
+         * El player se crea cuando usuario da click en play
          */
-        private fun setupVideo(post: Post) {
+        private fun setupVideoPreview(post: Post) {
             val context = binding.root.context
             
-            // Limpiar player anterior si existe
-            player?.release()
+            // Reset fallback flag cuando se carga nuevo preview
+            hasTriedMp4Fallback = false
+            
+            binding.previewFrameParent.visibility = View.GONE
+            binding.videoContainer.visibility = View.VISIBLE
+            binding.errorLayout.visibility = View.GONE
+            binding.loadingLayout.visibility = View.GONE
+            
+            // Mostrar preview + botón play (como app original ei/e0.java línea 622-627)
+            binding.imgVideoPreview.visibility = View.VISIBLE
+            binding.imgPlay.visibility = View.VISIBLE
+            binding.playerView.visibility = View.GONE  // PlayerView oculto hasta que se da play
+            
+            // Calcular dimensiones del video
+            val videoWidth = post.file.width
+            val videoHeight = post.file.height
+            val screenWidth = context.resources.displayMetrics.widthPixels
+            val screenHeight = context.resources.displayMetrics.heightPixels
+            val aspectRatio = videoWidth.toFloat() / videoHeight.toFloat()
+            val calculatedHeight = (screenWidth / aspectRatio).toInt()
+            val maxHeight = (screenHeight * 0.7).toInt()
+            val finalHeight = minOf(calculatedHeight, maxHeight)
+            
+            binding.videoContainer.layoutParams.height = finalHeight
+            binding.playerView.layoutParams.height = finalHeight
+            binding.imgVideoPreview.layoutParams.height = finalHeight
+            
+            // Cargar preview del video (thumbnail)
+            val previewUrl = post.preview.url ?: post.sample.url
+            if (previewUrl != null) {
+                Glide.with(context)
+                    .load(previewUrl)
+                    .into(binding.imgVideoPreview)
+            }
+            
+            // Click en play button crea y reproduce el video (como app original)
+            binding.imgPlay.setOnClickListener {
+                setupVideo(post)  // Aquí se crea el player
+            }
+            
+            // Click en preview también reproduce
+            binding.imgVideoPreview.setOnClickListener {
+                setupVideo(post)
+            }
+        }
+
+        /**
+         * Configura el reproductor de video con buffering y controles mejorados
+         * Similar a la implementación de la app original
+         * @param forceMp4 Si true, fuerza usar MP4 incluso si la preferencia es WEBM
+         */
+        private fun setupVideo(post: Post, forceMp4: Boolean = false) {
+            val context = binding.root.context
+            
+            // Crear nuevo player (como app original - NO reutiliza)
             player = null
             binding.playerView.player = null
             
@@ -1499,7 +1563,9 @@ class PostPagerAdapter(
             // Obtener URL del video según preferencias de calidad y formato
             // Usa la función de extensión getVideoUrl() que implementa la lógica de la app original
             // (ei/s.java líneas 85-120): calidad 0=original, 1=720p, 2=480p; formato 0=webm, 1=mp4
-            val videoUrl = post.getVideoUrl(videoQuality, videoFormat)
+            // Si forceMp4=true, usar formato MP4 ignorando preferencia del usuario
+            val formatToUse = if (forceMp4) 1 else videoFormat
+            val videoUrl = post.getVideoUrl(videoQuality, formatToUse)
             // Verificar si la URL es válida (similar a setupImage)
             if (videoUrl == null || videoUrl.isEmpty() || videoUrl == "null" || !videoUrl.startsWith("http")) {
                 binding.loadingLayout.visibility = View.GONE
@@ -1508,32 +1574,46 @@ class PostPagerAdapter(
                 return
             }
 
-            // Configuración de LoadControl para mejor buffering (como la app original)
+            // Configuración de LoadControl (valores conservadores como app original: 5000ms)
             val loadControl = DefaultLoadControl.Builder()
                 .setBufferDurationsMs(
-                    5000,   // minBufferMs
-                    30000,  // maxBufferMs
-                    1500,   // bufferForPlaybackMs
-                    3000    // bufferForPlaybackAfterRebufferMs
+                    5000,  // minBufferMs (igual que app original)
+                    5000,  // maxBufferMs (igual que app original)
+                    1500,  // bufferForPlaybackMs
+                    1500   // bufferForPlaybackAfterRebufferMs
                 )
                 .build()
 
+            // RenderersFactory con software decoder fallback (como app original línea 84-85)
+            // Esto permite decodificar VP9 y otros formatos cuando hardware decoder falla
+            val renderersFactory = DefaultRenderersFactory(context)
+                .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+
             // Crear ExoPlayer con configuración mejorada
             player = ExoPlayer.Builder(context)
+                .setRenderersFactory(renderersFactory)
                 .setLoadControl(loadControl)
                 .build().apply {
                     
                     binding.playerView.player = this
                     binding.playerView.controllerShowTimeoutMs = 2000
                     
-                    // Configurar media item
-                    setMediaItem(MediaItem.fromUri(videoUrl))
+                    // Configurar media source con cache (como app original línea 145)
+                    val cacheDataSourceFactory = ExoPlayerCacheManager.getCacheDataSourceFactory(context)
+                    val mediaSource = ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+                        .createMediaSource(MediaItem.fromUri(videoUrl))
+                    setMediaSource(mediaSource)
                     
                     // Configurar volumen según preferencia mute (como app original ei/s.java)
                     volume = if (muteVideos) 0.0f else 1.0f
                     
                     // Repeat mode (loop)
                     repeatMode = Player.REPEAT_MODE_ONE
+                    
+                    // Mostrar PlayerView ANTES de prepare (como app original línea 154)
+                    binding.playerView.visibility = View.VISIBLE
+                    binding.imgVideoPreview.visibility = View.GONE
+                    binding.imgPlay.visibility = View.GONE
                     
                     // Listener para estados del player
                     addListener(object : Player.Listener {
@@ -1550,8 +1630,6 @@ class PostPagerAdapter(
                                 }
                                 Player.STATE_READY -> {
                                     binding.loadingLayout.visibility = View.GONE
-                                    binding.imgVideoPreview.visibility = View.GONE
-                                    binding.imgPlay.visibility = View.GONE
                                     
                                     // Si autoplay Y landscape están habilitados, aplicar landscape
                                     if (autoPlayVideos && landscapeVideos && isPlaying) {
@@ -1566,37 +1644,59 @@ class PostPagerAdapter(
                         
                         override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                             val errorCode = error.errorCode
+                            val errorMessage = error.message ?: ""
                             
-                            // Detectar error de MediaCodec (ocurre cuando la app vuelve de segundo plano)
-                            // Estos errores se pueden recuperar reinicializando el player
-                            val isMediaCodecError = errorCode == androidx.media3.common.PlaybackException.ERROR_CODE_DECODER_INIT_FAILED ||
-                                errorCode == androidx.media3.common.PlaybackException.ERROR_CODE_DECODING_FAILED ||
-                                error.message?.contains("MediaCodec") == true
+                            // Detectar error de MediaCodec VP9 de forma inteligente
+                            val isVp9Error = errorMessage.contains("MediaCodecVideoRenderer", ignoreCase = true) && 
+                                           (errorMessage.contains("vp9", ignoreCase = true) || 
+                                            errorMessage.contains("vp09", ignoreCase = true))
                             
-                            if (isMediaCodecError) {
-                                // Auto-reintentar después de un breve delay para errores de MediaCodec
-                                binding.loadingLayout.visibility = View.VISIBLE
-                                binding.txtLoading.text = "Reiniciando video..."
-                                binding.errorLayout.visibility = View.GONE
+                            // Si es error de VP9 y NO hemos intentado MP4 fallback aún
+                            if (isVp9Error && !hasTriedMp4Fallback && this@PostPagerAdapter.videoFormat == 0) {
+                                // Verificar si existe versión MP4 del video
+                                val mp4Url = post.getVideoUrl(this@PostPagerAdapter.videoQuality, format = 1)  // 1 = MP4
+                                val currentUrl = post.getVideoUrl(this@PostPagerAdapter.videoQuality, this@PostPagerAdapter.videoFormat)
                                 
-                                // Capturar posición actual antes de la lambda (usar this@PostViewHolder para evitar shadow del player)
-                                val positionToReinit = this@PostViewHolder.currentPosition
-                                binding.root.postDelayed({
-                                    // Reinicializar el video
-                                    unregisterPlayer(positionToReinit)
+                                // Si hay MP4 disponible Y es diferente de la URL actual
+                                if (mp4Url != null && mp4Url != currentUrl && mp4Url.isNotEmpty()) {
+                                    // Marcar que ya intentamos fallback
+                                    hasTriedMp4Fallback = true
+                                    
+                                    // Liberar player actual
+                                    player?.release()
                                     player = null
-                                    binding.playerView.player = null
-                                    setupVideo(post)
-                                }, 500L) // 500ms de delay
-                                return
+                                    unregisterPlayer(bindingAdapterPosition)
+                                    
+                                    // Intentar cargar versión MP4 silenciosamente
+                                    setupVideo(post, forceMp4 = true)
+                                    return
+                                } else {
+                                    // No hay versión MP4 - mostrar mensaje amigable con opción de ver en línea
+                                    binding.loadingLayout.visibility = View.GONE
+                                    binding.errorLayout.visibility = View.VISIBLE
+                                    binding.txtError.text = "Video no soportado por este dispositivo.\n\nToca el botón para verlo en línea"
+                                    
+                                    // Cambiar ícono y descripción del botón para indicar que abre navegador
+                                    binding.btnRefresh.setImageResource(android.R.drawable.ic_menu_view)
+                                    binding.btnRefresh.contentDescription = "Ver en línea"
+                                    binding.btnRefresh.setOnClickListener {
+                                        // Abrir post en navegador
+                                        val postUrl = "https://e621.net/posts/${post.id}"
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(postUrl))
+                                        context.startActivity(intent)
+                                    }
+                                    return
+                                }
                             }
                             
-                            // Para otros errores, mostrar el mensaje de error
+                            // Si no es error VP9 o ya intentamos fallback, mostrar error normal
+                            // Mostrar error sin auto-retry (como app original)
+                            // El auto-retry causaba loops infinitos con MediaCodec errors
                             binding.loadingLayout.visibility = View.GONE
                             binding.errorLayout.visibility = View.VISIBLE
                             binding.txtError.text = "Video error: ${error.message}"
                             
-                            // Notificar error de red para retry automático
+                            // Notificar error de red para retry automático solo si es error de red
                             // ExoPlayer usa ERROR_CODE_IO_* para errores de red
                             if (errorCode == androidx.media3.common.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED ||
                                 errorCode == androidx.media3.common.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT ||
@@ -1622,17 +1722,12 @@ class PostPagerAdapter(
                         }
                     })
                     
-                    // Configurar autoplay ANTES de prepare() (importante para que funcione)
-                    // Como la app original (ei/s.java): primero configura, luego prepare(), luego play()
-                    playWhenReady = autoPlayVideos
-                    
-                    // Preparar el player
+                    // Secuencia de preparación como app original (líneas 158-160):
+                    // prepare() → pause() → setPlayWhenReady(true)
+                    // Como setupVideo() solo se llama al hacer click en play, siempre debe reproducir
                     prepare()
-                    
-                    // Si autoplay está habilitado, iniciar reproducción explícitamente
-                    if (autoPlayVideos) {
-                        play()
-                    }
+                    pause()
+                    playWhenReady = true  // Siempre true cuando usuario hace click en play
                 }
 
             // Registrar el player en el HashMap por posición (como la app original)
@@ -1679,6 +1774,8 @@ class PostPagerAdapter(
             // toque en el video pause/reproduzca, lo cual es molesto para el usuario.
 
             // Retry button
+            binding.btnRefresh.setImageResource(R.drawable.ic_refresh) // Restaurar ícono por defecto
+            binding.btnRefresh.contentDescription = context.getString(R.string.retry)
             binding.btnRefresh.setOnClickListener {
                 binding.errorLayout.visibility = View.GONE
                 unregisterPlayer(currentPosition)

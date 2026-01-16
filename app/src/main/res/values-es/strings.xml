@@ -947,6 +947,8 @@
     <string name="ss_title">Ajustes diapositiva</string>
     <string name="ss_toast_started">Diapositiva iniciada, pulsa el botón retroceso para detener</string>
     <string name="ss_toast_stopped">Diapositiva detenida</string>
+    <string name="ss_toast_next_page">Página siguiente</string>
+    <string name="ss_toast_prev_page">Página anterior</string>
     <string name="status_bar_notification_info_overflow">999+</string>
     <string name="summary_collapsed_preference_list">%1$s, %2$s</string>
     <string name="tag_added_to_current_search">Tag %1$s añadido a la búsqueda actual</string>

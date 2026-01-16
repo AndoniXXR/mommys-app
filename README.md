@@ -10,14 +10,20 @@ A modern Android client for browsing e621.net and e926.net, inspired by "The Wol
 - Favorites and saved posts management
 - Download images, GIFs and videos
 - PIN lock and biometric authentication for privacy
-- Video playback with ExoPlayer (loop, mute, speed controls)
-- Offline support with Room database caching
+- Advanced video playback system with intelligent codec handling
+- Offline support with Room database caching and video cache
 
 ### Post Viewing
 - Swipe navigation between posts with ViewPager2
 - Full resolution image viewing with zoom and pan
 - GIF animation support with play/pause controls
-- Video controls with progress bar, speed adjustment, and loop toggle
+- Video playback with ExoPlayer featuring:
+  - Smart codec support with automatic VP9 to MP4 fallback
+  - 100MB video cache for improved performance
+  - Software decoder fallback for unsupported formats
+  - Preview thumbnails with manual playback initiation
+  - Loop, mute, speed controls, and progress tracking
+  - Graceful handling of unsupported videos with browser fallback
 - Tag display organized by category (artist, character, species, etc.)
 - Quick actions: favorite, vote up/down, download, share
 
@@ -107,9 +113,25 @@ app/
 - **Networking:** Retrofit 2, OkHttp with cookie handling
 - **Database:** Room with migrations
 - **Image Loading:** Glide with GIF support
-- **Video:** Media3 ExoPlayer
+- **Video:** Media3 ExoPlayer with custom cache manager
 - **Async:** Kotlin Coroutines and Flow
 - **Security:** Biometric authentication, encrypted preferences
+
+## Video Playback System
+
+The app features an advanced video playback system designed for optimal compatibility and performance:
+
+### Key Features
+- **Intelligent Codec Handling:** Automatically detects VP9 codec issues and falls back to MP4 when available
+- **100MB Video Cache:** Implements LRU caching with ExoPlayer's CacheDataSource for smooth playback and reduced bandwidth
+- **Software Decoder Fallback:** Uses DefaultRenderersFactory with EXTENSION_RENDERER_MODE_PREFER to handle devices without hardware codec support
+- **Preview-First Approach:** Shows video thumbnails with play buttons, creating player instances only on user interaction to conserve memory
+- **Graceful Error Handling:** For truly unsupported videos, offers option to view in browser rather than showing technical errors
+
+### Architecture
+- **ExoPlayerCacheManager:** Singleton cache manager with SimpleCache and LeastRecentlyUsedCacheEvictor
+- **Smart Player Lifecycle:** Players are created on-demand, released on view recycling, and properly managed in ViewPager2
+- **Format Selection:** Supports quality preferences (original/720p/480p) and format preferences (webm/mp4) with intelligent fallback
 
 ## API
 
