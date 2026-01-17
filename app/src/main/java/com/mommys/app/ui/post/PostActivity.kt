@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.customview.widget.ViewDragHelper
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import android.widget.FrameLayout
@@ -504,11 +505,19 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
                     // Como hace la app original en di/b1.java método c (onPageSelected)
                     pagerAdapter.pauseAllPlayers()
                     
-                    // Si autoplay está habilitado, reproducir el video de la nueva página
-                    // Usar post{} para dar tiempo a que el ViewHolder se bindee correctamente
-                    binding.viewPager.post {
-                        pagerAdapter.playVideoAtPosition(position)
+                    // Buscar el ViewHolder directamente como en m16068J de PostActivity.java (línea 250)
+                    // Esto evita desincronización durante swipes rápidos o mientras está cargando
+                    val recyclerView = binding.viewPager.getChildAt(0) as? RecyclerView
+                    val viewHolder = recyclerView?.findViewHolderForAdapterPosition(position) as? PostPagerAdapter.PostViewHolder
+                    
+                    // Si autoplay está habilitado y el ViewHolder existe, reproducir video
+                    if (viewHolder != null) {
+                        pagerAdapter.playVideoInViewHolder(viewHolder)
                     }
+                    
+                    // Precargar imágenes de posts vecinos en background
+                    // Como hace la app original en m11459i() (ei/e0.java línea 1037)
+                    pagerAdapter.preloadAdjacentPosts(position, this@PostActivity)
                     
                     // Restaurar orientación a portrait cuando se cambia de página
                     // (como hace la app original ei/e0.java método n cuando se sale del video)

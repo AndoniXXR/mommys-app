@@ -90,6 +90,12 @@ class PostPagerAdapter(
 
     private val posts = mutableListOf<Post>()
     
+    init {
+        // Habilitar IDs estables para evitar rebinds incorrectos durante swipes
+        // Como la app original (aunque no usa explícitamente, el comportamiento es similar)
+        setHasStableIds(true)
+    }
+    
     // HashMap para almacenar los players por posición (como 'G' en la app original ei/e0.java)
     private val players = mutableMapOf<Int, ExoPlayer>()
     
@@ -138,6 +144,12 @@ class PostPagerAdapter(
     }
 
     fun getPost(position: Int): Post? = posts.getOrNull(position)
+    
+    override fun getItemId(position: Int): Long {
+        // Usar el ID del post como ID estable del item
+        // Esto previene rebinds incorrectos cuando hay cambios de posición
+        return posts.getOrNull(position)?.id?.toLong() ?: RecyclerView.NO_ID
+    }
 
     fun setAutoPlayVideos(autoPlay: Boolean) {
         autoPlayVideos = autoPlay
@@ -237,6 +249,25 @@ class PostPagerAdapter(
             // Player no disponible
         }
     }
+    
+    /**
+     * Reproduce el video directamente en un ViewHolder específico
+     * Como m16068J en PostActivity.java de la app original (línea 250)
+     * Se llama desde onPageSelected con el ViewHolder encontrado
+     */
+    fun playVideoInViewHolder(viewHolder: PostViewHolder) {
+        if (!autoPlayVideos) return
+        
+        viewHolder.getBoundPosition()?.let { position ->
+            val player = players[position] ?: return
+            try {
+                player.playWhenReady = true
+                player.play()
+            } catch (e: Exception) {
+                // Player no disponible
+            }
+        }
+    }
 
     /**
      * Libera todos los players
@@ -252,6 +283,64 @@ class PostPagerAdapter(
             }
         }
         players.clear()
+    }
+    
+    /**
+     * Precarga imágenes de posts vecinos en background
+     * Como m11459i() en ei/e0.java de la app original (línea 1037)
+     * Descarga en un thread separado para no bloquear UI
+     */
+    fun preloadAdjacentPosts(currentPosition: Int, context: Context) {
+        // Precargar post anterior
+        if (currentPosition > 0) {
+            posts.getOrNull(currentPosition - 1)?.let { post ->
+                preloadPostImage(post, context)
+            }
+        }
+        
+        // Precargar post siguiente
+        if (currentPosition < posts.size - 1) {
+            posts.getOrNull(currentPosition + 1)?.let { post ->
+                preloadPostImage(post, context)
+            }
+        }
+    }
+    
+    /**
+     * Precarga la imagen de un post en background usando Glide
+     * Como RunnableC3930a en la app original
+     */
+    private fun preloadPostImage(post: Post, context: Context) {
+        // Ejecutar en un thread de background
+        Thread {
+            try {
+                // Determinar URL según tipo de archivo
+                val ext = post.file.ext?.lowercase() ?: ""
+                val imageUrl = when {
+                    ext == "gif" || ext == "webm" || ext == "mp4" -> {
+                        // Para videos/gifs, precargar el sample (preview)
+                        post.sample.url ?: ""
+                    }
+                    else -> {
+                        // Para imágenes, precargar la versión completa
+                        post.file.url ?: ""
+                    }
+                }
+                
+                if (imageUrl.isNotEmpty()) {
+                    // Usar downloadOnly() de Glide para precargar sin mostrar
+                    // Esto descarga y cachea la imagen en background
+                    Glide.with(context)
+                        .downloadOnly()
+                        .load(imageUrl)
+                        .submit()
+                        .get() // Bloquea el thread de background hasta completar
+                }
+            } catch (e: Exception) {
+                // Error al precargar, no es crítico
+                // La imagen se cargará normalmente cuando el usuario llegue al post
+            }
+        }.start()
     }
     
     /**
@@ -900,35 +989,38 @@ class PostPagerAdapter(
             AlertDialog.Builder(context, R.style.DarkAlertDialog)
                 .setTitle(tagName)
                 .setItems(options) { _, which ->
-                    when (which) {
-                        0 -> { // Search - abre MainActivity con este tag (como di/k.java línea 129)
-                            searchTag(context, tagName)
+                    // Add delay to allow ripple effect to be visible before executing action
+                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                        when (which) {
+                            0 -> { // Search - abre MainActivity con este tag (como di/k.java línea 129)
+                                searchTag(context, tagName)
+                            }
+                            1 -> { // Add to saved searches
+                                addToSavedSearches(context, tagName)
+                            }
+                            2 -> { // Add to blacklist
+                                addToBlacklist(context, tagName)
+                            }
+                            3 -> { // Follow tag
+                                followTag(context, tagName)
+                            }
+                            4 -> { // Unfollow tag
+                                unfollowTag(context, tagName)
+                            }
+                            5 -> { // Add to current search
+                                addToCurrentSearch(context, tagName)
+                            }
+                            6 -> { // Remove from current search
+                                removeFromCurrentSearch(context, tagName)
+                            }
+                            7 -> { // View wiki
+                                openWikiPage(context, tagName)
+                            }
+                            8 -> { // Copy to clipboard
+                                copyToClipboard(context, tagName)
+                            }
                         }
-                        1 -> { // Add to saved searches
-                            addToSavedSearches(context, tagName)
-                        }
-                        2 -> { // Add to blacklist
-                            addToBlacklist(context, tagName)
-                        }
-                        3 -> { // Follow tag
-                            followTag(context, tagName)
-                        }
-                        4 -> { // Unfollow tag
-                            unfollowTag(context, tagName)
-                        }
-                        5 -> { // Add to current search
-                            addToCurrentSearch(context, tagName)
-                        }
-                        6 -> { // Remove from current search
-                            removeFromCurrentSearch(context, tagName)
-                        }
-                        7 -> { // View wiki
-                            openWikiPage(context, tagName)
-                        }
-                        8 -> { // Copy to clipboard
-                            copyToClipboard(context, tagName)
-                        }
-                    }
+                    }, 150) // 150ms delay to show ripple effect
                 }
                 .show()
         }
