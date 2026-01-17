@@ -97,6 +97,7 @@
         <!-- Post Activity -->
         <activity
             android:name=".ui.post.PostActivity"
+            android:alwaysRetainTaskState="true"
             android:configChanges="orientation|screenLayout|screenSize|uiMode"
             android:exported="true">
             <!-- Deep links for posts -->
