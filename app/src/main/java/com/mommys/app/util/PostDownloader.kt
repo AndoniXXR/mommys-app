@@ -21,6 +21,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.concurrent.TimeUnit
 
 /**
  * Clase para manejar la descarga de posts
@@ -211,8 +212,12 @@ object PostDownloader {
                 ?: throw Exception("Failed to create MediaStore entry")
             
             try {
-                // Descargar el archivo
-                val client = OkHttpClient.Builder().build()
+                // Descargar el archivo con timeouts configurados
+                val client = OkHttpClient.Builder()
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .writeTimeout(60, TimeUnit.SECONDS)
+                    .build()
                 val request = Request.Builder().url(url).build()
                 val response = client.newCall(request).execute()
                 
@@ -227,10 +232,10 @@ object PostDownloader {
                     ?: throw Exception("Failed to open output stream")
                 inputStream = body.byteStream()
                 
-                val buffer = ByteArray(8192)
+                val buffer = ByteArray(65536) // 64KB buffer para mejor rendimiento
                 var bytesRead: Int
                 var totalBytesRead: Long = 0
-                var lastProgress = 0
+                var lastProgress = -5 // Iniciar en -5 para forzar primera actualización
                 
                 while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                     outputStream.write(buffer, 0, bytesRead)
@@ -238,7 +243,8 @@ object PostDownloader {
                     
                     if (contentLength > 0) {
                         val progress = ((totalBytesRead * 100) / contentLength).toInt()
-                        if (progress != lastProgress) {
+                        // Actualizar solo cada 5% para reducir overhead
+                        if (progress >= lastProgress + 5 || progress == 100) {
                             lastProgress = progress
                             callback?.let {
                                 withContext(Dispatchers.Main) { it.onProgress(progress) }
@@ -312,8 +318,12 @@ object PostDownloader {
                 return@withContext android.net.Uri.fromFile(file).toString()
             }
             
-            // Descargar el archivo
-            val client = OkHttpClient.Builder().build()
+            // Descargar el archivo con timeouts configurados
+            val client = OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .build()
             val request = Request.Builder().url(url).build()
             val response = client.newCall(request).execute()
             
@@ -327,10 +337,10 @@ object PostDownloader {
             outputStream = FileOutputStream(file)
             inputStream = body.byteStream()
             
-            val buffer = ByteArray(8192)
+            val buffer = ByteArray(65536) // 64KB buffer para mejor rendimiento
             var bytesRead: Int
             var totalBytesRead: Long = 0
-            var lastProgress = 0
+            var lastProgress = -5 // Iniciar en -5 para forzar primera actualización
             
             while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                 outputStream.write(buffer, 0, bytesRead)
@@ -338,7 +348,8 @@ object PostDownloader {
                 
                 if (contentLength > 0) {
                     val progress = ((totalBytesRead * 100) / contentLength).toInt()
-                    if (progress != lastProgress) {
+                    // Actualizar solo cada 5% para reducir overhead
+                    if (progress >= lastProgress + 5 || progress == 100) {
                         lastProgress = progress
                         callback?.let {
                             withContext(Dispatchers.Main) { it.onProgress(progress) }

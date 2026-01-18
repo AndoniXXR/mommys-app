@@ -332,6 +332,15 @@
             </intent-filter>
         </receiver>
 
+        <!-- Download cancel receiver para manejar cancelación de descargas -->
+        <receiver
+            android:name=".receiver.DownloadCancelReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.mommys.app.ACTION_CANCEL_DOWNLOAD" />
+            </intent-filter>
+        </receiver>
+
         <!-- FileProvider para compartir archivos -->
         <provider
             android:name="androidx.core.content.FileProvider"

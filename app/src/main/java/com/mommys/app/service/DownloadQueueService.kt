@@ -6,6 +6,7 @@ import com.mommys.app.data.db.downloads.AppDownloadsDatabase
 import com.mommys.app.data.db.downloads.DownloadItem
 import com.mommys.app.data.model.*
 import com.mommys.app.data.preferences.PreferencesManager
+import com.mommys.app.util.DownloadNotificationHelper
 import com.mommys.app.util.PostDownloader
 import kotlinx.coroutines.*
 
@@ -89,14 +90,43 @@ object DownloadQueueService {
                 // Crear Post temporal para usar PostDownloader
                 val tempPost = createTempPost(nextDownload)
                 
-                // Descargar usando PostDownloader (que usa MediaStore correctamente)
+                // Crear notificación para esta descarga
+                val notificationId = 2000 + (nextDownload.postId % 10000)
+                val fileName = "Post #${nextDownload.postId}"
+                
+                // Descargar usando PostDownloader con callback para progreso
                 var success = false
                 runBlocking {
                     val result = PostDownloader.downloadPost(
                         context = context,
                         post = tempPost,
                         prefsManager = prefs,
-                        callback = null
+                        callback = object : PostDownloader.DownloadCallback {
+                            override fun onStart() {
+                                DownloadNotificationHelper.showDownloadStartNotification(
+                                    context, nextDownload.postId, fileName
+                                )
+                            }
+                            
+                            override fun onProgress(progress: Int) {
+                                DownloadNotificationHelper.updateDownloadProgress(
+                                    context, notificationId, progress, fileName
+                                )
+                            }
+                            
+                            override fun onSuccess(downloadedFile: PostDownloader.DownloadedFile) {
+                                DownloadNotificationHelper.showDownloadCompleteNotification(
+                                    context, notificationId, downloadedFile.fileName,
+                                    downloadedFile.uri, downloadedFile.mimeType
+                                )
+                            }
+                            
+                            override fun onError(error: String) {
+                                DownloadNotificationHelper.showDownloadErrorNotification(
+                                    context, notificationId, fileName, error
+                                )
+                            }
+                        }
                     )
                     success = result != null
                 }
