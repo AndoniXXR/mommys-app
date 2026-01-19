@@ -35,6 +35,24 @@ object PostDownloader {
     
     private const val TAG = "PostDownloader"
     
+    // OkHttpClient singleton compartido (FIX #1: reutilizar conexiones)
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(120, TimeUnit.SECONDS)  // Aumentado para videos grandes
+        .writeTimeout(120, TimeUnit.SECONDS)
+        .dispatcher(okhttp3.Dispatcher().apply {
+            maxRequests = 5  // Límite global de requests simultáneas
+            maxRequestsPerHost = 3  // Límite por host
+        })
+        .build()
+    
+    // Configuración de reintentos (FIX #4: retry logic)
+    private const val MAX_RETRIES = 3
+    private const val INITIAL_RETRY_DELAY_MS = 1000L
+    
+    // Buffer size aumentado (FIX #5: mejor performance)
+    private const val BUFFER_SIZE = 256 * 1024  // 256 KB
+    
     // Nombre de carpeta por defecto
     private const val DEFAULT_FOLDER = "Mommys"
     
@@ -213,13 +231,8 @@ object PostDownloader {
             
             try {
                 // Descargar el archivo con timeouts configurados
-                val client = OkHttpClient.Builder()
-                    .connectTimeout(30, TimeUnit.SECONDS)
-                    .readTimeout(60, TimeUnit.SECONDS)
-                    .writeTimeout(60, TimeUnit.SECONDS)
-                    .build()
                 val request = Request.Builder().url(url).build()
-                val response = client.newCall(request).execute()
+                val response = executeWithRetry(request)  // FIX #1 y #4: singleton + reintentos
                 
                 if (!response.isSuccessful) {
                     throw Exception("Download failed: ${response.code}")
@@ -232,7 +245,7 @@ object PostDownloader {
                     ?: throw Exception("Failed to open output stream")
                 inputStream = body.byteStream()
                 
-                val buffer = ByteArray(65536) // 64KB buffer para mejor rendimiento
+                val buffer = ByteArray(BUFFER_SIZE) // FIX #5: 256KB buffer
                 var bytesRead: Int
                 var totalBytesRead: Long = 0
                 var lastProgress = -5 // Iniciar en -5 para forzar primera actualización
@@ -319,13 +332,8 @@ object PostDownloader {
             }
             
             // Descargar el archivo con timeouts configurados
-            val client = OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(60, TimeUnit.SECONDS)
-                .build()
             val request = Request.Builder().url(url).build()
-            val response = client.newCall(request).execute()
+            val response = executeWithRetry(request)  // FIX #1 y #4: singleton + reintentos
             
             if (!response.isSuccessful) {
                 throw Exception("Download failed: ${response.code}")
@@ -337,7 +345,7 @@ object PostDownloader {
             outputStream = FileOutputStream(file)
             inputStream = body.byteStream()
             
-            val buffer = ByteArray(65536) // 64KB buffer para mejor rendimiento
+            val buffer = ByteArray(BUFFER_SIZE) // FIX #5: 256KB buffer
             var bytesRead: Int
             var totalBytesRead: Long = 0
             var lastProgress = -5 // Iniciar en -5 para forzar primera actualización
@@ -491,6 +499,40 @@ object PostDownloader {
     private fun getMimeType(post: Post): String {
         val ext = post.file.ext?.lowercase() ?: ""
         return MIME_TYPES[ext] ?: "image/jpeg"
+    }
+    
+    /**
+     * Ejecutar request HTTP con reintentos y exponential backoff (FIX #4)
+     */
+    private fun executeWithRetry(request: Request): okhttp3.Response {
+        var lastException: Exception? = null
+        var delay = INITIAL_RETRY_DELAY_MS
+        
+        for (attempt in 1..MAX_RETRIES) {
+            try {
+                Log.d(TAG, "Download attempt $attempt/$MAX_RETRIES")
+                val response = httpClient.newCall(request).execute()
+                if (response.isSuccessful) {
+                    return response
+                }
+                // Si no es exitoso, cerrar y reintentar
+                response.close()
+                throw Exception("HTTP ${response.code}: ${response.message}")
+            } catch (e: Exception) {
+                lastException = e
+                Log.w(TAG, "Attempt $attempt failed: ${e.message}")
+                
+                if (attempt < MAX_RETRIES) {
+                    // Exponential backoff: esperar antes del siguiente intento
+                    Log.d(TAG, "Retrying in ${delay}ms...")
+                    Thread.sleep(delay)
+                    delay *= 2  // Duplicar delay para siguiente intento
+                }
+            }
+        }
+        
+        // Si llegamos aquí, todos los intentos fallaron
+        throw lastException ?: Exception("Download failed after $MAX_RETRIES attempts")
     }
     
     /**

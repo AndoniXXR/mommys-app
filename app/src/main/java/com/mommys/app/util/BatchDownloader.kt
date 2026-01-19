@@ -17,6 +17,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 /**
  * Descargador de posts en batch con notificaciones individuales
@@ -34,6 +36,9 @@ object BatchDownloader {
     private const val BATCH_CHANNEL_ID = "batch_downloads"
     private const val COMPLETE_CHANNEL_ID = "download_complete"
     private const val NOTIFICATION_ID_BASE = 1000
+    
+    // FIX #2: Semaphore para limitar descargas concurrentes (máximo 2)
+    private val downloadSemaphore = Semaphore(2)
     
     /**
      * Iniciar descarga batch de posts
@@ -105,33 +110,35 @@ object BatchDownloader {
         var downloaded = 0
         
         for (post in posts) {
-            // Usar módulo para mantener IDs de notificación en rango razonable
-            val notificationId = NOTIFICATION_ID_BASE + (post.id % 10000)
-            val fileName = PostDownloader.generateFileName(post, prefsManager) + 
-                          PostDownloader.getFileExtension(post)
-            
-            Log.d(TAG, "Starting download for post ${post.id}, notificationId=$notificationId")
-            
-            try {
-                // Mostrar notificación de progreso para este post
-                showIndividualProgressNotification(context, notificationId, fileName, 0)
+            // FIX #2: Usar semaphore para limitar a 2 descargas concurrentes
+            downloadSemaphore.withPermit {
+                // Usar módulo para mantener IDs de notificación en rango razonable
+                val notificationId = NOTIFICATION_ID_BASE + (post.id % 10000)
+                val fileName = PostDownloader.generateFileName(post, prefsManager) + 
+                              PostDownloader.getFileExtension(post)
                 
-                // Descargar - sin callback, manejaremos la notificación directamente
-                val result = PostDownloader.downloadPost(
-                    context = context,
-                    post = post,
-                    prefsManager = prefsManager,
-                    callback = object : PostDownloader.DownloadCallback {
-                        override fun onStart() {}
-                        
-                        override fun onProgress(progress: Int) {
-                            // Actualizar progreso en la notificación
-                            showIndividualProgressNotification(context, notificationId, fileName, progress)
-                        }
-                        
-                        override fun onSuccess(downloadedFile: PostDownloader.DownloadedFile) {
-                            // No hacemos nada aquí, lo manejamos abajo con el result
-                        }
+                Log.d(TAG, "Starting download for post ${post.id}, notificationId=$notificationId")
+                
+                try {
+                    // Mostrar notificación de progreso para este post
+                    showIndividualProgressNotification(context, notificationId, fileName, 0)
+                    
+                    // Descargar - sin callback, manejaremos la notificación directamente
+                    val result = PostDownloader.downloadPost(
+                        context = context,
+                        post = post,
+                        prefsManager = prefsManager,
+                        callback = object : PostDownloader.DownloadCallback {
+                            override fun onStart() {}
+                            
+                            override fun onProgress(progress: Int) {
+                                // Actualizar progreso en la notificación
+                                showIndividualProgressNotification(context, notificationId, fileName, progress)
+                            }
+                            
+                            override fun onSuccess(downloadedFile: PostDownloader.DownloadedFile) {
+                                // No hacemos nada aquí, lo manejamos abajo con el result
+                            }
                         
                         override fun onError(error: String) {
                             // No hacemos nada aquí, lo manejamos abajo
@@ -163,6 +170,7 @@ object BatchDownloader {
                 e.printStackTrace()
                 showIndividualErrorNotification(context, notificationId, fileName, e.message ?: "Error")
             }
+            } // Fin de withPermit
         }
         
         // Mostrar toast final (como la app original: worker_download_done)
