@@ -29,7 +29,7 @@ class DownloadCancelReceiver : BroadcastReceiver() {
                     
                     // Detener el servicio de descargas si está corriendo
                     // En una implementación más compleja, marcaríamos solo esta descarga como cancelada
-                    DownloadQueueService.stop()
+                    DownloadQueueService.stop(context)
                     
                     // TODO: Si implementas cancelación granular, aquí marcarías el post específico
                     // como cancelado en la base de datos

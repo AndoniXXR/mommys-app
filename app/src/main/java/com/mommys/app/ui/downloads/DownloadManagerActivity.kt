@@ -88,7 +88,7 @@ class DownloadManagerActivity : AppCompatActivity() {
         }
         
         btnStop.setOnClickListener {
-            DownloadQueueService.stop()
+            DownloadQueueService.stop(this)
             Toast.makeText(this, R.string.stopped, Toast.LENGTH_SHORT).show()
         }
         

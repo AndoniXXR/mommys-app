@@ -44,6 +44,9 @@ object UpdateManager {
     // Intervalo de verificación: 24 horas en milisegundos
     private const val CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000L
     
+    // Flag para evitar múltiples comprobaciones automáticas en la misma sesión
+    private var hasCheckedInThisSession = false
+    
     // Handler para callbacks en el main thread
     private val mainHandler = Handler(Looper.getMainLooper())
     
@@ -136,10 +139,19 @@ object UpdateManager {
      */
     suspend fun checkForUpdates(context: Context, forceCheck: Boolean = false): UpdateResult = withContext(Dispatchers.IO) {
         try {
-            // Si no es forzado, verificar si ya se comprobó recientemente
-            if (!forceCheck && !shouldCheckForUpdates(context)) {
-                Log.d(TAG, "Skipping update check - checked recently")
-                return@withContext UpdateResult.NoUpdateAvailable
+            // Si no es forzado checkear:
+            // 1. Si ya se checkeó en esta sesión del proceso, no hacer nada
+            // 2. Si se checkeó hace menos de 24h (guardado en prefs), no hacer nada
+            if (!forceCheck) {
+                if (hasCheckedInThisSession) {
+                    Log.d(TAG, "Skipping update check - already checked in this session")
+                    return@withContext UpdateResult.NoUpdateAvailable
+                }
+                
+                if (!shouldCheckForUpdates(context)) {
+                    Log.d(TAG, "Skipping update check - checked recently")
+                    return@withContext UpdateResult.NoUpdateAvailable
+                }
             }
             
             Log.d(TAG, "Checking for updates from: $GITHUB_API_URL")
@@ -156,6 +168,11 @@ object UpdateManager {
                 .build()
             
             val response = client.newCall(request).execute()
+            
+            // Si obtuvimos respuesta, marcamos que ya revisamos en esta sesión
+            if (!forceCheck) {
+                hasCheckedInThisSession = true
+            }
             
             if (!response.isSuccessful) {
                 Log.e(TAG, "GitHub API error: ${response.code}")
@@ -238,6 +255,16 @@ object UpdateManager {
             Log.d(TAG, "Version comparison result: $comparisonResult (positive = update available)")
             
             if (comparisonResult > 0) {
+                // Doble chequeo: Si el tagName es idéntico a current, NO ES UPDATE
+                // (Aunque compareVersions ya debería manejarlo, esto protege de fallos de parsing sutiles o espacios)
+                val cleanTagName = tagName.removePrefix("v").trim()
+                val cleanCurrent = currentVersion.removePrefix("v").trim()
+                
+                if (cleanTagName == cleanCurrent) {
+                    Log.d(TAG, "Versions are identical string-wise: $cleanTagName. Ignoring update.")
+                    return@withContext UpdateResult.NoUpdateAvailable
+                }
+
                 Log.d(TAG, "Update available!")
                 return@withContext UpdateResult.UpdateAvailable(releaseInfo, currentVersion)
             }

@@ -42,6 +42,21 @@ object DownloadNotificationHelper {
             notificationManager.createNotificationChannel(channel)
         }
     }
+
+    /**
+     * Obtener notificación para el servicio en primer plano
+     */
+    fun getForegroundServiceNotification(context: Context): android.app.Notification {
+        createNotificationChannel(context)
+        
+        return NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_download)
+            .setContentTitle(context.getString(R.string.download_manager_title))
+            .setContentText(context.getString(R.string.download_manager_status_running))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .build()
+    }
     
     /**
      * Verificar si tenemos permiso para mostrar notificaciones

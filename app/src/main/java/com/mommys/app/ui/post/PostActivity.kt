@@ -397,8 +397,8 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
             onTagClick = { tag -> searchByTag(tag) },
             onArtistClick = { artist -> searchByTag(artist) },
             onScrollStateChanged = { isScrolled -> 
-                // Mostrar mini preview cuando scrollea hacia abajo
-                updateMiniPreview(isScrolled)
+                // Mini preview eliminada a petición del usuario
+                // updateMiniPreview(isScrolled)
             },
             onVoteUp = { post -> 
                 // Votar arriba - como la app original ei/n.java case 1

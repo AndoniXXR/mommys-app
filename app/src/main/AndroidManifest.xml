@@ -341,6 +341,12 @@
             </intent-filter>
         </receiver>
 
+        <!-- Download Queue Service (Foreground) -->
+        <service
+            android:name=".service.DownloadQueueService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
         <!-- FileProvider para compartir archivos -->
         <provider
             android:name="androidx.core.content.FileProvider"

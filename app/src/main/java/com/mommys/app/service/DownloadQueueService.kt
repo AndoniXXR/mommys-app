@@ -1,7 +1,13 @@
 package com.mommys.app.service
 
+import android.app.Service
 import android.content.Context
+import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
+import android.os.IBinder
 import android.util.Log
+import androidx.core.content.ContextCompat
 import com.mommys.app.data.db.downloads.AppDownloadsDatabase
 import com.mommys.app.data.db.downloads.DownloadItem
 import com.mommys.app.data.model.*
@@ -11,162 +17,156 @@ import com.mommys.app.util.PostDownloader
 import kotlinx.coroutines.*
 
 /**
- * Servicio para procesar la cola de descargas en segundo plano
- * Como si/C4044c.java (m16090s) + j/RunnableC2519l en la app original
- * 
- * IMPORTANTE: Usa Thread estático como el original para mantener
- * consistencia con isRunning() check en DownloadManagerActivity
+ * Servicio para procesar la cola de descargas en segundo plano.
+ * Refactorizado para ser un Foreground Service oficial de Android
+ * y evitar que el sistema lo mate al salir de la app.
  */
-object DownloadQueueService {
-    private const val TAG = "DownloadQueueService"
+class DownloadQueueService : Service() {
     
-    @Volatile
-    private var downloadThread: Thread? = null
+    private val serviceJob = Job()
+    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     
-    /**
-     * Verifica si el servicio está corriendo
-     * Como C4044c.f26271d.isAlive() en el original
-     */
-    fun isRunning(): Boolean = downloadThread?.isAlive == true
-    
-    /**
-     * Inicia el servicio de descargas
-     * Como C4044c.m16090s() - synchronized para evitar race conditions
-     */
-    @Synchronized
-    fun start(context: Context) {
-        val thread = downloadThread
-        // Si ya está corriendo, no hacer nada
-        if (thread != null && thread.isAlive) {
-            Log.d(TAG, "Download service already running")
-            return
-        }
-        
-        // Crear y arrancar nuevo thread
-        downloadThread = Thread {
-            processQueue(context.applicationContext)
-        }.apply { 
-            name = "DownloadQueueThread"
-            start() 
-        }
-        
-        Log.d(TAG, "Download service started")
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
     }
     
-    /**
-     * Detiene el servicio de descargas
-     * Como interrumpir C4044c.f26271d en el original
-     */
-    fun stop() {
-        downloadThread?.interrupt()
-        downloadThread = null
-        Log.d(TAG, "Download service stopped")
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(TAG, "DownloadQueueService started")
+        running = true
+        
+        // Iniciar en primer plano inmediatamente
+        startForegroundService()
+        
+        // Iniciar procesamiento de cola
+        serviceScope.launch {
+            processQueue(applicationContext)
+            // Al terminar la cola, detener el servicio
+            stopSelf()
+        }
+        
+        return START_STICKY
     }
     
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "DownloadQueueService destroyed")
+        running = false
+        serviceJob.cancel()
+    }
+    
+    private fun startForegroundService() {
+        val notification = DownloadNotificationHelper.getForegroundServiceNotification(this)
+        val notificationId = 9999 // ID fijo para el servicio
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(notificationId, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            startForeground(notificationId, notification)
+        }
+    }
+
     /**
      * Procesa la cola de descargas
-     * Como RunnableC2519l.run() en el original
      */
-    private fun processQueue(context: Context) {
+    private suspend fun processQueue(context: Context) = coroutineScope {
         val database = AppDownloadsDatabase.getInstance(context)
         val prefs = PreferencesManager(context)
         
         Log.d(TAG, "Starting download queue processing")
         
-        while (!Thread.currentThread().isInterrupted) {
+        while (isActive) {
             try {
-                // Obtener siguiente descarga pendiente (blocking call)
-                val nextDownload = runBlocking {
-                    database.downloadDao().getNextPendingDownload()
-                }
+                // Obtener siguiente descarga pendiente
+                val nextDownload = database.downloadDao().getNextPendingDownload()
                 
                 if (nextDownload == null) {
                     Log.d(TAG, "No more pending downloads, stopping")
                     break
                 }
                 
-                Log.d(TAG, "Processing download: ${nextDownload.postId}")
+                Log.d(TAG, "Processing download: " + nextDownload.postId)
                 
                 // Crear Post temporal para usar PostDownloader
                 val tempPost = createTempPost(nextDownload)
                 
-                // Crear notificación para esta descarga
+                // Crear notificaci�n para esta descarga
                 val notificationId = 2000 + (nextDownload.postId % 10000)
-                val fileName = "Post #${nextDownload.postId}"
+                val fileName = "Post #" + nextDownload.postId
                 
                 // Descargar usando PostDownloader con callback para progreso
                 var success = false
-                runBlocking {
-                    val result = PostDownloader.downloadPost(
-                        context = context,
-                        post = tempPost,
-                        prefsManager = prefs,
-                        callback = object : PostDownloader.DownloadCallback {
-                            override fun onStart() {
-                                DownloadNotificationHelper.showDownloadStartNotification(
-                                    context, nextDownload.postId, fileName
-                                )
-                            }
-                            
-                            override fun onProgress(progress: Int) {
-                                DownloadNotificationHelper.updateDownloadProgress(
-                                    context, notificationId, progress, fileName
-                                )
-                            }
-                            
-                            override fun onSuccess(downloadedFile: PostDownloader.DownloadedFile) {
-                                DownloadNotificationHelper.showDownloadCompleteNotification(
-                                    context, notificationId, downloadedFile.fileName,
-                                    downloadedFile.uri, downloadedFile.mimeType
-                                )
-                            }
-                            
-                            override fun onError(error: String) {
-                                DownloadNotificationHelper.showDownloadErrorNotification(
-                                    context, notificationId, fileName, error
-                                )
-                            }
-                        }
-                    )
-                    success = result != null
-                }
                 
-                if (success) {
-                    // Eliminar de la cola después de descarga exitosa
-                    runBlocking {
-                        database.downloadDao().deleteByFileUrl(nextDownload.fileUrl)
+                // Usar PostDownloader
+                val result = PostDownloader.downloadPost(
+                    context,
+                    tempPost,
+                    prefs,
+                    object : PostDownloader.DownloadCallback {
+                        override fun onStart() {
+                            DownloadNotificationHelper.showDownloadStartNotification(
+                                context, 
+                                nextDownload.postId, 
+                                fileName
+                            )
+                        }
+
+                        override fun onProgress(progress: Int) {
+                            DownloadNotificationHelper.updateDownloadProgress(
+                                context, 
+                                notificationId, 
+                                progress, 
+                                fileName
+                            )
+                        }
+
+                        override fun onSuccess(downloadedFile: PostDownloader.DownloadedFile) {
+                            success = true
+                            DownloadNotificationHelper.showDownloadCompleteNotification(
+                                context, 
+                                notificationId, 
+                                fileName,
+                                downloadedFile.uri,
+                                downloadedFile.mimeType
+                            )
+                        }
+
+                        override fun onError(error: String) {
+                            DownloadNotificationHelper.showDownloadErrorNotification(
+                                context, 
+                                notificationId, 
+                                fileName, 
+                                error
+                            )
+                        }
                     }
-                    Log.d(TAG, "Download completed: ${nextDownload.postId}")
+                )
+                
+                if (result != null) success = true;
+
+                if (success) {
+                    // Eliminar de la cola despu�s de descarga exitosa
+                    database.downloadDao().deleteByFileUrl(nextDownload.fileUrl)
+                    Log.d(TAG, "Download completed: " + nextDownload.postId)
                 } else {
                     // Marcar con error
-                    runBlocking {
-                        database.downloadDao().update(
-                            nextDownload.copy(error = "Download failed")
-                        )
-                    }
-                    Log.e(TAG, "Download failed: ${nextDownload.postId}")
+                    database.downloadDao().update(
+                        nextDownload.copy(error = "Download failed")
+                    )
+                    Log.e(TAG, "Download failed: " + nextDownload.postId)
                 }
                 
-                // Pequeña pausa entre descargas (como el original)
-                Thread.sleep(500)
+                // Peque�a pausa entre descargas
+                delay(500)
                 
-            } catch (e: InterruptedException) {
-                Log.d(TAG, "Download thread interrupted")
-                break
             } catch (e: Exception) {
-                Log.e(TAG, "Error in download queue", e)
-                // Continuar con la siguiente descarga
+                Log.e(TAG, "Error in download loop", e)
+                delay(1000)
             }
         }
-        
-        Log.d(TAG, "Download queue processing finished")
     }
     
-    /**
-     * Crea un Post temporal a partir de DownloadItem para usar PostDownloader
-     * Esto permite reutilizar toda la lógica de descarga con MediaStore
-     */
     private fun createTempPost(item: DownloadItem): Post {
+        // Crear un objeto Post b�sico con la info disponible en DownloadItem
         return Post(
             id = item.postId,
             createdAt = "",
@@ -207,5 +207,31 @@ object DownloadQueueService {
             isFavorited = false,
             hasNotes = false
         )
+    }
+
+    companion object {
+        private const val TAG = "DownloadQueueService"
+        
+        @Volatile
+        var running = false
+            internal set
+            
+        fun isRunning(): Boolean = running
+        
+        /**
+         * Inicia el servicio de descargas en primer plano
+         */
+        fun start(context: Context) {
+            val intent = Intent(context, DownloadQueueService::class.java)
+            ContextCompat.startForegroundService(context, intent)
+        }
+        
+        /**
+         * Detiene el servicio de descargas
+         */
+        fun stop(context: Context) {
+            val intent = Intent(context, DownloadQueueService::class.java)
+            context.stopService(intent)
+        }
     }
 }
