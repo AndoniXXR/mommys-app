@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 基本操作 -->
+    <string name="abc_action_bar_home_description">ホーム</string>
+    <string name="abc_action_bar_up_description">戻る</string>
+    <string name="abc_action_menu_overflow_description">その他</string>
+    <string name="abc_action_mode_done">完了</string>
+    <string name="abc_search_hint">検索…</string>
+    <string name="abc_searchview_description_search">検索</string>
+    
+    <!-- お気に入りと投票 -->
+    <string name="action_favourite_added">お気に入りに追加しました</string>
+    <string name="action_favourite_already_added">すでにお気に入りに登録済みです</string>
+    <string name="action_favourite_removed">お気に入りから削除しました</string>
+    <string name="action_forbidden">403 アクセス禁止。ログインしていますか？</string>
+    <string name="action_voted_down">低評価しました</string>
+    <string name="action_voted_up">高評価しました</string>
+    <string name="action_voted_removed_down">低評価を取り消しました</string>
+    <string name="action_voted_removed_up">高評価を取り消しました</string>
+    
+    <!-- 基本ボタン -->
+    <string name="add">追加</string>
+    <string name="cancel">キャンセル</string>
+    <string name="clear">クリア</string>
+    <string name="copy">コピー</string>
+    <string name="delete">削除</string>
+    <string name="done">完了</string>
+    <string name="download">ダウンロード</string>
+    <string name="downloading">ダウンロード中...</string>
+    <string name="edit">編集</string>
+    <string name="error">エラー</string>
+    <string name="go">移動</string>
+    <string name="later">後で</string>
+    <string name="loading">読み込み中…</string>
+    <string name="login">ログイン</string>
+    <string name="no">いいえ</string>
+    <string name="ok">OK</string>
+    <string name="open">開く</string>
+    <string name="save">保存</string>
+    <string name="search">検索</string>
+    <string name="settings">設定</string>
+    <string name="view">表示</string>
+    <string name="yes">はい</string>
+    
+    <!-- メインメニュー -->
+    <string name="menu_about">このアプリについて</string>
+    <string name="menu_browse">閲覧</string>
+    <string name="menu_browse_pools">プール</string>
+    <string name="menu_browse_sets">セット</string>
+    <string name="menu_browse_tags">タグ</string>
+    <string name="menu_downloads">ダウンロードキュー</string>
+    <string name="menu_filter">フィルターと並べ替え</string>
+    <string name="menu_following_tags">フォロー中のタグ投稿</string>
+    <string name="menu_go_to">移動</string>
+    <string name="menu_go_to_page">ページ</string>
+    <string name="menu_go_to_random_post">ランダム投稿</string>
+    <string name="menu_login">ログイン</string>
+    <string name="menu_my_account">マイアカウント</string>
+    <string name="menu_my_favourites">お気に入り</string>
+    <string name="menu_my_log_out">ログアウト</string>
+    <string name="menu_my_profile">マイプロフィール</string>
+    <string name="menu_popular">人気</string>
+    <string name="menu_popular_by_day">今日の人気</string>
+    <string name="menu_popular_by_month">今月の人気</string>
+    <string name="menu_popular_by_week">今週の人気</string>
+    <string name="menu_settings">設定</string>
+    
+    <!-- 検索 -->
+    <string name="main_search_hint">タグで検索</string>
+    <string name="main_btn_next">次のページ</string>
+    <string name="main_btn_previous">前のページ</string>
+    <string name="main_btn_search">検索</string>
+    <string name="main_back_again_to_exit">もう一度押すと終了します</string>
+    
+    <!-- ページとエラー -->
+    <string name="page_empty">空のページ。投稿が見つかりません</string>
+    <string name="page_error">読み込みに失敗しました\n接続を確認して再試行してください</string>
+    <string name="default_error_msg">不明なエラー</string>
+    
+    <!-- 投稿 - 基本情報 -->
+    <string name="post_description">説明</string>
+    <string name="post_details_title">投稿の詳細</string>
+    <string name="post_info_title">投稿 #%1$d</string>
+    <string name="post_info_artist">アーティスト：%1$s</string>
+    <string name="post_info_favourites">お気に入り：%1$d</string>
+    <string name="post_info_score">スコア：%1$d（%2$d 高評価 %3$d 低評価）</string>
+    <string name="post_info_children">子投稿あり</string>
+    <string name="post_info_parent">親投稿あり</string>
+    <string name="post_info_pool">プール：%1$s</string>
+    <string name="post_info_rating">レーティング：%1$s</string>
+    <string name="post_info_comments">%1$d 件のコメント</string>
+    <string name="post_desc_more">もっと見る…</string>
+    <string name="post_desc_less">閉じる…</string>
+    
+    <!-- 投稿 - タグ -->
+    <string name="post_tags_title">タグ（%1$d）</string>
+    <string name="post_tags_artist">アーティスト</string>
+    <string name="post_tags_character">キャラクター</string>
+    <string name="post_tags_copyright">著作権</string>
+    <string name="post_tags_general">一般</string>
+    <string name="post_tags_species">種族</string>
+    <string name="post_tags_meta">メタ</string>
+    <string name="post_tags_lore">ロア</string>
+    
+    <!-- 投稿 - エラー -->
+    <string name="post_error">投稿の読み込みに失敗しました\n接続を確認して再試行してください</string>
+    <string name="post_error_deleted">この投稿は削除されました</string>
+    <string name="post_error_not_logged_in">この投稿を見るにはログインが必要です</string>
+    <string name="post_error_not_sfw">セーフモード中です。この投稿は成人向けです</string>
+    
+    <!-- 投稿 - メニュー -->
+    <string name="post_menu_copy_post">リンクをコピー</string>
+    <string name="post_menu_edit_post">投稿を編集</string>
+    <string name="post_menu_open_post">ブラウザで開く</string>
+    <string name="post_menu_share_post">投稿を共有</string>
+    <string name="post_menu_reload_post">投稿を再読み込み</string>
+    <string name="post_menu_add_to_set">セットに追加</string>
+    <string name="post_menu_slideshow">スライドショー</string>
+    
+    <!-- フィルター -->
+    <string name="filter">フィルター</string>
+    <string name="filter_order">並べ替え</string>
+    <string name="filter_order_by_newest">新しい順（デフォルト）</string>
+    <string name="filter_order_by_oldest">古い順</string>
+    <string name="filter_order_by_score">スコア順</string>
+    <string name="filter_order_by_favs">お気に入り順</string>
+    <string name="filter_rating">レーティング</string>
+    <string name="filter_type">投稿タイプ</string>
+    <string name="filter_type_all">すべて表示</string>
+    <string name="filter_type_only_images">画像のみ</string>
+    <string name="filter_type_only_videos">動画のみ</string>
+    <string name="filter_type_only_gifs">GIF のみ</string>
+    
+    <!-- ブラックリスト -->
+    <string name="blacklist">ブラックリスト</string>
+    <string name="blacklist_saved">ブラックリストを保存しました</string>
+    <string name="blacklist_menu_save">保存</string>
+    <string name="blacklist_menu_help">ヘルプ</string>
+    <string name="blacklist_menu_import">インポート</string>
+    <string name="blacklist_menu_export">エクスポート</string>
+    
+    <!-- 保存した検索 -->
+    <string name="saved_title">保存した検索</string>
+    <string name="saved_save_current">現在の検索を保存</string>
+    <string name="saved_item_added">新しい検索を作成しました</string>
+    <string name="saved_item_deleted">検索を削除しました</string>
+    
+    <!-- コメント -->
+    <string name="comments_title">コメント</string>
+    <string name="comments_create">コメントを追加</string>
+    <string name="comment_reply">返信</string>
+    <string name="comment_vote_up">高評価</string>
+    <string name="comment_vote_down">低評価</string>
+    
+    <!-- タグメニュー -->
+    <string name="tag_menu_search">検索</string>
+    <string name="tag_menu_add_to_saved">検索に追加</string>
+    <string name="tag_menu_add_to_blacklist">ブラックリストに追加</string>
+    <string name="tag_menu_follow">タグをフォロー</string>
+    <string name="tag_menu_unfollow">フォロー解除</string>
+    <string name="tag_menu_add_to_search">検索に追加</string>
+    <string name="tag_menu_remove_from_search">検索から削除</string>
+    <string name="tag_menu_view_wiki">Wiki を表示</string>
+    <string name="tag_menu_copy">コピー</string>
+    
+    <!-- 設定 - 一般 -->
+    <string name="pref_general">一般</string>
+    <string name="pref_general_summary">e621/e926、言語、テーマ、画質、ブラックリスト、PIN コードなど</string>
+    <string name="pref_general_language_title">言語</string>
+    <string name="pref_general_language_summary">言語を変更</string>
+    <string name="pref_general_dark_mode_title">テーマを変更</string>
+    <string name="pref_general_dark_mode_summary">ダーク</string>
+    <string name="pref_general_blacklist_title">ブラックリストを管理</string>
+    <string name="pref_general_blacklist_enable_title">ブラックリストを有効にする</string>
+    <string name="pref_general_blacklist_enable_summary">無効にするとすべての投稿を表示します</string>
+    
+    <!-- 設定 - ストレージ -->
+    <string name="pref_storage">ストレージとダウンロード</string>
+    <string name="pref_storage_summary">保存先、キャッシュ、ファイル名など</string>
+    
+    <!-- 設定 - 検索 -->
+    <string name="pref_searching">検索とタグ</string>
+    <string name="pref_searching_summary">履歴、候補、ページあたりの投稿数など</string>
+    
+    <!-- 設定 - 投稿ビュー -->
+    <string name="pref_post_view">投稿ビューのカスタマイズ</string>
+    <string name="pref_post_view_summary">タグ、データ節約、戻るボタンなど</string>
+    
+    <!-- ログイン -->
+    <string name="login_success_toast">%1$s としてログインしました</string>
+    <string name="login_error_title">ログインに失敗しました</string>
+    
+    <!-- プール -->
+    <string name="browse_pools_title">プール</string>
+    <string name="pool_title">プール #%1$d</string>
+    
+    <!-- タグ -->
+    <string name="browse_tags_title">タグ</string>
+    <string name="tags">タグ</string>
+    <string name="copied_to_clipboard">クリップボードにコピーしました</string>
+    
+    <!-- 権限 -->
+    <string name="permission_required">権限が必要です</string>
+    <string name="notifications_permission_title">通知を許可しますか？</string>
+    <string name="notifications_permission_confirm">許可</string>
+    <string name="notifications_permission_decline">許可しない</string>
+    
+    <!-- 言語 -->
+    <string name="arrays_language_chinese_simplified">簡体字中国語 (Chinese Simplified)</string>
+    <string name="arrays_language_japanese">日本語 (Japanese)</string>
+    <string name="arrays_language_english">英語 (English)</string>
+    <string name="arrays_language_spanish">スペイン語 (Spanish)</string>
+    
+    <!-- 画質 -->
+    <string name="arrays_qualities_high">高</string>
+    <string name="arrays_qualities_medium">中</string>
+    <string name="arrays_qualities_low">低</string>
+    
+    <!-- テーマ -->
+    <string name="arrays_theme_entries_dark">ダーク</string>
+    <string name="arrays_theme_entries_light">ライト</string>
+    <string name="arrays_theme_entries_system_default">システムデフォルト（Android 10 以上）</string>
+    
+    <!-- その他 -->
+    <string name="sources">ソース</string>
+    <string name="details">詳細</string>
+    <string name="restart_app_for_changes">変更を適用するにはアプリを再起動してください</string>
+    
+    <!-- ネットワーク -->
+    <string name="pref_network">ネットワーク</string>
+    
+    <!-- エクスポート -->
+    <string name="pref_export">エクスポートとインポート</string>
+    <string name="encrypt">暗号化</string>
+    <string name="export_success">ファイルを %s にエクスポートしました</string>
+    <string name="import_success">データをインポートしました。アプリを再起動します</string>
+    
+    <!-- ダウンロードマネージャー -->
+    <string name="download_manager_title">ダウンロードキュー</string>
+    <string name="download_manager_start">開始</string>
+    <string name="download_manager_stop">停止</string>
+    <string name="download_manager_empty">キューにダウンロードはありません</string>
+    
+    <!-- セット -->
+    <string name="browse_sets_title">セット</string>
+    <string name="menu_my_sets">マイセット</string>
+    
+    <!-- アバウトメニュー -->
+    <string name="menu_about_changelog">更新履歴</string>
+    <string name="menu_about_licenses">ライセンス</string>
+    <string name="licenses_title">オープンソースライセンス</string>
+    <string name="menu_about_news">ニュース</string>
+    <string name="menu_about_donate">寄付</string>
+    
+    <!-- アップデート -->
+    <string name="update_checking">アップデートを確認中…</string>
+    <string name="update_available_title">新しいバージョンが利用可能です</string>
+    <string name="update_download">ダウンロードしてインストール</string>
+    <string name="update_no_update">最新バージョンを使用しています</string>
+    
+    <!-- Wiki -->
+    <string name="wiki_show_title">%1$s - Wiki</string>
+    <string name="menu_browse_wiki">Wiki</string>
+    
+    <!-- 寄付 -->
+    <string name="donate_title">寄付</string>
+    <string name="donate_sub_title">このアプリの開発を支援してください！</string>
+    
+    <!-- 投稿の編集 -->
+    <string name="edit_post_title">投稿 #%1$d を編集中</string>
+    <string name="edit_post_rating">レーティング</string>
+    <string name="edit_post_rating_s">安全</string>
+    <string name="edit_post_rating_q">疑わしい</string>
+    <string name="edit_post_rating_e">成人向け</string>
+    
+    <!-- スライドショー -->
+    <string name="ss_title">スライドショー設定</string>
+    <string name="ss_start">開始</string>
+</resources>

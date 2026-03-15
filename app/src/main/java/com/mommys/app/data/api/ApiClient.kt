@@ -20,7 +20,7 @@ object ApiClient {
     
     private const val CONNECT_TIMEOUT_SECONDS = 5L
     private const val RW_TIMEOUT_SECONDS = 15L
-    private const val USER_AGENT = "Mommys/1.0 (Android app)"
+    private const val USER_AGENT = "Mommys/1.4.6 (by AndoniXXR)"
     
     private var retrofit: Retrofit? = null
     private var currentBaseUrl: String = ApiService.BASE_URL_E926
@@ -84,12 +84,19 @@ object ApiClient {
      */
     private fun createHeaderInterceptor(): Interceptor {
         return Interceptor { chain ->
-            val request = chain.request().newBuilder()
+            val prefs = MommysApplication.getInstance().preferencesManager
+            val requestBuilder = chain.request().newBuilder()
                 .header("User-Agent", USER_AGENT)
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json")
-                .build()
-            chain.proceed(request)
+            
+            // Enviar Cookie header para pasar Cloudflare (como h7/d.java método q())
+            val cookies = prefs.getCookies()
+            if (cookies.isNotEmpty()) {
+                requestBuilder.header("Cookie", cookies)
+            }
+            
+            chain.proceed(requestBuilder.build())
         }
     }
     
@@ -117,13 +124,6 @@ object ApiClient {
                     )
                     requestBuilder.header("Authorization", basicAuth)
                 }
-                
-                // También agregar como query params (algunos endpoints lo requieren)
-                val url = chain.request().url.newBuilder()
-                    .addQueryParameter("login", username)
-                    .addQueryParameter("api_key", apiKey)
-                    .build()
-                requestBuilder.url(url)
             }
             
             // Para peticiones POST de votos/favoritos, agregar X-Requested-With

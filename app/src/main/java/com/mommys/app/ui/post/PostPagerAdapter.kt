@@ -19,6 +19,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
+import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
@@ -926,6 +927,33 @@ class PostPagerAdapter(
         }
 
         /**
+         * Muestra un Snackbar desde el contexto de la Activity
+         */
+        private fun showSnackbar(context: Context, message: String) {
+            // Desempaquetar ContextThemeWrapper si es necesario
+            var ctx: Context = context
+            while (ctx is android.view.ContextThemeWrapper) {
+                ctx = ctx.baseContext
+            }
+            val activity = ctx as? Activity
+            val rootView = activity?.findViewById<View>(android.R.id.content)
+            if (rootView != null) {
+                Snackbar.make(rootView, message, Snackbar.LENGTH_SHORT).show()
+            } else {
+                // Fallback: intentar con binding.root directamente
+                try {
+                    Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+                } catch (_: Exception) {
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        private fun showSnackbar(context: Context, resId: Int) {
+            showSnackbar(context, context.getString(resId))
+        }
+
+        /**
          * Muestra un diálogo con opciones cuando se toca un tag
          * Como en la app original (PostActivity.java onTagClicked con post_tag_clicked array)
          * Orden de opciones (di/k.java líneas 120-170):
@@ -952,43 +980,51 @@ class PostPagerAdapter(
                 context.getString(R.string.tag_menu_copy)                     // 8
             )
 
-            AlertDialog.Builder(context, R.style.DarkAlertDialog)
+            val dialog = AlertDialog.Builder(context, R.style.DarkAlertDialog)
                 .setTitle(tagName)
-                .setItems(options) { _, which ->
-                    // Add delay to allow ripple effect to be visible before executing action
-                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                        when (which) {
-                            0 -> { // Search - abre MainActivity con este tag (como di/k.java línea 129)
-                                searchTag(context, tagName)
-                            }
-                            1 -> { // Add to saved searches
-                                addToSavedSearches(context, tagName)
-                            }
-                            2 -> { // Add to blacklist
-                                addToBlacklist(context, tagName)
-                            }
-                            3 -> { // Follow tag
-                                followTag(context, tagName)
-                            }
-                            4 -> { // Unfollow tag
-                                unfollowTag(context, tagName)
-                            }
-                            5 -> { // Add to current search
-                                addToCurrentSearch(context, tagName)
-                            }
-                            6 -> { // Remove from current search
-                                removeFromCurrentSearch(context, tagName)
-                            }
-                            7 -> { // View wiki
-                                openWikiPage(context, tagName)
-                            }
-                            8 -> { // Copy to clipboard
-                                copyToClipboard(context, tagName)
-                            }
+                .setItems(options, null) // Sin listener aquí, lo manejamos manualmente
+                .create()
+
+            dialog.setOnShowListener {
+                val listView = dialog.listView
+                listView.setOnItemClickListener { _, view, position, _ ->
+                    // Efecto visual: hundir el ítem tocado
+                    view.animate()
+                        .scaleX(0.95f)
+                        .scaleY(0.95f)
+                        .alpha(0.6f)
+                        .setDuration(100)
+                        .withEndAction {
+                            view.animate()
+                                .scaleX(1.0f)
+                                .scaleY(1.0f)
+                                .alpha(1.0f)
+                                .setDuration(100)
+                                .withEndAction {
+                                    dialog.dismiss()
+                                    executeTagAction(context, tagName, position)
+                                }
+                                .start()
                         }
-                    }, 150) // 150ms delay to show ripple effect
+                        .start()
                 }
-                .show()
+            }
+
+            dialog.show()
+        }
+
+        private fun executeTagAction(context: Context, tagName: String, which: Int) {
+            when (which) {
+                0 -> searchTag(context, tagName)
+                1 -> addToSavedSearches(context, tagName)
+                2 -> addToBlacklist(context, tagName)
+                3 -> followTag(context, tagName)
+                4 -> unfollowTag(context, tagName)
+                5 -> addToCurrentSearch(context, tagName)
+                6 -> removeFromCurrentSearch(context, tagName)
+                7 -> openWikiPage(context, tagName)
+                8 -> copyToClipboard(context, tagName)
+            }
         }
 
         /**
@@ -1018,7 +1054,7 @@ class PostPagerAdapter(
                     
                     if (alreadyExists) {
                         withContext(Dispatchers.Main) {
-                            Toast.makeText(context, R.string.tag_already_in_saved, Toast.LENGTH_SHORT).show()
+                            showSnackbar(context, R.string.tag_already_in_saved)
                         }
                     } else {
                         // Insert new saved search
@@ -1029,13 +1065,13 @@ class PostPagerAdapter(
                         )
                         app.database.savedSearchDao().insert(savedSearch)
                         withContext(Dispatchers.Main) {
-                            Toast.makeText(context, R.string.tag_added_to_saved, Toast.LENGTH_SHORT).show()
+                            showSnackbar(context, R.string.tag_added_to_saved)
                         }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(context, R.string.tag_added_to_saved, Toast.LENGTH_SHORT).show()
+                        showSnackbar(context, R.string.tag_added_to_saved)
                     }
                 }
             }
@@ -1054,7 +1090,7 @@ class PostPagerAdapter(
             // Check if tag already exists (as a whole line)
             val lines = currentRaw.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
             if (lines.contains(tagName)) {
-                Toast.makeText(context, R.string.tag_already_in_blacklist, Toast.LENGTH_SHORT).show()
+                showSnackbar(context, R.string.tag_already_in_blacklist)
                 return
             }
             
@@ -1068,7 +1104,7 @@ class PostPagerAdapter(
             // Save using PreferencesManager (this also updates the Set version)
             prefsManager.setBlacklistRaw(newRaw)
             
-            Toast.makeText(context, R.string.tag_added_to_blacklist, Toast.LENGTH_SHORT).show()
+            showSnackbar(context, R.string.tag_added_to_blacklist)
         }
 
         /**
@@ -1080,13 +1116,13 @@ class PostPagerAdapter(
             val wasAdded = prefsManager.addFollowingTag(tagName)
             
             if (wasAdded) {
-                Toast.makeText(context, R.string.tag_following, Toast.LENGTH_SHORT).show()
+                showSnackbar(context, R.string.tag_following)
                 // Schedule the job if following is enabled
                 if (prefsManager.followingEnabled) {
                     FollowingJobService.schedule(context)
                 }
             } else {
-                Toast.makeText(context, R.string.tag_already_following, Toast.LENGTH_SHORT).show()
+                showSnackbar(context, R.string.tag_already_following)
             }
         }
 
@@ -1099,9 +1135,9 @@ class PostPagerAdapter(
             val wasRemoved = prefsManager.removeFollowingTag(tagName)
             
             if (wasRemoved) {
-                Toast.makeText(context, R.string.tag_unfollowed, Toast.LENGTH_SHORT).show()
+                showSnackbar(context, R.string.tag_unfollowed)
             } else {
-                Toast.makeText(context, R.string.tag_not_following, Toast.LENGTH_SHORT).show()
+                showSnackbar(context, R.string.tag_not_following)
             }
         }
 
@@ -1116,7 +1152,7 @@ class PostPagerAdapter(
             val updated = pendingTags.toMutableSet()
             updated.add(tagName)
             prefs.edit().putStringSet("pending_add", updated).apply()
-            Toast.makeText(context, context.getString(R.string.tag_added_to_search), Toast.LENGTH_SHORT).show()
+            showSnackbar(context, R.string.tag_added_to_search)
         }
 
         /**
@@ -1129,7 +1165,7 @@ class PostPagerAdapter(
             val updated = pendingTags.toMutableSet()
             updated.add(tagName)
             prefs.edit().putStringSet("pending_remove", updated).apply()
-            Toast.makeText(context, context.getString(R.string.tag_removed_from_search), Toast.LENGTH_SHORT).show()
+            showSnackbar(context, R.string.tag_removed_from_search)
         }
 
         /**
@@ -1142,7 +1178,7 @@ class PostPagerAdapter(
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(wikiUrl))
                 context.startActivity(intent)
             } catch (e: Exception) {
-                Toast.makeText(context, "Error opening wiki", Toast.LENGTH_SHORT).show()
+                showSnackbar(context, "Error opening wiki")
             }
         }
 
@@ -1153,7 +1189,7 @@ class PostPagerAdapter(
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Tag", tagName)
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(context, R.string.tag_copied, Toast.LENGTH_SHORT).show()
+            showSnackbar(context, R.string.tag_copied)
         }
 
         private fun setupDetails(post: Post, context: Context) {
@@ -1183,21 +1219,21 @@ class PostPagerAdapter(
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
                 val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
                 val date = inputFormat.parse(post.createdAt.substringBefore('.'))
-                details.add("Created" to (date?.let { outputFormat.format(it) } ?: post.createdAt))
+                details.add(context.getString(R.string.detail_label_created) to (date?.let { outputFormat.format(it) } ?: post.createdAt))
             } catch (e: Exception) {
-                details.add("Created" to post.createdAt)
+                details.add(context.getString(R.string.detail_label_created) to post.createdAt)
             }
 
             // Uploader
             post.uploaderId?.let {
-                details.add("Uploader ID" to it.toString())
+                details.add(context.getString(R.string.detail_label_uploader) to it.toString())
             }
 
             // Size
-            details.add("Size" to "${post.file.width}x${post.file.height}")
+            details.add(context.getString(R.string.detail_label_size) to "${post.file.width}x${post.file.height}")
 
             // Format
-            details.add("Format" to post.file.ext.uppercase())
+            details.add(context.getString(R.string.detail_label_format) to post.file.ext.uppercase())
 
             // File size
             val fileSizeKb = (post.file.size ?: 0) / 1024
@@ -1207,7 +1243,7 @@ class PostPagerAdapter(
             } else {
                 "$fileSizeKb KB"
             }
-            details.add("File size" to fileSizeStr)
+            details.add(context.getString(R.string.detail_label_file_size) to fileSizeStr)
 
             // Agregar cada detalle
             details.forEach { (label, value) ->
@@ -1222,7 +1258,7 @@ class PostPagerAdapter(
             // Sources
             if (post.sources.isNotEmpty()) {
                 val sourcesLabel = TextView(context).apply {
-                    text = "Sources:"
+                    text = context.getString(R.string.detail_label_sources)
                     setTypeface(typeface, Typeface.BOLD)
                     textSize = 12f
                     setPadding(8, 12, 8, 4)
@@ -1295,11 +1331,15 @@ class PostPagerAdapter(
             
             binding.txtLoading.text = String.format("0.00 MB / %.2f MB", fileSizeMb)
 
-            // Verificar si la URL es válida (similar a setupImage)
+            // Verificar si la URL es válida (como ei/e0.java línea 656-662)
             if (gifUrl == null || gifUrl.isEmpty() || gifUrl == "null" || !gifUrl.startsWith("http")) {
                 binding.loadingLayout.visibility = View.GONE
                 binding.errorLayout.visibility = View.VISIBLE
-                binding.txtError.text = context.getString(R.string.post_error_not_logged_in)
+                binding.txtError.text = if (post.flags.deleted) {
+                    context.getString(R.string.post_error_deleted)
+                } else {
+                    context.getString(R.string.post_error_not_logged_in)
+                }
                 return
             }
 
@@ -1376,12 +1416,15 @@ class PostPagerAdapter(
             // Mostrar tamaño inicial
             binding.txtLoading.text = String.format("0.00 MB / %.2f MB", fileSizeMb)
 
-            // Verificar si la URL es válida (no null, no vacía, no "null", empieza con http)
-            // Similar a ii/m.java línea 750 y ei/e0.java línea 977 de la app original
+            // Verificar si la URL es válida (como ei/e0.java línea 656-662)
             if (imageUrl == null || imageUrl.isEmpty() || imageUrl == "null" || !imageUrl.startsWith("http")) {
                 binding.loadingLayout.visibility = View.GONE
                 binding.errorLayout.visibility = View.VISIBLE
-                binding.txtError.text = context.getString(R.string.post_error_not_logged_in)
+                binding.txtError.text = if (post.flags.deleted) {
+                    context.getString(R.string.post_error_deleted)
+                } else {
+                    context.getString(R.string.post_error_not_logged_in)
+                }
                 return
             }
 
@@ -1639,11 +1682,15 @@ class PostPagerAdapter(
             // Si forceMp4=true, usar formato MP4 ignorando preferencia del usuario
             val formatToUse = if (forceMp4) 1 else videoFormat
             val videoUrl = post.getVideoUrl(videoQuality, formatToUse)
-            // Verificar si la URL es válida (similar a setupImage)
+            // Verificar si la URL es válida (como ei/e0.java línea 656-662)
             if (videoUrl == null || videoUrl.isEmpty() || videoUrl == "null" || !videoUrl.startsWith("http")) {
                 binding.loadingLayout.visibility = View.GONE
                 binding.errorLayout.visibility = View.VISIBLE
-                binding.txtError.text = context.getString(R.string.post_error_not_logged_in)
+                binding.txtError.text = if (post.flags.deleted) {
+                    context.getString(R.string.post_error_deleted)
+                } else {
+                    context.getString(R.string.post_error_not_logged_in)
+                }
                 return
             }
 

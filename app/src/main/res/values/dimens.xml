@@ -27,7 +27,7 @@
     <dimen name="search_suggestion_edit_icon_width">48dp</dimen>
     
     <!-- Grid item dimensions (exact from original) -->
-    <item name="grid_item_info_btn_alpha" format="float" type="dimen">0.5</item>
+    <item name="grid_item_info_btn_alpha" format="float" type="dimen">0.85</item>
     <dimen name="grid_item_info_btn_margin">2dp</dimen>
     <dimen name="grid_item_info_padding">5dp</dimen>
     <dimen name="grid_item_info_text_size">11sp</dimen>

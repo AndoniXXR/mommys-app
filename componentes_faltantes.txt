@@ -1,0 +1,23 @@
+COMPONENTES FALTANTES - Traducciones/Idiomas
+=============================================
+
+[X] 1. Crear locales_config.xml (PRIORIDAD ALTA) ✓ COMPLETADO
+    - Android 13+ necesita este archivo para coordinar cambios de locale app-wide
+    - Sin él, AppCompatDelegate.setApplicationLocales() no funciona correctamente
+    - Ubicación: app/src/main/res/xml/locales_config.xml
+
+[X] 2. Agregar AppLocalesMetadataHolderService + autoStoreLocales al AndroidManifest (PRIORIDAD ALTA) ✓ COMPLETADO
+    - AndroidX necesita este servicio para persistir/restaurar locale automáticamente
+    - Sin él, la restauración depende del código manual en MommysApplication.onCreate()
+    - Agregar <service> con <meta-data android:name="autoStoreLocales" android:value="true"/>
+
+[X] 3. Agregar android:localeConfig al tag <application> del AndroidManifest (PRIORIDAD ALTA) ✓ COMPLETADO
+    - Vincula locales_config.xml con la app para Android 13+
+    - android:localeConfig="@xml/locales_config"
+
+[X] 4. Quitar uiMode de configChanges en todas las Activities (PRIORIDAD MEDIA) ✓ COMPLETADO
+    - Se quitó |uiMode de las 28 declaraciones de activity en AndroidManifest.xml
+
+[X] 5. Crear carpetas values-zh y values-ja con traducciones (PRIORIDAD BAJA) ✓ COMPLETADO
+    - La app ofrece chino y japonés pero no tiene strings traducidos
+    - Sin estas carpetas, esos idiomas muestran todo en inglés (fallback)

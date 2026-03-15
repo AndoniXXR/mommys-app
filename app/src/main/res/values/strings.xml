@@ -1336,6 +1336,14 @@
     <string name="post_details_author_start">Author:</string>
     <string name="post_details_approver">Approver: %1$d</string>
     <string name="post_details_approver_start">Approver:</string>
+    <string name="detail_label_created">Created</string>
+    <string name="detail_label_uploader">Uploader ID</string>
+    <string name="detail_label_size">Size</string>
+    <string name="detail_label_format">Format</string>
+    <string name="detail_label_file_size">File size</string>
+    <string name="detail_label_sources">Sources:</string>
+    <string name="detail_label_rating">Rating</string>
+    <string name="detail_label_id">ID</string>
     <string name="post_details_parent">Parent: %1$s</string>
     <string name="post_details_pending">Post pending approval</string>
     <string name="post_details_flagged">Post flagged for deletion</string>

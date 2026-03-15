@@ -235,15 +235,17 @@ class PopularActivity : AppCompatActivity() {
                             Log.d(TAG, "Post ${post.id}: preview.url=${post.preview.url}, file.url=${post.file.url}")
                         }
                         
-                        // Filtrar posts con URLs nulas (contenido restringido)
-                        // Similar a PageHandler - posts que la API devuelve sin acceso
-                        // La API puede devolver null, "" o literalmente "null" como string
-                        val filteredPosts = newPosts.filter { post ->
-                            val previewUrl = post.preview.url
-                            val sampleUrl = post.sample?.url
-                            val fileUrl = post.file.url
-                            // URL válida: no null, no vacía, no "null", empieza con http
-                            isValidUrl(previewUrl) || isValidUrl(sampleUrl) || isValidUrl(fileUrl)
+                        // Filtrar posts con URLs nulas SOLO si no está logueado
+                        // Como vi/u.java: si logueado, mostrar todos los posts
+                        val filteredPosts = if (preferencesManager.isLoggedIn()) {
+                            newPosts
+                        } else {
+                            newPosts.filter { post ->
+                                val previewUrl = post.preview.url
+                                val sampleUrl = post.sample?.url
+                                val fileUrl = post.file.url
+                                isValidUrl(previewUrl) || isValidUrl(sampleUrl) || isValidUrl(fileUrl)
+                            }
                         }
                         
                         posts.clear()

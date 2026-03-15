@@ -175,22 +175,22 @@ class PageHandler(
         // Cargar seenIds para filtrar/marcar posts vistos
         val seenIds = AppSeenDatabase.getAllSeenIdsSync(context)
         
-        // PRIMERO: Filtrar posts con URLs nulas (posts especiales/restringidos)
-        // Estos son posts que la API devuelve pero sin URLs porque el usuario
-        // no tiene acceso al contenido (no usa e621 o no está logueado)
-        // La API puede devolver null, "" o literalmente "null" como string
-        // Similar a dVar.z() y dVar.y() en la app original (h7/d.java)
-        val postsWithValidUrls = newPosts.filter { post ->
-            val previewUrl = post.preview.url
-            val sampleUrl = post.sample?.url
-            val fileUrl = post.file.url
-            
-            // Verificar que al menos una URL sea válida (no null, no vacía, no "null")
-            isValidUrl(previewUrl) || isValidUrl(sampleUrl) || isValidUrl(fileUrl)
+        // Filtrar posts con URLs nulas SOLO si NO está logueado
+        // Como vi/u.java: if (var8_8) break; → si logueado, salta el filtro de URL nula
+        // Si está logueado, mostrar todos los posts (incluso eliminados/sin URL)
+        val postsWithValidUrls = if (prefs.isLoggedIn()) {
+            hiddenPostsCount = 0
+            newPosts
+        } else {
+            val filtered = newPosts.filter { post ->
+                val previewUrl = post.preview.url
+                val sampleUrl = post.sample?.url
+                val fileUrl = post.file.url
+                isValidUrl(previewUrl) || isValidUrl(sampleUrl) || isValidUrl(fileUrl)
+            }
+            hiddenPostsCount = newPosts.size - filtered.size
+            filtered
         }
-        
-        // Contar los posts ocultos (posts sin URLs válidas)
-        hiddenPostsCount = newPosts.size - postsWithValidUrls.size
         
         // SEGUNDO: Filtrar posts blacklisted (si blacklist está habilitado)
         // Como vi/u.java onPostExecute() - filtra antes de mostrar en grid
