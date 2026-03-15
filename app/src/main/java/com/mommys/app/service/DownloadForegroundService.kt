@@ -137,10 +137,9 @@ class DownloadForegroundService : Service() {
 
     private suspend fun downloadSingle(post: Post) {
         val prefs = PreferencesManager(applicationContext)
-        val notificationId = 1000 + (post.id % 10000)
         val fileName = "Post #${post.id}"
 
-        DownloadNotificationHelper.showDownloadStartNotification(
+        val notificationId = DownloadNotificationHelper.showDownloadStartNotification(
             applicationContext, post.id, fileName
         )
 
