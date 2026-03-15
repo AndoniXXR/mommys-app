@@ -421,6 +421,10 @@ class PreferencesManager(context: Context) {
         get() = userPrefs.getBoolean("post_expand_description", true)
         set(value) { userPrefs.edit { putBoolean("post_expand_description", value) } }
     
+    var postExpandDetails: Boolean
+        get() = userPrefs.getBoolean("post_expand_details", true)
+        set(value) { userPrefs.edit { putBoolean("post_expand_details", value) } }
+    
     var postHideComments: Boolean
         get() = userPrefs.getBoolean("post_hide_comments", false)
         set(value) { userPrefs.edit { putBoolean("post_hide_comments", value) } }

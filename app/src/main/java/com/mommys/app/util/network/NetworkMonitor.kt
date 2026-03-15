@@ -472,7 +472,7 @@ class NetworkMonitor private constructor(private val context: Context) {
         
         _networkState.value = newState
         _networkStateLiveData.postValue(newState)
-        _isConnected.value = isConnected && isValidated
+        _isConnected.value = newState.isConnected
     }
     
     /**

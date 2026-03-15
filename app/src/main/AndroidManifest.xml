@@ -13,6 +13,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <application
         android:name=".MommysApplication"
@@ -316,6 +318,12 @@
                 <data android:scheme="https" android:host="e926.net" android:pathPattern="/comments/.*" />
             </intent-filter>
         </activity>
+
+        <!-- Download Foreground Service -->
+        <service
+            android:name=".service.DownloadForegroundService"
+            android:foregroundServiceType="dataSync"
+            android:exported="false" />
 
         <!-- Following Job Service -->
         <service

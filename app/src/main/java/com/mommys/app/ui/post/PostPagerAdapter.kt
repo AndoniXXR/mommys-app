@@ -75,7 +75,6 @@ sealed class PostMenuAction {
 class PostPagerAdapter(
     private val onTagClick: (String) -> Unit,
     private val onArtistClick: (String) -> Unit,
-    private val onScrollStateChanged: (Boolean) -> Unit,
     private val onVoteUp: (Post) -> Unit = {},
     private val onVoteDown: (Post) -> Unit = {},
     private val onFavorite: (Post) -> Unit = {},
@@ -286,64 +285,6 @@ class PostPagerAdapter(
     }
     
     /**
-     * Precarga imágenes de posts vecinos en background
-     * Como m11459i() en ei/e0.java de la app original (línea 1037)
-     * Descarga en un thread separado para no bloquear UI
-     */
-    fun preloadAdjacentPosts(currentPosition: Int, context: Context) {
-        // Precargar post anterior
-        if (currentPosition > 0) {
-            posts.getOrNull(currentPosition - 1)?.let { post ->
-                preloadPostImage(post, context)
-            }
-        }
-        
-        // Precargar post siguiente
-        if (currentPosition < posts.size - 1) {
-            posts.getOrNull(currentPosition + 1)?.let { post ->
-                preloadPostImage(post, context)
-            }
-        }
-    }
-    
-    /**
-     * Precarga la imagen de un post en background usando Glide
-     * Como RunnableC3930a en la app original
-     */
-    private fun preloadPostImage(post: Post, context: Context) {
-        // Ejecutar en un thread de background
-        Thread {
-            try {
-                // Determinar URL según tipo de archivo
-                val ext = post.file.ext?.lowercase() ?: ""
-                val imageUrl = when {
-                    ext == "gif" || ext == "webm" || ext == "mp4" -> {
-                        // Para videos/gifs, precargar el sample (preview)
-                        post.sample.url ?: ""
-                    }
-                    else -> {
-                        // Para imágenes, precargar la versión completa
-                        post.file.url ?: ""
-                    }
-                }
-                
-                if (imageUrl.isNotEmpty()) {
-                    // Usar downloadOnly() de Glide para precargar sin mostrar
-                    // Esto descarga y cachea la imagen en background
-                    Glide.with(context)
-                        .downloadOnly()
-                        .load(imageUrl)
-                        .submit()
-                        .get() // Bloquea el thread de background hasta completar
-                }
-            } catch (e: Exception) {
-                // Error al precargar, no es crítico
-                // La imagen se cargará normalmente cuando el usuario llegue al post
-            }
-        }.start()
-    }
-    
-    /**
      * Obtiene el player en una posición específica
      */
     fun getPlayerAt(position: Int): ExoPlayer? = players[position]
@@ -475,6 +416,7 @@ class PostPagerAdapter(
         private var currentPosition: Int = -1
         private var currentPostId: Int = -1
         private var hasTriedMp4Fallback = false  // Flag para evitar loop infinito en fallback
+        private var isFadeShowing = false  // Estado del fade preview (como wolfstash ei/y.java)
         
         // Estados actuales de los botones (para restaurar si hay error)
         private var currentVoteState: Int = 0  // -1, 0, 1
@@ -637,9 +579,33 @@ class PostPagerAdapter(
             // --- Barra de botones de acción (como la app original lLButtons) ---
             setupActionButtons(post, context)
 
-            // --- Scroll listener para mini preview ---
-            binding.scrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-                onScrollStateChanged(scrollY > 200)
+            // --- Scroll listener para fade preview (como wolfstash ei/y.java) ---
+            binding.scrollView.setOnScrollChangeListener { _, _, _, _, _ ->
+                val rect = android.graphics.Rect()
+                // Check if the media view (image or video) is still locally visible
+                val mediaView = if (binding.previewFrameParent.visibility == View.VISIBLE) {
+                    binding.imgPreview
+                } else {
+                    binding.videoContainer
+                }
+                val isVisible = mediaView.getLocalVisibleRect(rect)
+                if (isVisible) {
+                    if (isFadeShowing) {
+                        isFadeShowing = false
+                        val fadeOut = android.view.animation.AlphaAnimation(0.6f, 0.0f)
+                        fadeOut.duration = 300
+                        fadeOut.fillAfter = true
+                        binding.imgFade.startAnimation(fadeOut)
+                        binding.imgFade.visibility = View.INVISIBLE
+                    }
+                } else if (!isFadeShowing) {
+                    isFadeShowing = true
+                    val fadeIn = android.view.animation.AlphaAnimation(0.0f, 0.6f)
+                    fadeIn.duration = 300
+                    fadeIn.fillAfter = true
+                    binding.imgFade.startAnimation(fadeIn)
+                    binding.imgFade.visibility = View.VISIBLE
+                }
             }
         }
 
@@ -1194,8 +1160,12 @@ class PostPagerAdapter(
             val detailsContainer = binding.detailsContainer
             detailsContainer.removeAllViews()
 
-            var detailsExpanded = false
-            detailsContainer.visibility = View.GONE
+            val prefsManager = PreferencesManager(context)
+            var detailsExpanded = prefsManager.postExpandDetails
+            detailsContainer.visibility = if (detailsExpanded) View.VISIBLE else View.GONE
+            binding.imgDetailsExpand.setImageResource(
+                if (detailsExpanded) R.drawable.ic_expand_less else R.drawable.ic_expand_more
+            )
 
             binding.detailsHeader.setOnClickListener {
                 detailsExpanded = !detailsExpanded
@@ -1285,6 +1255,17 @@ class PostPagerAdapter(
             val ext = post.file.ext.lowercase()
             val isVideo = ext in listOf("webm", "mp4")
             val isGif = ext == "gif"
+
+            // Cargar imgFade con preview (como wolfstash ei/e0.java línea 600)
+            val previewUrl = post.preview.url
+            if (previewUrl != null) {
+                Glide.with(binding.root.context)
+                    .load(previewUrl)
+                    .into(binding.imgFade)
+            }
+            // Reset fade state
+            isFadeShowing = false
+            binding.imgFade.visibility = View.INVISIBLE
 
             when {
                 isVideo -> setupVideoPreview(post)  // Solo preview, NO crear player
@@ -1666,20 +1647,19 @@ class PostPagerAdapter(
                 return
             }
 
-            // Configuración de LoadControl (valores conservadores como app original: 5000ms)
+            // Configuración de LoadControl (valores por defecto como wolfstash)
             val loadControl = DefaultLoadControl.Builder()
                 .setBufferDurationsMs(
-                    5000,  // minBufferMs (igual que app original)
-                    5000,  // maxBufferMs (igual que app original)
-                    1500,  // bufferForPlaybackMs
-                    1500   // bufferForPlaybackAfterRebufferMs
+                    5000,  // minBufferMs
+                    5000,  // maxBufferMs
+                    2500,  // bufferForPlaybackMs (default, no agresivo)
+                    5000   // bufferForPlaybackAfterRebufferMs (default)
                 )
                 .build()
 
-            // RenderersFactory con software decoder fallback (como app original línea 84-85)
-            // Esto permite decodificar VP9 y otros formatos cuando hardware decoder falla
+            // RenderersFactory con software decoder fallback (como wolfstash)
             val renderersFactory = DefaultRenderersFactory(context)
-                .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+                .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
 
             // Crear ExoPlayer con configuración mejorada
             player = ExoPlayer.Builder(context)

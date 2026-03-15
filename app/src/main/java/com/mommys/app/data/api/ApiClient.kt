@@ -2,20 +2,24 @@ package com.mommys.app.data.api
 
 import android.util.Base64
 import com.mommys.app.MommysApplication
+import okhttp3.Dns
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.net.Inet4Address
+import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 
 /**
  * Cliente de red singleton
+ * Configurado como wolfstash: timeout corto + IPv4 primero para evitar bloqueo IPv6
  */
 object ApiClient {
     
-    private const val TIMEOUT_SECONDS = 30L
-    // User-Agent similar a la app original
+    private const val CONNECT_TIMEOUT_SECONDS = 5L
+    private const val RW_TIMEOUT_SECONDS = 15L
     private const val USER_AGENT = "Mommys/1.0 (Android app)"
     
     private var retrofit: Retrofit? = null
@@ -58,9 +62,10 @@ object ApiClient {
     
     private fun createRetrofit(baseUrl: String): Retrofit {
         val client = OkHttpClient.Builder()
-            .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-            .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-            .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(RW_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(RW_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .dns(IPv4FirstDns())
             .addInterceptor(createHeaderInterceptor())
             .addInterceptor(createAuthInterceptor())
             .addInterceptor(createLoggingInterceptor())
@@ -132,11 +137,24 @@ object ApiClient {
     }
     
     /**
-     * Interceptor para logging (debug)
+     * Interceptor para logging
      */
     private fun createLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = HttpLoggingInterceptor.Level.HEADERS
+        }
+    }
+
+    /**
+     * DNS resolver que prioriza IPv4 sobre IPv6.
+     * Wolfstash usa HttpURLConnection que internamente tiene Happy Eyeballs.
+     * OkHttp 4.x no lo tiene, así que priorizamos IPv4 para evitar el timeout
+     * de 30s cuando IPv6 está roto en el WiFi del usuario.
+     */
+    private class IPv4FirstDns : Dns {
+        override fun lookup(hostname: String): List<InetAddress> {
+            val addresses = Dns.SYSTEM.lookup(hostname)
+            return addresses.sortedBy { if (it is Inet4Address) 0 else 1 }
         }
     }
 }

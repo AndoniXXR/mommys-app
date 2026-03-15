@@ -59,10 +59,8 @@ object BatchDownloader {
             Toast.LENGTH_LONG
         ).show()
         
-        // Iniciar descarga en background
-        CoroutineScope(Dispatchers.IO).launch {
-            downloadPosts(context, posts, prefsManager)
-        }
+        // Usar ForegroundService para que las descargas sobrevivan en segundo plano
+        com.mommys.app.service.DownloadForegroundService.enqueueBatch(context, posts)
     }
     
     /**

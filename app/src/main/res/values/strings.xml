@@ -717,6 +717,8 @@
     <string name="pref_post_expand_tags_summary">Show all tags when opening a post</string>
     <string name="pref_post_expand_description_title">Expand description</string>
     <string name="pref_post_expand_description_summary">Show full description when opening a post</string>
+    <string name="pref_post_expand_details_title">Expand details by default</string>
+    <string name="pref_post_expand_details_summary">Show post details when opening a post</string>
     <string name="pref_post_hide_comments_title">Hide comments</string>
     <string name="pref_post_hide_comments_summary">Do not show comments section</string>
     <string name="pref_post_hide_score_title">Hide score</string>

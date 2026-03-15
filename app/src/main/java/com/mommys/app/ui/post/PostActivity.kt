@@ -396,10 +396,7 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         pagerAdapter = PostPagerAdapter(
             onTagClick = { tag -> searchByTag(tag) },
             onArtistClick = { artist -> searchByTag(artist) },
-            onScrollStateChanged = { isScrolled -> 
-                // Mostrar mini preview cuando scrollea hacia abajo
-                updateMiniPreview(isScrolled)
-            },
+
             onVoteUp = { post -> 
                 // Votar arriba - como la app original ei/n.java case 1
                 viewModel.voteUp(post.id)
@@ -514,10 +511,6 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
                     if (viewHolder != null) {
                         pagerAdapter.playVideoInViewHolder(viewHolder)
                     }
-                    
-                    // Precargar imágenes de posts vecinos en background
-                    // Como hace la app original en m11459i() (ei/e0.java línea 1037)
-                    pagerAdapter.preloadAdjacentPosts(position, this@PostActivity)
                     
                     // Restaurar orientación a portrait cuando se cambia de página
                     // (como hace la app original ei/e0.java método n cuando se sale del video)
@@ -749,31 +742,6 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         // Actualizar estado de favorito
         viewModel.checkFavoriteStatus(post.id)
         
-        // Actualizar mini preview
-        updateMiniPreviewImage(post)
-    }
-
-    /**
-     * Mostrar/ocultar mini preview de imagen cuando scrollea
-     */
-    private fun updateMiniPreview(show: Boolean) {
-        if (show) {
-            binding.imgMini.visibility = View.VISIBLE
-        } else {
-            binding.imgMini.visibility = View.GONE
-        }
-    }
-
-    /**
-     * Cargar imagen en mini preview
-     */
-    private fun updateMiniPreviewImage(post: Post) {
-        val previewUrl = post.preview.url
-        if (previewUrl != null) {
-            Glide.with(this)
-                .load(previewUrl)
-                .into(binding.imgMini)
-        }
     }
 
     /**
@@ -854,7 +822,17 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
      */
     private fun performDownload(post: Post) {
         Toast.makeText(this, R.string.action_downloading, Toast.LENGTH_SHORT).show()
-        viewModel.downloadPost(this, post, preferencesManager)
+        
+        // Usar ForegroundService para que la descarga sobreviva en segundo plano
+        com.mommys.app.service.DownloadForegroundService.enqueueDownload(this, post)
+        
+        // Auto-acciones inmediatas (no dependen de que termine la descarga)
+        if (preferencesManager.postUpvoteOnDownload) {
+            viewModel.voteUp(post.id)
+        }
+        if (preferencesManager.postFavOnDownload) {
+            viewModel.toggleFavorite(post.id)
+        }
     }
     
     /**
@@ -1479,5 +1457,15 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         super.onStop()
         // Desregistrar callback para evitar leaks y refreshes cuando no está visible
         networkDispatcher.unregisterPageRefreshCallback(this)
+        
+        // Liberar TODOS los ExoPlayers cuando la Activity deja de ser visible
+        // Esto es CRÍTICO para evitar agotamiento de MediaCodec cuando el usuario
+        // abre múltiples Activities via searchByTag() con FLAG_ACTIVITY_NEW_TASK.
+        // onDestroy() NO se llama para Activities en el back stack, así que si solo
+        // liberamos ahí, los codecs se acumulan (límite sistema ~16-32 instancias)
+        // y eventualmente aparece "video not supported on this device".
+        if (::pagerAdapter.isInitialized) {
+            pagerAdapter.releaseAllPlayers()
+        }
     }
 }

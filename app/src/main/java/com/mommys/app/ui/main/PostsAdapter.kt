@@ -89,13 +89,13 @@ class PostsAdapter(
      * Similar a selected_select_all de la app original
      */
     fun selectAll() {
-        currentList.forEach { post ->
+        currentList.forEachIndexed { index, post ->
             if (!selectedPostIds.contains(post.id)) {
                 selectedPostIds.add(post.id)
                 selectionCallback?.onPostSelected(post)
+                notifyItemChanged(index)
             }
         }
-        notifyDataSetChanged()
     }
     
     /**
@@ -103,14 +103,15 @@ class PostsAdapter(
      * Similar a MainActivity.H() de la app original
      */
     fun clearAllSelections() {
-        currentList.forEach { post ->
+        val indicesToUpdate = mutableListOf<Int>()
+        currentList.forEachIndexed { index, post ->
             if (selectedPostIds.contains(post.id)) {
-                selectedPostIds.remove(post.id)
                 selectionCallback?.onPostDeselected(post)
+                indicesToUpdate.add(index)
             }
         }
         selectedPostIds.clear()
-        notifyDataSetChanged()
+        indicesToUpdate.forEach { notifyItemChanged(it) }
     }
     
     /**
@@ -118,17 +119,27 @@ class PostsAdapter(
      * Usado cuando se sincroniza con el estado global
      */
     fun clearLocalSelections() {
+        if (selectedPostIds.isEmpty()) return
+        val indicesToUpdate = currentList.mapIndexedNotNull { index, post ->
+            if (selectedPostIds.contains(post.id)) index else null
+        }
         selectedPostIds.clear()
-        notifyDataSetChanged()
+        indicesToUpdate.forEach { notifyItemChanged(it) }
     }
     
     /**
      * Sincroniza el estado de selección con un set externo
      */
     fun syncSelections(selectedIds: Set<Int>) {
+        val changed = mutableListOf<Int>()
+        currentList.forEachIndexed { index, post ->
+            val wasSelected = selectedPostIds.contains(post.id)
+            val isNowSelected = selectedIds.contains(post.id)
+            if (wasSelected != isNowSelected) changed.add(index)
+        }
         selectedPostIds.clear()
         selectedPostIds.addAll(selectedIds)
-        notifyDataSetChanged()
+        changed.forEach { notifyItemChanged(it) }
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {

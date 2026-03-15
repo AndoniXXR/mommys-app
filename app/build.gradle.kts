@@ -5,12 +5,24 @@ plugins {
 }
 
 // Función para obtener la versión desde git tags
+// Usa --sort=-version:refname para obtener el tag de versión más alta
+// que apunte al HEAD actual o sea ancestro de HEAD
 fun getVersionFromGit(): String {
     return try {
-        val process = Runtime.getRuntime().exec("git describe --tags --abbrev=0")
-        val version = process.inputStream.bufferedReader().readText().trim().removePrefix("v")
+        // Primero intentar obtener todos los tags que apuntan al HEAD actual, ordenados por versión desc
+        val process = Runtime.getRuntime().exec(arrayOf("git", "tag", "--sort=-version:refname", "--points-at", "HEAD"))
+        val tags = process.inputStream.bufferedReader().readText().trim()
         process.waitFor()
-        if (version.isEmpty()) "1.0.0" else version
+        val bestTag = tags.lines().firstOrNull { it.startsWith("v") }?.removePrefix("v")
+        if (!bestTag.isNullOrEmpty()) {
+            bestTag
+        } else {
+            // Fallback: git describe clásico
+            val p2 = Runtime.getRuntime().exec(arrayOf("git", "describe", "--tags", "--abbrev=0"))
+            val version = p2.inputStream.bufferedReader().readText().trim().removePrefix("v")
+            p2.waitFor()
+            if (version.isEmpty()) "1.0.0" else version
+        }
     } catch (e: Exception) {
         println("Warning: Could not read git tag, using default version 1.0.0")
         "1.0.0"
@@ -99,6 +111,7 @@ dependencies {
     
     // Image Loading
     implementation(libs.glide)
+    implementation(libs.glide.okhttp)
     kapt(libs.glide.compiler)
     
     // UI Components

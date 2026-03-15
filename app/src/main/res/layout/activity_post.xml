@@ -66,16 +66,6 @@
 
     </RelativeLayout>
 
-    <!-- Mini preview de la imagen al scrollear (como la app original) -->
-    <ImageView
-        android:id="@+id/imgMini"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:clickable="false"
-        android:scaleType="centerCrop"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <!-- Loading indicator -->
     <FrameLayout
         android:id="@+id/loadingLayout"

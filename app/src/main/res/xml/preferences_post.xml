@@ -18,6 +18,14 @@
         android:singleLineTitle="false" />
 
     <SwitchPreferenceCompat
+        android:key="post_expand_details"
+        android:title="@string/pref_post_expand_details_title"
+        android:summary="@string/pref_post_expand_details_summary"
+        android:icon="@drawable/ic_expand_more"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
+    <SwitchPreferenceCompat
         android:key="post_back_button"
         android:title="@string/pref_post_back_button_title"
         android:summary="@string/pref_post_back_button_summary"

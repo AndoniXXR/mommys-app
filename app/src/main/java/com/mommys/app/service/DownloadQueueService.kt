@@ -5,9 +5,6 @@ import android.util.Log
 import com.mommys.app.data.db.downloads.AppDownloadsDatabase
 import com.mommys.app.data.db.downloads.DownloadItem
 import com.mommys.app.data.model.*
-import com.mommys.app.data.preferences.PreferencesManager
-import com.mommys.app.util.DownloadNotificationHelper
-import com.mommys.app.util.PostDownloader
 import kotlinx.coroutines.*
 
 /**
@@ -65,17 +62,15 @@ object DownloadQueueService {
     
     /**
      * Procesa la cola de descargas
-     * Como RunnableC2519l.run() en el original
+     * Lee items pendientes del Room DB y los encola en el ForegroundService
      */
     private fun processQueue(context: Context) {
         val database = AppDownloadsDatabase.getInstance(context)
-        val prefs = PreferencesManager(context)
         
         Log.d(TAG, "Starting download queue processing")
         
         while (!Thread.currentThread().isInterrupted) {
             try {
-                // Obtener siguiente descarga pendiente (blocking call)
                 val nextDownload = runBlocking {
                     database.downloadDao().getNextPendingDownload()
                 }
@@ -87,75 +82,25 @@ object DownloadQueueService {
                 
                 Log.d(TAG, "Processing download: ${nextDownload.postId}")
                 
-                // Crear Post temporal para usar PostDownloader
                 val tempPost = createTempPost(nextDownload)
                 
-                // Crear notificación para esta descarga
-                val notificationId = 2000 + (nextDownload.postId % 10000)
-                val fileName = "Post #${nextDownload.postId}"
+                // Encolar en el ForegroundService (sobrevive en segundo plano)
+                DownloadForegroundService.enqueueDownload(context, tempPost)
                 
-                // Descargar usando PostDownloader con callback para progreso
-                var success = false
+                // Eliminar de la cola de Room DB ya que el ForegroundService se encarga
                 runBlocking {
-                    val result = PostDownloader.downloadPost(
-                        context = context,
-                        post = tempPost,
-                        prefsManager = prefs,
-                        callback = object : PostDownloader.DownloadCallback {
-                            override fun onStart() {
-                                DownloadNotificationHelper.showDownloadStartNotification(
-                                    context, nextDownload.postId, fileName
-                                )
-                            }
-                            
-                            override fun onProgress(progress: Int) {
-                                DownloadNotificationHelper.updateDownloadProgress(
-                                    context, notificationId, progress, fileName
-                                )
-                            }
-                            
-                            override fun onSuccess(downloadedFile: PostDownloader.DownloadedFile) {
-                                DownloadNotificationHelper.showDownloadCompleteNotification(
-                                    context, notificationId, downloadedFile.fileName,
-                                    downloadedFile.uri, downloadedFile.mimeType
-                                )
-                            }
-                            
-                            override fun onError(error: String) {
-                                DownloadNotificationHelper.showDownloadErrorNotification(
-                                    context, notificationId, fileName, error
-                                )
-                            }
-                        }
-                    )
-                    success = result != null
+                    database.downloadDao().deleteByFileUrl(nextDownload.fileUrl)
                 }
                 
-                if (success) {
-                    // Eliminar de la cola después de descarga exitosa
-                    runBlocking {
-                        database.downloadDao().deleteByFileUrl(nextDownload.fileUrl)
-                    }
-                    Log.d(TAG, "Download completed: ${nextDownload.postId}")
-                } else {
-                    // Marcar con error
-                    runBlocking {
-                        database.downloadDao().update(
-                            nextDownload.copy(error = "Download failed")
-                        )
-                    }
-                    Log.e(TAG, "Download failed: ${nextDownload.postId}")
-                }
+                Log.d(TAG, "Enqueued download for post ${nextDownload.postId}")
                 
-                // Pequeña pausa entre descargas (como el original)
-                Thread.sleep(500)
+                Thread.sleep(200)
                 
             } catch (e: InterruptedException) {
                 Log.d(TAG, "Download thread interrupted")
                 break
             } catch (e: Exception) {
                 Log.e(TAG, "Error in download queue", e)
-                // Continuar con la siguiente descarga
             }
         }
         
