@@ -37,6 +37,7 @@ import com.mommys.app.ui.notes.NotesActivity
 import com.mommys.app.data.db.seen.AppSeenDatabase
 import com.mommys.app.util.AdManager
 import com.mommys.app.util.BlacklistHelper
+import com.mommys.app.util.ProgressDownloader
 import com.mommys.app.util.network.NetworkAwareDispatcher
 import com.mommys.app.util.network.NetworkState
 import kotlinx.coroutines.Job
@@ -149,6 +150,9 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         Log.d(TAG, "savedInstanceState: ${savedInstanceState != null}")
         
         preferencesManager = PreferencesManager(this)
+
+        // Inicializar caché de imágenes para ProgressDownloader
+        ProgressDownloader.init(this)
         
         // Apply FLAG_SECURE if hideInTasks is enabled (matching original app)
         if (preferencesManager.hideInTasks) {

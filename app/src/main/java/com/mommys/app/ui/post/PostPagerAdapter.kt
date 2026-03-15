@@ -361,7 +361,8 @@ class PostPagerAdapter(
         holder.getBoundPosition()?.let { position ->
             unregisterPlayer(position)
         }
-        holder.cleanupPlayer()
+        // Limpieza completa como la app original (ei/e0.java líneas 978-1025)
+        holder.cleanupAll()
     }
     
     /**
@@ -418,6 +419,7 @@ class PostPagerAdapter(
         private var currentPostId: Int = -1
         private var hasTriedMp4Fallback = false  // Flag para evitar loop infinito en fallback
         private var isFadeShowing = false  // Estado del fade preview (como wolfstash ei/y.java)
+        private var activeDownloadCall: okhttp3.Call? = null  // Descarga activa cancelable (como ei/e0.java e0 field)
         
         // Estados actuales de los botones (para restaurar si hay error)
         private var currentVoteState: Int = 0  // -1, 0, 1
@@ -438,6 +440,30 @@ class PostPagerAdapter(
             binding.playerView.player = null
             binding.imgMute.visibility = View.GONE
             player = null
+        }
+
+        /**
+         * Limpieza completa al reciclar ViewHolder (como ei/e0.java onViewRecycled)
+         * Cancela todas las cargas de Glide y libera recursos
+         */
+        fun cleanupAll() {
+            // Cancelar descarga activa (como ei/e0.java: e0.h = true)
+            activeDownloadCall?.cancel()
+            activeDownloadCall = null
+
+            // Cancelar todas las cargas de Glide pendientes en TODAS las ImageViews
+            val context = binding.root.context
+            Glide.with(context).clear(binding.imgPreview)
+            Glide.with(context).clear(binding.imgFade)
+            Glide.with(context).clear(binding.imgVideoPreview)
+
+            // Limpiar drawables para evitar flash de imagen anterior
+            binding.imgPreview.setImageDrawable(null)
+            binding.imgFade.setImageDrawable(null)
+            binding.imgVideoPreview.setImageDrawable(null)
+
+            // Limpiar player
+            cleanupPlayer()
         }
         
         /**
@@ -554,6 +580,18 @@ class PostPagerAdapter(
             val context = binding.root.context
             currentPosition = position
             currentPostId = post.id
+
+            // Cancelar descarga activa del post anterior
+            activeDownloadCall?.cancel()
+            activeDownloadCall = null
+
+            // Limpiar imágenes anteriores (como ei/e0.java onBindViewHolder: setImageDrawable(null))
+            binding.imgPreview.setImageDrawable(null)
+            binding.imgFade.setImageDrawable(null)
+            binding.imgVideoPreview.setImageDrawable(null)
+
+            // Resetear scroll al top (como ei/e0.java línea 624: scrollView.scrollTo(0, 0))
+            binding.scrollView.scrollTo(0, 0)
             
             // Inicializar estados actuales desde el post
             currentVoteState = post.score.ourScore
@@ -1399,22 +1437,18 @@ class PostPagerAdapter(
          */
         private fun setupImage(post: Post) {
             val context = binding.root.context
+
+            // Cancelar descarga anterior si existe (como ei/e0.java: if(e10.f0) return)
+            activeDownloadCall?.cancel()
+            activeDownloadCall = null
             
             binding.previewFrameParent.visibility = View.VISIBLE
             binding.videoContainer.visibility = View.GONE
             binding.errorLayout.visibility = View.GONE
-            
-            // Mostrar loading
-            binding.loadingLayout.visibility = View.VISIBLE
-            binding.progressBar.progress = 0
-            binding.progressBar.max = 100
 
             val imageUrl = post.file.url ?: post.sample.url ?: post.preview.url
             val fileSize = post.file.size
             val fileSizeMb = fileSize / (1024.0 * 1024.0)
-            
-            // Mostrar tamaño inicial
-            binding.txtLoading.text = String.format("0.00 MB / %.2f MB", fileSizeMb)
 
             // Verificar si la URL es válida (como ei/e0.java línea 656-662)
             if (imageUrl == null || imageUrl.isEmpty() || imageUrl == "null" || !imageUrl.startsWith("http")) {
@@ -1428,8 +1462,23 @@ class PostPagerAdapter(
                 return
             }
 
+            // Cargar sample/preview via Glide EN PARALELO (como app original ei/e0.java f())
+            // El usuario ve la imagen de calidad media inmediatamente mientras descarga la full-res
+            val sampleUrl = post.sample.url ?: post.preview.url
+            if (sampleUrl != null && sampleUrl != imageUrl) {
+                Glide.with(context)
+                    .load(sampleUrl)
+                    .into(binding.imgPreview)
+            }
+
+            // Mostrar loading overlay sobre el preview
+            binding.loadingLayout.visibility = View.VISIBLE
+            binding.progressBar.progress = 0
+            binding.progressBar.max = 100
+            binding.txtLoading.text = String.format("0.00 MB / %.2f MB", fileSizeMb)
+
             // Descargar imagen con progreso real
-            ProgressDownloader.download(imageUrl, object : ProgressDownloader.ProgressListener {
+            activeDownloadCall = ProgressDownloader.download(imageUrl, object : ProgressDownloader.ProgressListener {
                 override fun onProgress(bytesRead: Long, contentLength: Long, done: Boolean) {
                     if (contentLength > 0) {
                         val progress = ((bytesRead.toDouble() / contentLength.toDouble()) * 100).toInt()
@@ -1447,12 +1496,21 @@ class PostPagerAdapter(
                 }
 
                 override fun onComplete(data: ByteArray?) {
+                    activeDownloadCall = null
                     // Verificar si la vista ya fue reciclada para otro post
                     if (currentPostId != post.id) {
                         return
                     }
 
-                    binding.loadingLayout.visibility = View.GONE
+                    // Transición suave: fade-out del loading overlay
+                    binding.loadingLayout.animate()
+                        .alpha(0f)
+                        .setDuration(200)
+                        .withEndAction {
+                            binding.loadingLayout.visibility = View.GONE
+                            binding.loadingLayout.alpha = 1f
+                        }
+                        .start()
                     
                     if (data != null) {
                         try {
@@ -1490,23 +1548,24 @@ class PostPagerAdapter(
                                 binding.errorLayout.visibility = View.GONE
                             } else {
                                 // Fallback a Glide si no se puede decodificar
-                                loadImageWithGlide(imageUrl, context)
+                                loadImageWithGlide(imageUrl, context, post.id)
                             }
                         } catch (e: OutOfMemoryError) {
                             // Si aún hay OOM, usar Glide que maneja mejor la memoria
-                            loadImageWithGlide(imageUrl, context)
+                            loadImageWithGlide(imageUrl, context, post.id)
                         } catch (e: Exception) {
-                            loadImageWithGlide(imageUrl, context)
+                            loadImageWithGlide(imageUrl, context, post.id)
                         }
                     } else {
-                        loadImageWithGlide(imageUrl, context)
+                        loadImageWithGlide(imageUrl, context, post.id)
                     }
                 }
 
                 override fun onError(exception: Exception) {
+                    activeDownloadCall = null
                     binding.loadingLayout.visibility = View.GONE
                     // Intentar con Glide como fallback
-                    loadImageWithGlide(imageUrl, context)
+                    loadImageWithGlide(imageUrl, context, post.id)
                 }
             })
 
@@ -1525,7 +1584,10 @@ class PostPagerAdapter(
           * Fallback para cargar imagen con Glide con downsampling automático
           * para evitar crashes por imágenes demasiado grandes
           */
-        private fun loadImageWithGlide(imageUrl: String, context: Context) {
+        private fun loadImageWithGlide(imageUrl: String, context: Context, postId: Int) {
+            // Race guard: si el ViewHolder ya fue reasignado a otro post, no cargar
+            if (currentPostId != postId) return
+
             // Obtener dimensiones de pantalla para limitar el tamaño máximo
             val displayMetrics = context.resources.displayMetrics
             val maxWidth = displayMetrics.widthPixels * 2  // 2x la pantalla máximo

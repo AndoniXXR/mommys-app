@@ -62,6 +62,34 @@
                         android:adjustViewBounds="true"
                         android:contentDescription="@string/cd_post_image" />
 
+                    <!-- Loading overlay sobre preview (como app original) -->
+                    <LinearLayout
+                        android:id="@+id/loadingLayout"
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top"
+                        android:visibility="gone">
+
+                        <ProgressBar
+                            android:id="@+id/progressBar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:max="100"
+                            style="@style/Widget.AppCompat.ProgressBar.Horizontal" />
+
+                        <TextView
+                            android:id="@+id/txtLoading"
+                            android:textSize="12sp"
+                            android:textColor="?android:textColorSecondary"
+                            android:background="@color/colorLoadingTextBG"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:alpha="0.7"
+                            tools:text="0.5 MB / 2.0 MB" />
+
+                    </LinearLayout>
+
                 </FrameLayout>
 
                 <!-- Content Frame Parent (para video) -->
@@ -543,33 +571,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Loading layout (como adapter_post_loading.xml) -->
-    <LinearLayout
-        android:id="@+id/loadingLayout"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="100"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal" />
-
-        <TextView
-            android:id="@+id/txtLoading"
-            android:textSize="12sp"
-            android:textColor="?android:textColorSecondary"
-            android:background="@color/colorLoadingTextBG"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:alpha="0.7"
-            tools:text="0.5 MB / 2.0 MB" />
-
-    </LinearLayout>
+    <!-- loadingLayout moved inside previewFrameParent as overlay -->
 
     <!-- Snackbar container -->
     <LinearLayout
