@@ -208,6 +208,17 @@ class PostPagerAdapter(
     fun setDragging(dragging: Boolean) {
         isDragging = dragging
     }
+
+    /**
+     * Referencia al SlidingPanelLayout para coordinar scroll↔drag.
+     * Como ei/y.java en la app original: se usa para activar/desactivar
+     * el drag del panel según la posición del ScrollView.
+     */
+    private var slidingPanel: com.mommys.app.ui.views.SlidingPanelLayout? = null
+
+    fun setSlidingPanel(panel: com.mommys.app.ui.views.SlidingPanelLayout?) {
+        slidingPanel = panel
+    }
     
     /**
      * Obtiene el host base según preferencias
@@ -618,8 +629,8 @@ class PostPagerAdapter(
             // --- Barra de botones de acción (como la app original lLButtons) ---
             setupActionButtons(post, context)
 
-            // --- Scroll listener para fade preview (como wolfstash ei/y.java) ---
-            binding.scrollView.setOnScrollChangeListener { _, _, _, _, _ ->
+            // --- Scroll listener para fade preview + coordinación panel (como wolfstash ei/y.java) ---
+            binding.scrollView.setOnScrollChangeListener { v, _, _, _, _ ->
                 val rect = android.graphics.Rect()
                 // Check if the media view (image or video) is still locally visible
                 val mediaView = if (binding.previewFrameParent.visibility == View.VISIBLE) {
@@ -645,6 +656,11 @@ class PostPagerAdapter(
                     binding.imgFade.startAnimation(fadeIn)
                     binding.imgFade.visibility = View.VISIBLE
                 }
+
+                // --- Coordinación scroll↔panel (como ei/y.java en la app original) ---
+                // canScrollVertically(-1) = true cuando el ScrollView NO está en el tope (tiene contenido arriba)
+                val canScrollUp = v.canScrollVertically(-1)
+                slidingPanel?.dragEnabled = !canScrollUp
             }
         }
 

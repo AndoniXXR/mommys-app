@@ -198,6 +198,13 @@ class StorageSettingsFragment : PreferenceFragmentCompat() {
             preferencesManager.storageHide = newValue as Boolean
             true
         }
+        
+        val vibratePref = findPreference<SwitchPreferenceCompat>("download_vibrate_on_complete")
+        vibratePref?.isChecked = preferencesManager.downloadVibrateOnComplete
+        vibratePref?.setOnPreferenceChangeListener { _, newValue ->
+            preferencesManager.downloadVibrateOnComplete = newValue as Boolean
+            true
+        }
     }
 
     /**

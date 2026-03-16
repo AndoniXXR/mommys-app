@@ -1,5 +1,7 @@
 package com.mommys.app.ui.main
 
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -228,13 +230,23 @@ class PostsAdapter(
             // Actualizar el ratio de aspecto (puede cambiar desde Settings)
             (binding.imgPreview as? AspectRatioImageView)?.aspectRatio = aspectRatio
             
+            // Placeholder multicolor aleatorio como la app original (ei/m.java)
+            val placeholder = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                setColor(Color.rgb(
+                    (Math.random() * 100).toInt() + 30,
+                    (Math.random() * 100).toInt() + 30,
+                    (Math.random() * 100).toInt() + 30
+                ))
+            }
+
             // Cargar imagen con Glide
             val imageUrl = post.preview.url ?: post.sample?.url ?: post.file.url
             
             Glide.with(binding.imgPreview)
                 .load(imageUrl)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .placeholder(R.drawable.placeholder_image)
+                .placeholder(placeholder)
                 .error(R.drawable.placeholder_image)
                 .centerCrop()
                 .into(binding.imgPreview)

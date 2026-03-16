@@ -4,7 +4,10 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ViewConfiguration
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.viewpager2.widget.ViewPager2
+import com.mommys.app.R
 import kotlin.math.abs
 
 /**
@@ -13,7 +16,11 @@ import kotlin.math.abs
  * Esto permite que el ViewPager2 reciba los swipes horizontales para cambiar de página,
  * mientras que los swipes verticales hacia abajo siguen activando el refresh.
  * 
- * Basado en la implementación original de la app (CustomSwipeRefreshLayout.java)
+ * También sobreescribe canChildScrollUp() para buscar el RecyclerView del grid
+ * dentro del ViewPager2, ya que ViewPager2 horizontal siempre retorna
+ * canScrollVertically(-1) = false.
+ * 
+ * Basado en la implementación original de la app (CustomSwipeRefreshLayout.java + k5/l.java)
  */
 class CustomSwipeRefreshLayout @JvmOverloads constructor(
     context: Context,
@@ -24,6 +31,27 @@ class CustomSwipeRefreshLayout @JvmOverloads constructor(
     private var initialX: Float = 0f
     private var initialY: Float = 0f
     private var declined: Boolean = false
+
+    /**
+     * Busca el RecyclerView del grid dentro del ViewPager2 actual.
+     * Como k5/l.java g() en la app original, pero adaptado porque
+     * el hijo directo es ViewPager2 (horizontal) que siempre retorna false.
+     */
+    override fun canChildScrollUp(): Boolean {
+        val viewPager = findViewPager2() ?: return super.canChildScrollUp()
+        val innerRecycler = viewPager.getChildAt(0) as? RecyclerView ?: return super.canChildScrollUp()
+        val currentHolder = innerRecycler.findViewHolderForAdapterPosition(viewPager.currentItem)
+        val gridRecycler = currentHolder?.itemView?.findViewById<RecyclerView>(R.id.recyclerView)
+        return gridRecycler?.canScrollVertically(-1) ?: false
+    }
+
+    private fun findViewPager2(): ViewPager2? {
+        for (i in 0 until childCount) {
+            val child = getChildAt(i)
+            if (child is ViewPager2) return child
+        }
+        return null
+    }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {

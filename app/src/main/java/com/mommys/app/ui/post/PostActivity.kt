@@ -204,6 +204,7 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         setupBackButtons()
         Log.d(TAG, "Setting up ViewPager...")
         setupViewPager()
+        connectPanelToAdapter()
         Log.d(TAG, "Setting up observers...")
         setupObservers()
         Log.d(TAG, "Setting up network monitoring...")
@@ -391,6 +392,13 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         
         // Guardar referencia
         slidingPanel = panel
+    }
+
+    /**
+     * Pasa la referencia del SlidingPanel al adapter para coordinación scroll↔drag
+     */
+    private fun connectPanelToAdapter() {
+        pagerAdapter.setSlidingPanel(slidingPanel)
     }
 
     /**
@@ -595,12 +603,12 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         viewModel.downloadResult.observe(this) { result ->
             result?.let {
                 if (it.success) {
-                    Toast.makeText(this, R.string.action_downloaded, Toast.LENGTH_SHORT).show()
+                    Snackbar.make(binding.root, R.string.action_downloaded, Snackbar.LENGTH_SHORT).show()
                     // Actualizar UI del botón de descarga
                     pagerAdapter.updateDownloadState(it.postId, true, false)
                 } else {
                     val message = it.errorMessage ?: getString(R.string.action_download_failed)
-                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                    Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
                     // Restaurar botón
                     pagerAdapter.updateDownloadState(it.postId, false, false)
                 }

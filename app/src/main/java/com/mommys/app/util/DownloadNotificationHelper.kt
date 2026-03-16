@@ -13,7 +13,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.mommys.app.R
-import com.mommys.app.receiver.DownloadCancelReceiver
 
 /**
  * Helper para manejar notificaciones de descarga
@@ -67,18 +66,6 @@ object DownloadNotificationHelper {
         
         val notificationId = NOTIFICATION_ID_BASE + postId
         
-        // Crear intent para cancelar descarga cuando usuario borra notificación
-        val deleteIntent = Intent(context, DownloadCancelReceiver::class.java).apply {
-            action = DownloadCancelReceiver.ACTION_CANCEL_DOWNLOAD
-            putExtra(DownloadCancelReceiver.EXTRA_POST_ID, postId)
-        }
-        val deletePendingIntent = PendingIntent.getBroadcast(
-            context,
-            notificationId,
-            deleteIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_download)
             .setContentTitle(context.getString(R.string.download_notification_title))
@@ -87,7 +74,6 @@ object DownloadNotificationHelper {
             .setOngoing(true)
             .setProgress(100, 0, true) // Indeterminate progress
             .setAutoCancel(false)
-            .setDeleteIntent(deletePendingIntent)
             .build()
         
         try {

@@ -174,6 +174,18 @@ class DownloadForegroundService : Service() {
                     applicationContext, notificationId, result.fileName,
                     result.uri, result.mimeType
                 )
+                // Vibración leve al completar descarga
+                if (prefs.downloadVibrateOnComplete) {
+                    val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
+                    if (vibrator?.hasVibrator() == true) {
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            vibrator.vibrate(android.os.VibrationEffect.createOneShot(100, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+                        } else {
+                            @Suppress("DEPRECATION")
+                            vibrator.vibrate(100)
+                        }
+                    }
+                }
             } else {
                 DownloadNotificationHelper.showDownloadErrorNotification(
                     applicationContext, notificationId, fileName,

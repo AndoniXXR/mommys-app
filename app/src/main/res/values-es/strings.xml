@@ -1432,6 +1432,8 @@
     <string name="pref_storage_options_category">Opciones</string>
     <string name="pref_storage_cache_category">Caché</string>
     <string name="pref_storage_cache_cleared">Caché limpiada</string>
+    <string name="pref_download_vibrate_title">Vibrar al completar descarga</string>
+    <string name="pref_download_vibrate_summary">Vibración breve cuando una descarga finaliza</string>
     <string name="pref_storage_clear_cache_title">Limpiar caché</string>
     <string name="pref_storage_clear_cache_summary">Tamaño actual de la caché: calculando…</string>
     <string name="pref_storage_clear_cache_summary_size">Tamaño actual de la caché: %s</string>

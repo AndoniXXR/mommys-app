@@ -578,6 +578,10 @@ class PreferencesManager(context: Context) {
         get() = userPrefs.getString("storage_file_name_mask", "%artist%-%id%") ?: "%artist%-%id%"
         set(value) { userPrefs.edit { putString("storage_file_name_mask", value) } }
     
+    var downloadVibrateOnComplete: Boolean
+        get() = userPrefs.getBoolean("download_vibrate_on_complete", true)
+        set(value) { userPrefs.edit { putBoolean("download_vibrate_on_complete", value) } }
+
     var storageOverwrite: Boolean
         get() = userPrefs.getBoolean("storage_overwrite", true)
         set(value) { userPrefs.edit { putBoolean("storage_overwrite", value) } }

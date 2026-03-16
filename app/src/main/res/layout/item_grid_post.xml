@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/grid_item_margin"
+    app:cardBackgroundColor="?attr/colorSurface"
     app:cardCornerRadius="@dimen/card_corner_radius">
     
     <FrameLayout
@@ -18,7 +19,6 @@
             android:id="@+id/imgPreview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@color/colorWhite"
             android:adjustViewBounds="true"/>
         
         <!-- Checkmark de selección (centro) - grande y visible con fondo circular -->

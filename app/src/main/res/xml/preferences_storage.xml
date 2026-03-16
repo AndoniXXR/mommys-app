@@ -68,4 +68,12 @@
         android:icon="@drawable/ic_delete"
         android:singleLineTitle="false" />
 
+    <SwitchPreferenceCompat
+        android:key="download_vibrate_on_complete"
+        android:title="@string/pref_download_vibrate_title"
+        android:summary="@string/pref_download_vibrate_summary"
+        android:icon="@drawable/ic_vibration"
+        android:defaultValue="true"
+        android:singleLineTitle="false" />
+
 </PreferenceScreen>

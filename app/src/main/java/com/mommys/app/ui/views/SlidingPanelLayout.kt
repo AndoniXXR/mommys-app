@@ -98,6 +98,14 @@ class SlidingPanelLayout @JvmOverloads constructor(
     private var isDragging = false
     private var isInTouchZone = false
     
+    /**
+     * Flag para habilitar/deshabilitar el drag desde fuera.
+     * Como 'h' en df/c.java de la app original:
+     * - true = drag habilitado (ScrollView en el tope)
+     * - false = drag deshabilitado (ScrollView tiene contenido por scrollear arriba)
+     */
+    var dragEnabled: Boolean = true
+    
     // Velocidad mínima escalada
     private val minFlingVelocity: Float
     
@@ -179,7 +187,7 @@ class SlidingPanelLayout @JvmOverloads constructor(
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        if (!config.touchEnabled) {
+        if (!config.touchEnabled || !dragEnabled) {
             return false
         }
         
@@ -211,7 +219,7 @@ class SlidingPanelLayout @JvmOverloads constructor(
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!config.touchEnabled) {
+        if (!config.touchEnabled || !dragEnabled) {
             return false
         }
         

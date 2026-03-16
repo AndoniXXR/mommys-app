@@ -15,6 +15,9 @@ import com.mommys.app.util.PostDownloader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 
 /**
  * Resultado de una acción (voto, favorito, etc)
@@ -537,6 +540,19 @@ class PostViewModel : ViewModel() {
                         DownloadNotificationHelper.showDownloadCompleteNotification(
                             context, notificationId, fileName, result.uri, result.mimeType
                         )
+                    }
+                    
+                    // Vibración leve al completar descarga
+                    if (prefsManager.downloadVibrateOnComplete) {
+                        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                        if (vibrator?.hasVibrator() == true) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+                            } else {
+                                @Suppress("DEPRECATION")
+                                vibrator.vibrate(100)
+                            }
+                        }
                     }
                     
                     // Auto-acciones como la app original ei/p.java
