@@ -39,7 +39,7 @@ class SearchHelper(private val context: Context) {
         )
     }
     
-    private val suggestionsManager = SuggestionsManager(context)
+    private val suggestionsManager = SuggestionsManager()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
     private val app: MommysApplication

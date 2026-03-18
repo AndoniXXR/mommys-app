@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.mommys.app.data.api.ApiClient
 import com.mommys.app.data.database.AppDatabase
 import com.mommys.app.data.preferences.PreferencesManager
-import com.mommys.app.data.search.SuggestionsManager
 import com.mommys.app.util.network.NetworkAwareDispatcher
 import com.mommys.app.util.network.NetworkMonitor
 
@@ -22,15 +21,9 @@ class MommysApplication : Application() {
     // Basado en Dispatcher.java de Picasso en la app original
     val networkDispatcher: NetworkAwareDispatcher by lazy { NetworkAwareDispatcher.getInstance() }
     
-    // SuggestionsManager pre-cargado en background para evitar delay en la primera búsqueda
-    val suggestionsManager: SuggestionsManager by lazy { SuggestionsManager(this) }
-    
     override fun onCreate() {
         super.onCreate()
         _instance = this
-        
-        // Pre-cargar sugerencias en background (172K tags, 2.62 MB JSON)
-        Thread { suggestionsManager.preload() }.start()
         
         // Configurar ApiClient para usar el host correcto (e621 o e926)
         try {

@@ -1,7 +1,5 @@
 package com.mommys.app.data.search
 
-import android.content.Context
-import org.json.JSONArray
 import java.util.Locale
 
 /**
@@ -25,92 +23,118 @@ data class Suggestion(
 
 /**
  * Gestor de sugerencias de búsqueda.
- * Similar a la combinación de RecentSearchesProvider + suggestions.json de la app original.
- * 
- * Carga las sugerencias predefinidas desde assets y las combina con el historial.
+ * Réplica exacta de RecentSearchesProvider.a de la app original:
+ * tags y operadores hardcodeados como lista estática (0ms de carga).
  */
-class SuggestionsManager(private val context: Context) {
+class SuggestionsManager {
     
-    companion object {
-        private const val SUGGESTIONS_FILE = "suggestions.json"
-        private const val MAX_CACHE_SIZE = 200000
-    }
-    
-    // Cache de sugerencias predefinidas
-    private val predefinedSuggestions: List<String> by lazy {
-        loadSuggestionsFromAssets()
-    }
-    
-    /** Fuerza la carga del cache (llamar desde background thread) */
-    fun preload() {
-        predefinedSuggestions.size
-    }
-    
-    // Operadores de búsqueda conocidos
-    private val operators = listOf(
-        // Score
+    // Lista estática exacta de la app original (RecentSearchesProvider.a)
+    // 418 tags + operadores hardcodeados en bytecode
+    private val predefinedSuggestions = listOf(
+        "mammal", "anthro", "female", "hi_res", "male", "solo",
+        "clothing", "hair", "fur", "duo", "simple_background",
+        "canid", "canine", "video_games", "clothed", "smile",
+        "blush", "open_mouth", "looking_at_viewer", "digital_media_(artwork)",
+        "tongue", "text", "feral", "horn", "felid", "nintendo",
+        "canis", "equid", "biped", "blue_eyes", "white_body",
+        "absurd_res", "tongue_out", "english_text", "wings",
+        "my_little_pony", "pok\u00e9mon", "pok\u00e9mon_(species)", "standing",
+        "teeth", "scalie", "white_background", "group", "claws",
+        "white_fur", "friendship_is_magic", "1:1", "eyes_closed",
+        "lying", "humanoid", "monochrome", "muscular", "fox",
+        "equine", "human", "green_eyes", "dragon", "fingers",
+        "long_hair", "toes", "outside", "comic", "piercing",
+        "furniture", "feline", "blue_body", "domestic_dog", "2017",
+        "brown_body", "2019", "ambiguous_gender", "sitting", "2018",
+        "looking_back", "dialogue", "feathers", "2016", "black_body",
+        "tuft", "horse", "<3", "wolf", "brown_fur", "eyewear",
+        "legwear", "size_difference", "leporid", "young", "solo_focus",
+        "narrowed_eyes", "red_eyes", "black_nose", "feathered_wings",
+        "headgear", "domestic_cat", "paws", "reptile", "collar",
+        "grey_body", "shirt", "on_back", "multicolored_body", "sweat",
+        "blonde_hair", "rabbit", "half-closed_eyes", "5_fingers",
+        "brown_hair", "black_fur", "fangs", "pantherine", "2015",
+        "headwear", "abs", "black_hair", "yellow_body", "pony",
+        "muscular_male", "glasses", "multicolored_hair", "anthrofied",
+        "yellow_eyes", "ear_piercing", "jewelry", "not_furry", "bed",
+        "pecs", "cutie_mark", "blue_fur", "eyelashes", "vein",
+        "detailed_background", "unicorn", "avian", "hat", "markings",
+        "purple_eyes", "pawpads", "barefoot", "multicolored_fur",
+        "grey_fur", "pose", "inside", "bovid", "biceps", "2014",
+        "signature", "handwear", "blue_hair", "licking", "footwear",
+        "gloves", "hybrid", "disney", "animal_humanoid", "belly",
+        "fan_character", "membrane_(anatomy)", "plant", "food",
+        "orange_body", "4_toes", "sketch", "rodent", "white_hair",
+        "toe_claws", "purple_hair", "stripes", "membranous_wings",
+        "hooves", "raised_tail", "yellow_fur", "marine", "kneeling",
+        "animated", "sky", "one_eye_closed", "red_hair", "all_fours",
+        "weapon", "earth_pony", "rear_view", "water", "bird",
+        "short_hair", "portrait", "purple_body", "tree", "pink_hair",
+        "girly", "eyebrows", "holding_object", "2013", "chest_tuft",
+        "two_tone_body", "stockings", "scales", "unknown_artist",
+        "orange_fur", "3d_(artwork)", "16:9", "feet", "speech_bubble",
+        "3_toes", "tan_body", "4:3", "tears", "front_view",
+        "japanese_text", "red_body", "two_tone_hair", "swimwear",
+        "pants", "sonic_the_hedgehog_(series)", "faceless_male",
+        "mammal_humanoid", "greyscale", "female/female", "brown_eyes",
+        "fluffy", "digitigrade", "pink_body", "necklace", "two_tone_fur",
+        "accessory", "black_and_white", "hindpaw", "shoes", "seductive",
+        "mostly_nude", "machine", "green_body", "makeup", "drooling",
+        "tiger", "beak", "on_top", "caprine", "multicolored_tail",
+        "partially_clothed", "grin", "sharp_teeth", "looking_at_another",
+        "zootopia", "tan_fur", "armor", "glowing", "2012",
+        "winged_unicorn", "tentacles", "purple_fur", "pillow",
+        "smaller_male", "4_fingers", "traditional_media_(artwork)",
+        "mythology", "grass", "arthropod", "cloud",
+        "digital_drawing_(artwork)", "fish", "alien", "mustelid",
+        "melee_weapon", "low_res", "happy", "spots", "big_muscles",
+        "lion", "demon", "inner_ear_fluff", "alpha_channel", "kemono",
+        "shorts", "fluffy_tail", "pok\u00e9morph", "bovine", "bikini",
+        "twilight_sparkle_(mlp)", "facial_hair", "pink_nose", "whiskers",
+        "humanoid_hands", "armwear", "grey_background", "pink_fur",
+        "dress", "cervid", "kissing", "digimon", "ribbons", "skirt",
+        "robot", "transformation", "murine", "digimon_(species)",
+        "on_bed", "hair_accessory", "holidays", "wet", "messy",
+        "bedroom_eyes", "legendary_pok\u00e9mon", "long_ears", "lips",
+        "side_view", "red_fur", "beverage", "censored", "spikes",
+        "night", "translated", "tattoo", "fire", "undertale", "flower",
+        "fully_clothed", "eeveelution", "green_hair", "blue_feathers",
+        "socks", "uniform", "boots", "transparent_background",
+        "humanoid_pointy_ears", "lizard", "soles", "spitz",
+        "facial_piercing", "dipstick_tail", "open_smile", "day",
+        "seaside", "rainbow_dash_(mlp)", "scar", "abstract_background",
+        "athletic", "judy_hopps", "black_eyes", "fluttershy_(mlp)",
+        "looking_down", "first_person_view", "beach", "leash",
+        "crossover", "torn_clothing", "shark", "ponytail",
+        "full-length_portrait", "2011", "wink", "freckles", "nick_wilde",
+        "blue_skin", "belt", "plantigrade", "on_front", "forest",
+        "humor",
+        // Operadores (exactos de la app original)
         "score:100", "score:>=100", "score:>100", "score:<=100", "score:<100",
-        "score:>=50", "score:>=200", "score:>=500", "score:>=1000",
-        // Favcount
         "favcount:100", "favcount:>=100", "favcount:>100", "favcount:<=100", "favcount:<100",
-        "favcount:>=50", "favcount:>=200", "favcount:>=500",
-        // Comments
-        "commentcount:>10", "commentcount:>20", "commentcount:>50",
-        // Rating
+        "commentcount:>20",
         "rating:safe", "rating:questionable", "rating:explicit",
-        // Type
-        "type:jpg", "type:png", "type:gif", "type:webm", "type:mp4",
-        // Parent/Child
-        "ischild:true", "ischild:false", "isparent:true", "isparent:false",
-        "parent:none",
-        // Dimensions
-        "width:>=1920", "width:>=1080", "height:>=1920", "height:>=1080",
-        "mpixels:>=2",
-        // Ratio
-        "ratio:1.33", "ratio:1.78", "ratio:0.56",
-        // Date
-        "date:today", "date:yesterday", "date:week", "date:month", "date:year",
-        // Duration (videos)
-        "duration:>30", "duration:>60", "duration:>120",
-        // Status
-        "status:active", "status:pending", "status:flagged", "status:deleted",
-        // Pool
-        "inpool:true", "inpool:false",
-        // Order
-        "order:id", "order:id_asc", "order:random",
+        "type:jpg", "type:png", "type:gif", "type:webm", "type:mp4", "type:swf",
+        "ischild:true", "isparent:true",
+        "parent:1234", "parent:none",
+        "width:1000", "height:1000", "mpixels:1",
+        "ratio:1.33", "filesize:200KB",
+        "duration:>120",
+        "date:2020-10-27", "date:today", "date:yesterday",
+        "status:active", "status:pending", "status:flagged",
+        "inpool:true",
+        "order:id", "order:random",
         "order:score", "order:score_asc",
         "order:favcount", "order:favcount_asc",
         "order:tagcount", "order:tagcount_asc",
+        "order:desclength", "order:desclength_asc",
         "order:comments", "order:comments_asc",
         "order:mpixels", "order:mpixels_asc",
         "order:filesize", "order:filesize_asc",
         "order:landscape", "order:portrait",
         "order:change",
-        "order:duration", "order:duration_asc",
-        // Negation examples
-        "-male", "-female", "-comic", "-animated"
+        "order:duration", "order:duration_asc"
     )
-    
-    /**
-     * Carga las sugerencias desde el archivo JSON en assets
-     */
-    private fun loadSuggestionsFromAssets(): List<String> {
-        return try {
-            val inputStream = context.assets.open(SUGGESTIONS_FILE)
-            val json = inputStream.bufferedReader().use { it.readText() }
-            val jsonArray = JSONArray(json)
-            
-            val list = mutableListOf<String>()
-            for (i in 0 until minOf(jsonArray.length(), MAX_CACHE_SIZE)) {
-                list.add(jsonArray.getString(i))
-            }
-            list
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Si falla, retornar lista vacía
-            emptyList()
-        }
-    }
     
     /**
      * Obtiene sugerencias que coincidan con el query
@@ -121,21 +145,8 @@ class SuggestionsManager(private val context: Context) {
         if (query.isBlank()) return emptyList()
         
         val queryLower = query.lowercase(Locale.getDefault())
-        val results = mutableListOf<Suggestion>()
         
-        // 1. Buscar en operadores (alta prioridad)
-        val matchingOperators = operators.filter { op ->
-            op.lowercase().startsWith(queryLower) || 
-            op.lowercase().contains(queryLower)
-        }.take(limit / 4)
-        
-        for (op in matchingOperators) {
-            val score = if (op.lowercase().startsWith(queryLower)) 100 else 50
-            results.add(Suggestion(op, SuggestionType.OPERATOR, score))
-        }
-        
-        // 2. Buscar en sugerencias predefinidas
-        val matchingTags = predefinedSuggestions.asSequence()
+        return predefinedSuggestions.asSequence()
             .filter { tag ->
                 val tagLower = tag.lowercase()
                 tagLower.startsWith(queryLower) || tagLower.contains(queryLower)
@@ -143,22 +154,16 @@ class SuggestionsManager(private val context: Context) {
             .take(limit)
             .map { tag ->
                 val tagLower = tag.lowercase()
+                val type = if (tag.contains(":")) SuggestionType.OPERATOR else SuggestionType.TAG
                 val score = when {
-                    tagLower == queryLower -> 200          // Coincidencia exacta
-                    tagLower.startsWith(queryLower) -> 100 // Empieza con
-                    else -> 25                              // Contiene
+                    tagLower == queryLower -> 200
+                    tagLower.startsWith(queryLower) -> 100
+                    else -> 25
                 }
-                Suggestion(tag, SuggestionType.TAG, score)
+                Suggestion(tag, type, score)
             }
-            .toList()
-        
-        results.addAll(matchingTags)
-        
-        // 3. Ordenar por score y limitar
-        return results
             .sortedByDescending { it.score }
-            .distinctBy { it.text.lowercase() }
-            .take(limit)
+            .toList()
     }
     
     /**
@@ -200,6 +205,6 @@ class SuggestionsManager(private val context: Context) {
      * Obtiene la cantidad total de sugerencias disponibles
      */
     fun getTotalSuggestionsCount(): Int {
-        return predefinedSuggestions.size + operators.size
+        return predefinedSuggestions.size
     }
 }

@@ -71,10 +71,9 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
         selectionArgs: Array<out String>?,
         sortOrder: String?
     ): Cursor {
-        // Usar instancia pre-cargada de MommysApplication
+        // Usar SuggestionsManager (datos estáticos, sin I/O)
         if (suggestionsManager == null) {
-            suggestionsManager = (context?.applicationContext as? MommysApplication)?.suggestionsManager
-                ?: context?.let { SuggestionsManager(it) }
+            suggestionsManager = SuggestionsManager()
         }
 
         // Obtener el query actual del usuario
