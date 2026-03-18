@@ -41,6 +41,11 @@ class SuggestionsManager(private val context: Context) {
         loadSuggestionsFromAssets()
     }
     
+    /** Fuerza la carga del cache (llamar desde background thread) */
+    fun preload() {
+        predefinedSuggestions.size
+    }
+    
     // Operadores de búsqueda conocidos
     private val operators = listOf(
         // Score
