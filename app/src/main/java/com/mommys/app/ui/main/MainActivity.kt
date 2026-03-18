@@ -1,12 +1,14 @@
 package com.mommys.app.ui.main
 
 import android.Manifest
+import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.SearchRecentSuggestions
 import android.text.InputType
 import android.view.Menu
 import android.view.View
@@ -31,6 +33,7 @@ import com.mommys.app.data.api.ApiService
 import com.mommys.app.data.db.seen.AppSeenDatabase
 import com.mommys.app.data.model.Post
 import com.mommys.app.data.search.SearchHelper
+import com.mommys.app.data.search.SearchSuggestionsProvider
 import com.mommys.app.databinding.ActivityMainBinding
 import com.mommys.app.service.FollowingJobService
 import com.mommys.app.ui.about.AboutActivity
@@ -43,7 +46,6 @@ import com.mommys.app.ui.popular.PopularActivity
 import com.mommys.app.ui.saved.SavedSearchesActivity
 import com.mommys.app.ui.settings.SettingsActivity
 import com.mommys.app.ui.views.MySearchView
-import com.mommys.app.ui.views.SearchSuggestionsAdapter
 import com.mommys.app.util.AdManager
 import com.mommys.app.util.UpdateManager
 import com.mommys.app.util.network.NetworkAwareDispatcher
@@ -79,7 +81,10 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     private lateinit var pagesAdapter: PagesAdapter
     private lateinit var api: ApiService
     private lateinit var searchHelper: SearchHelper
-    private lateinit var suggestionsAdapter: SearchSuggestionsAdapter
+    // SearchRecentSuggestions para guardar historial (como la app original)
+    private val recentSuggestions by lazy {
+        SearchRecentSuggestions(this, SearchSuggestionsProvider.AUTHORITY, SearchSuggestionsProvider.MODE)
+    }
     
     private val prefs by lazy { MommysApplication.getInstance().preferencesManager }
     
@@ -98,8 +103,19 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     // Control de páginas preparadas
     private var pagesCreated: AtomicInteger = AtomicInteger(0)
     
-    // Si estamos añadiendo páginas
-    private val isAddingPages: AtomicBoolean = AtomicBoolean(false)
+    // Frontera de páginas - CAS atómico como V en la app original
+    // Solo permite avanzar secuencialmente: compareAndSet(n-1, n+count-1)
+    private val pagesFrontier: AtomicInteger = AtomicInteger(0)
+    
+    // Flag permanente: fin de resultados alcanzado (como R en decompilada)
+    // Una vez true, addMorePages() no crea más páginas hasta nueva búsqueda
+    private val reachedEnd: AtomicBoolean = AtomicBoolean(false)
+    
+    // Señal de fin para que onPageSelected limpie páginas vacías (como S en decompilada)
+    private val endSignal: AtomicBoolean = AtomicBoolean(false)
+    
+    // Número de página donde se alcanzó el fin (como W en decompilada)
+    private val endPageNumber: AtomicInteger = AtomicInteger(-1)
     
     // Página a la que ir después de cargar
     private var pendingPageJump = 0
@@ -112,7 +128,6 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     
     // Job para debounce de sugerencias
     private var suggestionJob: Job? = null
-    private val suggestionDebounceMs = 200L
     
     // Control para "presiona otra vez para salir" (como la app original)
     private var backPressedOnce = false
@@ -566,16 +581,49 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                     currentPageDisplay = position + 1
                     updatePageNumber()
                     
-                    // Añadir más páginas si llegamos cerca del final
-                    // Similar a di/i0.java de la app original
-                    if (position >= pageHandlers.size - 2 && !isAddingPages.get()) {
-                        // Verificar la última página para saber si debemos añadir más
-                        // Solo añadir si la última página:
-                        // 1. Ya terminó de cargar (!isLoading)
-                        // 2. No es la última página (tiene posts completos)
+                    if (pageHandlers.isEmpty()) return
+                    
+                    // PARTE 1: Añadir más páginas si llegamos cerca del final
+                    // Como di/i0.java: !adapter.k && size <= offscreen + position + 2
+                    val offscreen = binding.viewPager.offscreenPageLimit.coerceAtLeast(0)
+                    if (!pagesAdapter.isAddingFlag
+                        && pageHandlers.size <= offscreen + position + 2
+                    ) {
+                        pagesAdapter.isAddingFlag = true
                         val lastHandler = pageHandlers.lastOrNull()
-                        if (lastHandler != null && !lastHandler.isLoading && !lastHandler.isLastPage) {
-                            addMorePages(pageHandlers.size + 1, 3)
+                        if (lastHandler != null && !lastHandler.isEmptyAndLast()) {
+                            addMorePages(lastHandler.pageNumber + 1, 3)
+                        }
+                        pagesAdapter.isAddingFlag = false
+                    }
+                    
+                    // PARTE 2: Limpiar páginas vacías sobrantes si endSignal activa
+                    // Como di/i0.java bloque S.compareAndSet(true, false)
+                    if (endSignal.compareAndSet(true, false)) {
+                        val endPage = endPageNumber.get()
+                        if (endPage >= 0) {
+                            // Recolectar páginas vacías desde el final
+                            val toRemove = mutableListOf<PageHandler>()
+                            var removeStartIndex = pageHandlers.size - 1
+                            for (i in pageHandlers.size - 1 downTo 1) {
+                                val h = pageHandlers[i]
+                                if (h.isEmptyAndLast() || h.pageNumber >= endPage) {
+                                    toRemove.add(h)
+                                    removeStartIndex = i
+                                } else {
+                                    break
+                                }
+                            }
+                            if (toRemove.isNotEmpty()) {
+                                pageHandlers.removeAll(toRemove.toSet())
+                                pagesAdapter.notifyItemRangeRemoved(
+                                    removeStartIndex, toRemove.size
+                                )
+                                // Actualizar totalPages con la última página restante
+                                if (pageHandlers.isNotEmpty()) {
+                                    totalPages.set(pageHandlers.last().pageNumber)
+                                }
+                            }
                         }
                     }
                 }
@@ -584,91 +632,89 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     }
     
     private fun setupSearchView() {
-        // Crear adaptador de sugerencias
-        suggestionsAdapter = SearchSuggestionsAdapter(
-            context = this,
-            onSuggestionClick = { query ->
-                // Ejecutar búsqueda con el query completo
-                binding.searchView.setQuery(query, true)
-            },
-            onInsertClick = { text ->
-                // Insertar texto en el SearchView sin ejecutar
-                val currentQuery = binding.searchView.query?.toString() ?: ""
-                val words = currentQuery.trim().split("\\s+".toRegex()).toMutableList()
-                if (words.isNotEmpty() && words.last().isNotEmpty()) {
-                    words[words.lastIndex] = text
-                } else {
-                    words.add(text)
-                }
-                val newQuery = words.joinToString(" ") + " "
-                binding.searchView.setQuery(newQuery, false)
-            }
-        )
+        // === Réplica exacta de la app original (líneas 858-877 de MainActivity.java) ===
         
-        // Configurar SearchView
+        // 1. Conectar SearchView con SearchableInfo del framework
+        //    Esto vincula el SearchView con el ContentProvider (SearchSuggestionsProvider)
+        //    para que las sugerencias se gestionen automáticamente por el Filter interno.
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        val searchableInfo = searchManager.getSearchableInfo(componentName)
+        if (searchableInfo != null) {
+            binding.searchView.setSearchableInfo(searchableInfo)
+        }
+        
+        // 2. Configurar SearchView (idéntico a la original)
         binding.searchView.apply {
-            // Configurar listeners
+            isSubmitButtonEnabled = false
+            setQueryRefinementEnabled(true)
+            setIconifiedByDefault(false)
+            
+            // IME options: FLAG_NO_PERSONALIZED_LEARNING (como la original)
+            val currentIme = imeOptions
+            imeOptions = currentIme or 0x10000000
+            
+            // 3. Listener de texto (como la original)
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     val trimmedQuery = query?.trim() ?: ""
                     clearFocus()
                     
-                    // Comportamiento como app original: nueva búsqueda = nueva Activity
-                    // Esto permite usar Back para volver a la búsqueda anterior
                     if (trimmedQuery.isNotEmpty()) {
                         openNewSearch(trimmedQuery)
                     } else {
-                        // Query vacío = recargar página actual
                         performSearch("")
                     }
                     return true
                 }
                 
                 override fun onQueryTextChange(newText: String?): Boolean {
-                    // Cancelar job anterior
-                    suggestionJob?.cancel()
-                    
-                    // Debounce para no hacer demasiadas queries
-                    suggestionJob = CoroutineScope(Dispatchers.Main).launch {
-                        delay(suggestionDebounceMs)
-                        updateSuggestions(newText ?: "")
-                    }
-                    return true
+                    return false // Dejar que el framework gestione las sugerencias
                 }
             })
             
-            // Cuando el SearchView obtiene foco, mostrar sugerencias
-            setOnQueryTextFocusChangeListener { _, hasFocus ->
-                if (hasFocus) {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        updateSuggestions(query?.toString() ?: "")
-                    }
+            // 4. Listener de sugerencias — cuando el usuario hace click en una sugerencia
+            //    (como setOnSuggestionListener(new u5.i(this)) en la original)
+            setOnSuggestionListener(object : SearchView.OnSuggestionListener {
+                override fun onSuggestionSelect(position: Int): Boolean {
+                    return false
                 }
-            }
-            
-            // Configurar para que muestre sugerencias
-            setIconifiedByDefault(false)
-            isSubmitButtonEnabled = false
+                
+                override fun onSuggestionClick(position: Int): Boolean {
+                    val cursor = suggestionsAdapter?.cursor ?: return false
+                    if (!cursor.moveToPosition(position)) return false
+                    
+                    // Obtener el texto de la sugerencia (SUGGEST_COLUMN_QUERY)
+                    val queryIdx = cursor.getColumnIndex(android.app.SearchManager.SUGGEST_COLUMN_QUERY)
+                    val text1Idx = cursor.getColumnIndex(android.app.SearchManager.SUGGEST_COLUMN_TEXT_1)
+                    
+                    val suggestionText = if (queryIdx >= 0) {
+                        cursor.getString(queryIdx)
+                    } else if (text1Idx >= 0) {
+                        cursor.getString(text1Idx)
+                    } else {
+                        return false
+                    }
+                    
+                    // Poner texto + ejecutar búsqueda (como la original: r(text) + B.performClick())
+                    binding.searchView.refineQuery(suggestionText)
+                    binding.btnSearch.performClick()
+                    return true
+                }
+            })
         }
         
-        // Configurar el AutoCompleteTextView interno del SearchView
+        // 5. Configurar el EditText interno
         try {
-            val searchAutoComplete = binding.searchView.findViewById<androidx.appcompat.widget.SearchView.SearchAutoComplete>(
+            val editText = binding.searchView.findViewById<EditText>(
                 androidx.appcompat.R.id.search_src_text
             )
-            searchAutoComplete?.apply {
-                setAdapter(suggestionsAdapter)
-                threshold = 0 // Mostrar sugerencias desde el primer caracter
-                
-                setOnItemClickListener { _, _, position, _ ->
-                    suggestionsAdapter.getSuggestionQuery(position)?.let { query ->
-                        binding.searchView.setQuery(query, true)
-                    }
+            editText?.apply {
+                if (Build.VERSION.SDK_INT >= 26) {
+                    imeOptions = imeOptions or 0x1000000
                 }
                 
-                // Como la app original: cuando el usuario presiona "Ir/Search" en el teclado,
-                // simular click en el botón de la lupa. Esto asegura que el comportamiento
-                // sea idéntico para query vacío (Android no llama onQueryTextSubmit si está vacío)
+                // Cuando el usuario presiona "Ir/Search" en el teclado,
+                // simular click en el botón de búsqueda
                 setOnEditorActionListener { _, _, _ ->
                     binding.btnSearch.performClick()
                     true
@@ -676,22 +722,6 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
             }
         } catch (e: Exception) {
             e.printStackTrace()
-        }
-    }
-    
-    /**
-     * Actualiza las sugerencias del SearchView
-     */
-    private fun updateSuggestions(query: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val cursor = searchHelper.getSuggestionsCursor(query)
-                withContext(Dispatchers.Main) {
-                    suggestionsAdapter.changeCursor(cursor)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
         }
     }
     
@@ -746,8 +776,11 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
      * para poder usar Back y volver a la búsqueda anterior.
      */
     private fun openNewSearch(tags: String, page: Int = 1) {
-        // Guardar en historial
+        // Guardar en historial (framework + Room, como la original)
         if (tags.isNotEmpty()) {
+            if (prefs.searchHistory) {
+                recentSuggestions.saveRecentQuery(tags, null)
+            }
             CoroutineScope(Dispatchers.IO).launch {
                 searchHelper.saveToHistory(tags)
             }
@@ -768,8 +801,11 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     private fun performSearch(query: String) {
         val tags = query.split("\\s+".toRegex()).filter { it.isNotEmpty() }
         
-        // Guardar en historial de base de datos si hay tags
+        // Guardar en historial (framework + Room, como la original)
         if (tags.isNotEmpty()) {
+            if (prefs.searchHistory) {
+                recentSuggestions.saveRecentQuery(query, null)
+            }
             CoroutineScope(Dispatchers.IO).launch {
                 searchHelper.saveToHistory(query)
             }
@@ -922,6 +958,10 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
         
         pagesCreated.set(0)
         totalPages.set(0)
+        pagesFrontier.set(0)
+        reachedEnd.set(false)
+        endSignal.set(false)
+        endPageNumber.set(-1)
         currentPageDisplay = 1
         pendingPageJump = 0
         
@@ -937,22 +977,16 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
      * Similar a F() de la app original
      */
     private fun addMorePages(startPage: Int, count: Int) {
-        if (count <= 0 || isAddingPages.get()) return
+        if (count <= 0) return
         if (startPage > maxPages) return
         
+        // Flag permanente R: si ya alcanzamos el fin, no crear más
+        if (reachedEnd.get()) return
+        
         // Verificar si la última página ya indica que no hay más resultados
-        // Similar a la verificación !hVar.c() en di/i0.java de la app original
         if (pageHandlers.isNotEmpty()) {
             val lastHandler = pageHandlers.last()
-            
-            // c() en la app original: posts.isEmpty() && isLastPage
-            // No añadir más si la última página indica que no hay más posts
-            if (lastHandler.isEmptyAndLast()) {
-                return
-            }
-            
-            // Si la última página es la última (menos posts que el límite), no añadir más
-            if (lastHandler.isLastPage) {
+            if (lastHandler.isEmptyAndLast() || lastHandler.isLastPage) {
                 return
             }
         }
@@ -961,12 +995,12 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
         val actualCount = minOf(count, maxPages - startPage + 1)
         if (actualCount <= 0) return
         
-        if (!isAddingPages.compareAndSet(false, true)) return
+        // CAS atómico como V en la decompilada: solo permite avanzar secuencialmente
+        if (!pagesFrontier.compareAndSet(startPage - 1, startPage + actualCount - 1)) return
         
         val gridColumns = prefs.getGridColumns()
         val startPosition = pageHandlers.size
         
-        // Crear los PageHandlers
         for (i in 0 until actualCount) {
             val pageNumber = startPage + i
             if (pageNumber > maxPages) break
@@ -982,7 +1016,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                 onLoadPage = { pageNum ->
                     loadPageData(pageNum)
                 },
-                selectionCallback = this,  // Pasar this como SelectionCallback
+                selectionCallback = this,
                 onInfoClick = { post ->
                     showPostInfo(post)
                 }
@@ -994,17 +1028,17 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
         if (insertedCount > 0) {
             runOnUiThread {
                 pagesAdapter.notifyPagesInserted(startPosition, insertedCount)
+                pagesAdapter.isAddingFlag = false
                 
-                // Si hay una página pendiente para navegar
                 if (pendingPageJump > 0 && pendingPageJump <= pageHandlers.size) {
                     binding.viewPager.setCurrentItem(pendingPageJump - 1, false)
                     pendingPageJump = 0
                     binding.progressBar.visibility = View.GONE
                 }
             }
+        } else {
+            pagesAdapter.isAddingFlag = false
         }
-        
-        isAddingPages.set(false)
     }
     
     /**
@@ -1047,16 +1081,18 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                     if (handler != null) {
                         if (response.isSuccessful) {
                             val posts = response.body()?.posts ?: emptyList()
-                            // Pasar el límite para detectar si es la última página
                             handler.onPostsReceived(posts, postsPerPage)
-                            // Aplicar filtros guardados a la página recién cargada
                             handler.applyFiltersAndSort(currentRatingFilter, currentTypeFilter, currentOrderType)
                             
-                            // IMPORTANTE: Después de cargar, añadir más páginas si NO es la última
-                            // Esto es similar a cómo la app original añade páginas en di/i0.java
-                            // Solo añadir si esta página tiene posts y no es la última
-                            if (!handler.isLastPage && posts.isNotEmpty()) {
-                                // Añadir páginas para offscreenPageLimit + buffer
+                            // Como ii/g.java: si la página está vacía+última, activar fin
+                            if (handler.isEmptyAndLast()) {
+                                if (reachedEnd.compareAndSet(false, true)) {
+                                    endSignal.set(true)
+                                    endPageNumber.set(pageNumber)
+                                    totalPages.set(pageNumber)
+                                }
+                            } else if (!handler.isLastPage && posts.isNotEmpty()) {
+                                // Solo añadir más si NO es última y hay posts
                                 val neededPages = (binding.viewPager.offscreenPageLimit + 2) - (pageHandlers.size - pageNumber)
                                 if (neededPages > 0) {
                                     addMorePages(pageHandlers.size + 1, neededPages)
@@ -1697,6 +1733,10 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
         pageHandlers.clear()
         pagesCreated.set(0)
         totalPages.set(0)
+        pagesFrontier.set(0)
+        reachedEnd.set(false)
+        endSignal.set(false)
+        endPageNumber.set(-1)
         
         // Recrear el adapter y asignarlo de nuevo
         pagesAdapter = PagesAdapter(pageHandlers, binding.viewPager)
@@ -1798,7 +1838,6 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
         suggestionJob?.cancel()
         networkObserverJob?.cancel() // Cancelar observación de red
         searchHelper.cleanup()
-        suggestionsAdapter.changeCursor(null)
         UpdateManager.cleanup(this) // Limpiar recursos del UpdateManager
     }
     

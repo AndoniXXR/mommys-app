@@ -164,6 +164,11 @@ class PageHandler(
     var blacklistedPostsCount: Int = 0
         private set
     
+    // Cantidad de posts RAW recibidos del servidor (antes de cualquier filtro)
+    // Como f y r en ii/h.java: si el servidor retornó posts aunque estén ocultos,
+    // la página NO está realmente vacía
+    private var rawPostCount: Int = 0
+    
     /**
      * Llamado cuando llegan los posts del servidor
      * @param newPosts Lista de posts recibidos
@@ -171,6 +176,9 @@ class PageHandler(
      */
     fun onPostsReceived(newPosts: List<Post>, requestedLimit: Int = 75) {
         posts.clear()
+        
+        // Guardar conteo bruto del servidor (antes de filtros)
+        rawPostCount = newPosts.size
         
         // Cargar seenIds para filtrar/marcar posts vistos
         val seenIds = AppSeenDatabase.getAllSeenIdsSync(context)
@@ -329,7 +337,11 @@ class PageHandler(
      * @return true si está vacía Y es la última página (no añadir más)
      */
     fun isEmptyAndLast(): Boolean {
+        // Como c() en ii/h.java: d.isEmpty() && l && f.isEmpty() && r == 0
+        // Si el servidor retornó posts (rawPostCount > 0) aunque todos fueron
+        // filtrados por blacklist/URLs nulas, la página NO está realmente vacía
         return originalPosts.isEmpty() && isLastPage && !isLoading && !hasError
+            && rawPostCount == 0
     }
     
     /**

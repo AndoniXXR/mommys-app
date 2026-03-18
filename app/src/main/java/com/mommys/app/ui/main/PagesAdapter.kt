@@ -23,6 +23,11 @@ class PagesAdapter(
     private val viewPager: ViewPager2
 ) : RecyclerView.Adapter<PagesAdapter.PageViewHolder>() {
     
+    // Flag anti re-entrada para prevenir que onPageSelected dispare
+    // creación de páginas si ya hay una en curso.
+    // Como boolean k en ei.k de la app original.
+    var isAddingFlag: Boolean = false
+    
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_page, parent, false) as FrameLayout

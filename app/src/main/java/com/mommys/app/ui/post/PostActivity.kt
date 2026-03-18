@@ -34,6 +34,7 @@ import com.mommys.app.data.preferences.PreferencesManager
 import com.mommys.app.databinding.ActivityPostBinding
 import com.mommys.app.ui.main.MainActivity
 import com.mommys.app.ui.notes.NotesActivity
+import com.mommys.app.ui.pool.PoolActivity
 import com.mommys.app.data.db.seen.AppSeenDatabase
 import com.mommys.app.util.AdManager
 import com.mommys.app.util.BlacklistHelper
@@ -1337,21 +1338,12 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
     
     /**
      * Navegar a un pool específico por ID
-     * Como la app original (va.java case 1):
+     * Como la app original:
      * postActivity.startActivity(new Intent(postActivity, PoolActivity.class).putExtra("i", poolId))
-     * 
-     * Por ahora, abrimos una búsqueda con el tag pool:<id>
-     * TODO: Implementar PoolActivity cuando tengamos la pantalla de pools
      */
     private fun navigateToPool(poolId: Int) {
         Log.d(TAG, "Navigating to pool: $poolId")
-        // Buscar posts del pool usando el tag pool:<id>
-        val intent = Intent(this, MainActivity::class.java).apply {
-            putExtra("search_query", "pool:$poolId order:id")
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
-        startActivity(intent)
-        Toast.makeText(this, getString(R.string.loading_pool, poolId), Toast.LENGTH_SHORT).show()
+        startActivity(PoolActivity.newIntent(this, poolId))
     }
     
     // ==================== NETWORK MONITORING ====================

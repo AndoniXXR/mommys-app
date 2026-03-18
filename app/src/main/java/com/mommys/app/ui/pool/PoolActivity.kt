@@ -7,14 +7,21 @@ import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.github.chrisbanes.photoview.PhotoView
 import com.mommys.app.R
 import com.mommys.app.data.api.ApiClient
 import com.mommys.app.data.db.downloads.AppDownloadsDatabase
@@ -29,6 +36,7 @@ import com.mommys.app.ui.main.SelectionCallback
 import com.mommys.app.ui.post.PostActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -70,6 +78,7 @@ class PoolActivity : AppCompatActivity(), SelectionCallback {
     private var poolId: Int = -1
     private var pool: Pool? = null
     private val posts = mutableListOf<Post>()
+    private var loadJob: Job? = null
     
     // Selection tracking (like LinkedHashSet K in original)
     private val selectedPosts = LinkedHashSet<Post>()
@@ -93,9 +102,26 @@ class PoolActivity : AppCompatActivity(), SelectionCallback {
         setupToolbar()
         setupRecyclerView()
         setupBottomNav()
+        setupBackPress()
         
         // Load pool data
         loadPool()
+    }
+    
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val newPoolId = getPoolId()
+        if (newPoolId > 0 && newPoolId != poolId) {
+            poolId = newPoolId
+            supportActionBar?.title = getString(R.string.pool_title_id, poolId)
+            clearSelection()
+            val oldSize = posts.size
+            posts.clear()
+            adapter.notifyItemRangeRemoved(0, oldSize)
+            poolPosts.clear()
+            loadPool()
+        }
     }
     
     private fun getPoolId(): Int {
@@ -129,12 +155,32 @@ class PoolActivity : AppCompatActivity(), SelectionCallback {
         binding.toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
     }
     
+    private fun setupBackPress() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // Like original app (di/m.java case 4):
+                // If info overlay visible -> close it
+                // If selection active -> clear selection
+                // Otherwise -> finish
+                val fLInfo = findViewById<FrameLayout>(R.id.fLInfo)
+                if (fLInfo != null && fLInfo.childCount > 0) {
+                    hidePostInfo()
+                } else if (selectedPosts.isNotEmpty()) {
+                    clearSelection()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
+    }
+    
     private fun setupRecyclerView() {
         val gridWidth = prefs.getGridWidth()
         
         adapter = PostsAdapter(
             onPostClick = { post -> openPost(post) },
-            onInfoClick = null,
+            onInfoClick = { post -> showPostInfo(post) },
             selectionCallback = this
         ).apply {
             aspectRatio = prefs.gridHeight / 100.0
@@ -179,12 +225,15 @@ class PoolActivity : AppCompatActivity(), SelectionCallback {
     }
     
     private fun loadPool() {
+        // Cancel any in-progress load
+        loadJob?.cancel()
+        
         binding.progressBar.visibility = View.VISIBLE
         binding.txtTitle.text = getString(R.string.pool_subtitle_loading)
         binding.txtTitleStatus.visibility = View.VISIBLE
         binding.txtTitleStatus.text = getString(R.string.pool_subtitle_status_1)
         
-        scope.launch {
+        loadJob = scope.launch {
             try {
                 // Step 1: Fetch pool info
                 val api = ApiClient.getApiService()
@@ -204,43 +253,52 @@ class PoolActivity : AppCompatActivity(), SelectionCallback {
                 binding.txtTitle.text = poolData.name.replace("_", " ")
                 binding.txtTitleStatus.text = getString(R.string.pool_subtitle_status_2, poolData.postIds.size)
                 
-                // Step 2: Fetch posts
+                // Step 2: Fetch posts using pool:{id} tag (like original app)
                 if (poolData.postIds.isEmpty()) {
                     binding.progressBar.visibility = View.GONE
                     binding.txtTitleStatus.text = getString(R.string.pool_empty)
                     return@launch
                 }
                 
-                // Fetch posts in batches (API limit is 100 per request with id: tag)
                 val allPosts = mutableListOf<Post>()
-                val postIdChunks = poolData.postIds.chunked(100)
+                var page = 1
                 
-                for ((index, chunk) in postIdChunks.withIndex()) {
+                while (true) {
                     binding.txtTitleStatus.text = getString(
                         R.string.pool_subtitle_status_3,
-                        index + 1,
-                        postIdChunks.size
+                        page,
+                        ((poolData.postIds.size + 319) / 320).coerceAtLeast(1)
                     )
                     
-                    val idTags = chunk.joinToString(" ") { "id:$it" }
                     val response = withContext(Dispatchers.IO) {
-                        api.getPosts(tags = idTags, limit = 100)
+                        api.getPosts(tags = "pool:$poolId", limit = 320, page = page)
                     }
                     
                     if (response.isSuccessful) {
                         val fetchedPosts = response.body()?.posts
                         if (fetchedPosts != null) {
                             allPosts.addAll(fetchedPosts)
+                            if (fetchedPosts.size < 320) break
+                        } else {
+                            break
                         }
+                    } else {
+                        break
                     }
+                    page++
                 }
                 
-                // Sort posts in pool order
+                // Apply blacklist and flash filtering like original app
+                val filteredPosts = filterPosts(allPosts)
+                
+                // Reorder posts to match exact pool order
                 val orderedPosts = poolData.postIds.mapNotNull { id ->
-                    allPosts.find { it.id == id }
+                    filteredPosts.find { it.id == id }
                 }
                 
+                val oldSize = posts.size
                 posts.clear()
+                if (oldSize > 0) adapter.notifyItemRangeRemoved(0, oldSize)
                 posts.addAll(orderedPosts)
                 poolPosts.clear()
                 poolPosts.addAll(orderedPosts)
@@ -461,6 +519,12 @@ class PoolActivity : AppCompatActivity(), SelectionCallback {
             }
             R.id.refresh -> {
                 item.isEnabled = false
+                // Clear list before reloading (like original app)
+                val oldSize = posts.size
+                posts.clear()
+                if (oldSize > 0) adapter.notifyItemRangeRemoved(0, oldSize)
+                poolPosts.clear()
+                clearSelection()
                 loadPool()
                 binding.recyclerView.postDelayed({ item.isEnabled = true }, 1000)
                 true
@@ -507,8 +571,115 @@ class PoolActivity : AppCompatActivity(), SelectionCallback {
         updateFollowButton()
     }
     
+    // ==================== Post Info Overlay ====================
+    
+    private fun showPostInfo(post: Post) {
+        val fLInfo = findViewById<FrameLayout>(R.id.fLInfo) ?: return
+        fLInfo.removeAllViews()
+        
+        val contentView = layoutInflater.inflate(R.layout.content_post_info, fLInfo, false)
+        
+        val txtPost = contentView.findViewById<TextView>(R.id.txtPost)
+        val txtTags = contentView.findViewById<TextView>(R.id.txtTags)
+        val txtArtist = contentView.findViewById<TextView>(R.id.txtArtist)
+        val txtScore = contentView.findViewById<TextView>(R.id.txtScore)
+        val txtFavourites = contentView.findViewById<TextView>(R.id.txtFavourites)
+        val txtRating = contentView.findViewById<TextView>(R.id.txtRating)
+        val txtComments = contentView.findViewById<TextView>(R.id.txtComments)
+        val txtPool = contentView.findViewById<TextView>(R.id.txtPool)
+        val txtParent = contentView.findViewById<TextView>(R.id.txtParent)
+        val txtChildren = contentView.findViewById<TextView>(R.id.txtChildren)
+        val imgPreview = contentView.findViewById<PhotoView>(R.id.imgPreview)
+        val imgClose = contentView.findViewById<ImageView>(R.id.imgClose)
+        
+        txtPost.text = getString(R.string.post_info_title, post.id)
+        
+        val totalTags = post.tags.general.size + post.tags.species.size +
+                        post.tags.character.size + post.tags.artist.size +
+                        post.tags.copyright.size + post.tags.meta.size +
+                        post.tags.lore.size + post.tags.invalid.size
+        txtTags.text = getString(R.string.post_info_tags, totalTags)
+        
+        val artistName = if (post.tags.artist.isNotEmpty()) {
+            post.tags.artist.joinToString(", ")
+        } else {
+            getString(R.string.unknown_artist)
+        }
+        txtArtist.text = getString(R.string.post_info_artist, artistName)
+        txtScore.text = getString(R.string.post_info_score, post.score.total, post.score.up, kotlin.math.abs(post.score.down))
+        txtFavourites.text = getString(R.string.post_info_favourites, post.favCount)
+        txtRating.text = getString(R.string.post_info_rating, post.rating.uppercase())
+        
+        if (post.commentCount > 0) {
+            txtComments.visibility = View.VISIBLE
+            txtComments.text = getString(R.string.post_info_comments, post.commentCount)
+        } else {
+            txtComments.visibility = View.GONE
+        }
+        
+        if (post.pools.isNotEmpty()) {
+            txtPool.visibility = View.VISIBLE
+            txtPool.text = getString(R.string.post_info_pool)
+        } else {
+            txtPool.visibility = View.GONE
+        }
+        
+        if (post.relationships.parentId != null && post.relationships.parentId > 0) {
+            txtParent.visibility = View.VISIBLE
+            txtParent.text = getString(R.string.post_info_parent)
+        } else {
+            txtParent.visibility = View.GONE
+        }
+        
+        if (post.relationships.hasChildren) {
+            txtChildren.visibility = View.VISIBLE
+            txtChildren.text = getString(R.string.post_info_children)
+        } else {
+            txtChildren.visibility = View.GONE
+        }
+        
+        val previewUrl = post.preview.url ?: post.sample?.url ?: post.file.url
+        Glide.with(this).load(previewUrl).into(imgPreview)
+        
+        imgPreview.setOnClickListener { hidePostInfo() }
+        imgClose.setOnClickListener { hidePostInfo() }
+        fLInfo.setOnClickListener { hidePostInfo() }
+        
+        fLInfo.addView(contentView)
+        fLInfo.visibility = View.VISIBLE
+    }
+    
+    private fun hidePostInfo() {
+        val fLInfo = findViewById<FrameLayout>(R.id.fLInfo) ?: return
+        fLInfo.visibility = View.GONE
+        fLInfo.removeAllViews()
+    }
+    
+    // ==================== Post Filtering ====================
+    
+    private fun filterPosts(allPosts: List<Post>): List<Post> {
+        val applyBlacklist = prefs.blacklistEnabled && prefs.blacklistPoolPosts
+        val blacklist = if (applyBlacklist) prefs.getBlacklist() else emptySet()
+        val includeFlash = prefs.searchIncludeFlash
+        
+        return allPosts.filter { post ->
+            // Filter flash/swf if disabled
+            if (!includeFlash && post.file.ext.equals("swf", ignoreCase = true)) return@filter false
+            
+            // Filter blacklisted tags
+            if (blacklist.isNotEmpty()) {
+                val postTags = post.tags.general + post.tags.artist + post.tags.species +
+                               post.tags.character + post.tags.copyright + post.tags.meta
+                if (postTags.any { it in blacklist }) return@filter false
+            }
+            
+            true
+        }
+    }
+    
     override fun onDestroy() {
         super.onDestroy()
+        loadJob?.cancel()
         scope.cancel()
     }
 }

@@ -33,7 +33,7 @@ class SuggestionsManager(private val context: Context) {
     
     companion object {
         private const val SUGGESTIONS_FILE = "suggestions.json"
-        private const val MAX_CACHE_SIZE = 5000
+        private const val MAX_CACHE_SIZE = 200000
     }
     
     // Cache de sugerencias predefinidas

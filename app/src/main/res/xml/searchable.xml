@@ -4,5 +4,4 @@
     android:hint="@string/main_search_hint"
     android:searchSuggestAuthority="com.mommys.app.search.provider"
     android:searchSuggestSelection=" ?"
-    android:searchSuggestThreshold="0"
-    android:voiceSearchMode="showVoiceSearchButton|launchRecognizer" />
+    android:searchSuggestThreshold="0" />
