@@ -10,23 +10,23 @@ import android.provider.BaseColumns
 import android.util.Base64
 import android.util.Log
 import com.mommys.app.MommysApplication
+import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
-import org.json.JSONObject
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * ContentProvider para sugerencias de búsqueda.
- * Sistema híbrido: API autocomplete + fallback estático.
+ * Sistema instantáneo: resultados locales al instante, API en background.
  *
- * Extiende SearchRecentSuggestionsProvider (framework Android) que gestiona
- * automáticamente el historial reciente en SQLite interno.
- *
- * Sobreescribe query() para combinar:
- * 1. Historial de búsquedas recientes (del framework)
- * 2. Tags dinámicos de la API /tags/autocomplete.json (artistas, personajes, etc.)
- * 3. Fallback: tags estáticos de SuggestionsManager si la API falla
+ * Flujo:
+ * 1. query() retorna INMEDIATAMENTE con tags locales + historial (0ms)
+ * 2. En paralelo, lanza la API /tags/autocomplete.json en un hilo
+ * 3. Cuando la API responde, guarda en cache y llama notifyChange()
+ * 4. El SearchView re-consulta automáticamente y ahora incluye resultados API del cache
  */
 class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
 
@@ -34,31 +34,45 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
         const val AUTHORITY = "com.mommys.app.search.provider"
         const val MODE = DATABASE_MODE_QUERIES or DATABASE_MODE_2LINES
         private const val TAG = "SearchSugProvider"
-        private const val API_TIMEOUT_MS = 3000L
+        private const val API_TIMEOUT_MS = 2000L
         private const val MAX_API_RESULTS = 20
+        private const val DEBOUNCE_MS = 250L
 
-        // Columnas EXACTAS que SearchRecentSuggestionsProvider retorna
-        // con DATABASE_MODE_QUERIES | DATABASE_MODE_2LINES.
-        // El orden DEBE coincidir para que MergeCursor funcione.
         private val SUGGEST_COLUMNS = arrayOf(
-            SearchManager.SUGGEST_COLUMN_FORMAT,     // 0
-            SearchManager.SUGGEST_COLUMN_ICON_1,     // 1
-            SearchManager.SUGGEST_COLUMN_TEXT_1,      // 2
-            SearchManager.SUGGEST_COLUMN_TEXT_2,      // 3
-            SearchManager.SUGGEST_COLUMN_QUERY,       // 4
-            BaseColumns._ID                           // 5
+            SearchManager.SUGGEST_COLUMN_FORMAT,
+            SearchManager.SUGGEST_COLUMN_ICON_1,
+            SearchManager.SUGGEST_COLUMN_TEXT_1,
+            SearchManager.SUGGEST_COLUMN_TEXT_2,
+            SearchManager.SUGGEST_COLUMN_QUERY,
+            BaseColumns._ID
         )
     }
 
     private var suggestionsManager: SuggestionsManager? = null
 
-    // OkHttpClient dedicado a autocomplete con timeout corto
+    // Cache de resultados API por prefijo
+    private val apiCache = ConcurrentHashMap<String, List<ApiTag>>()
+
+    // Request en curso (para cancelar si el usuario sigue escribiendo)
+    private val pendingCall = AtomicReference<Call?>(null)
+
+    // Último término buscado (para debounce)
+    @Volatile private var lastSearchTerm = ""
+    @Volatile private var lastQueryTime = 0L
+
     private val httpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
             .connectTimeout(API_TIMEOUT_MS, TimeUnit.MILLISECONDS)
             .readTimeout(API_TIMEOUT_MS, TimeUnit.MILLISECONDS)
             .build()
     }
+
+    // Modelo ligero para cache
+    private data class ApiTag(
+        val name: String,
+        val postCount: Int,
+        val category: Int
+    )
 
     init {
         setupSuggestions(AUTHORITY, MODE)
@@ -71,27 +85,25 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
         selectionArgs: Array<out String>?,
         sortOrder: String?
     ): Cursor {
-        // Usar SuggestionsManager (datos estáticos, sin I/O)
         if (suggestionsManager == null) {
             suggestionsManager = SuggestionsManager()
         }
 
-        // Obtener el query actual del usuario
         val query = selectionArgs?.firstOrNull()
             ?: uri.lastPathSegment?.takeIf { it != SearchManager.SUGGEST_URI_PATH_QUERY }
             ?: ""
 
-        // 1. Obtener historial reciente del framework
+        // 1. Historial reciente (framework SQLite)
         val recentCursor: Cursor? = try {
             super.query(uri, projection, selection, selectionArgs, sortOrder)
         } catch (e: Exception) {
             null
         }
 
-        // 2. Obtener sugerencias de tags
-        val tagsCursor = getTagSuggestionsCursor(query)
+        // 2. Sugerencias de tags (local + cache API)
+        val tagsCursor = getTagSuggestionsCursor(query, uri)
 
-        // 3. Combinar: historial primero, luego tags
+        // 3. Combinar
         return if (recentCursor != null && tagsCursor.count > 0) {
             MergeCursor(arrayOf(recentCursor, tagsCursor))
         } else if (tagsCursor.count > 0) {
@@ -102,13 +114,10 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
     }
 
     /**
-     * Genera cursor con sugerencias de tags.
-     * Estrategia híbrida:
-     * - Primero intenta API /tags/autocomplete.json (tags dinámicos: artistas, personajes, etc.)
-     * - Si la API falla (sin red, timeout), usa SuggestionsManager (tags estáticos de suggestions.json)
-     * - Si es un operador (contiene ":"), solo busca localmente
+     * Retorna sugerencias de tags instantáneamente.
+     * Si hay cache API → usa cache. Si no → local + lanza API en background.
      */
-    private fun getTagSuggestionsCursor(fullQuery: String): MatrixCursor {
+    private fun getTagSuggestionsCursor(fullQuery: String, uri: Uri): MatrixCursor {
         val cursor = MatrixCursor(SUGGEST_COLUMNS)
         val manager = suggestionsManager ?: return cursor
 
@@ -118,117 +127,172 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
 
         if (lastWord.isEmpty()) return cursor
 
-        // Si es un operador, solo buscar localmente (la API no maneja operadores)
+        // Operadores: solo local, sin API
         if (manager.isOperator(lastWord) || lastWord.contains(":")) {
             return getLocalSuggestionsCursor(lastWord, manager)
         }
 
-        // Intentar API primero
-        val apiCursor = tryApiAutocomplete(lastWord)
-        if (apiCursor != null && apiCursor.count > 0) {
-            return apiCursor
+        // ¿Hay resultados API en cache para este término?
+        val cached = findCachedResults(lastWord)
+        if (cached != null) {
+            // Cache hit → retornar resultados API inmediatamente
+            return buildApiCursor(cached)
         }
 
-        // Fallback: sugerencias estáticas locales
-        return getLocalSuggestionsCursor(lastWord, manager)
+        // Cache miss → retornar local al instante + lanzar API en background
+        val localCursor = getLocalSuggestionsCursor(lastWord, manager)
+        launchApiInBackground(lastWord, uri)
+        return localCursor
     }
 
     /**
-     * Intenta obtener sugerencias de la API /tags/autocomplete.json
-     * Llamada HTTP síncrona (ContentProvider.query() corre en binder thread, no main thread)
+     * Busca en cache: coincidencia exacta o prefijo compatible
      */
-    private fun tryApiAutocomplete(searchTerm: String): MatrixCursor? {
-        try {
-            val app = context?.applicationContext as? MommysApplication ?: return null
-            val prefs = app.preferencesManager
+    private fun findCachedResults(term: String): List<ApiTag>? {
+        // Coincidencia exacta primero
+        apiCache[term]?.let { return it }
 
-            // Determinar URL base según configuración
-            val baseUrl = if (prefs.useE621()) {
-                "https://e621.net"
-            } else {
-                "https://e926.net"
+        // Buscar cache de prefijo más corto y filtrar localmente
+        for (i in term.length - 1 downTo 1) {
+            val prefix = term.substring(0, i)
+            val cached = apiCache[prefix]
+            if (cached != null) {
+                // Filtrar el cache existente con el término más largo
+                val filtered = cached.filter { it.name.contains(term, ignoreCase = true) }
+                if (filtered.isNotEmpty()) return filtered
             }
+        }
+        return null
+    }
 
-            // Construir URL: /tags/autocomplete.json?search[name_matches]=fox*&limit=20
-            val url = "$baseUrl/tags/autocomplete.json" +
-                "?search[name_matches]=${Uri.encode(searchTerm)}*" +
-                "&limit=$MAX_API_RESULTS"
+    /**
+     * Lanza la llamada API en un hilo background.
+     * Cuando responde, guarda en cache y notifica al ContentResolver
+     * para que el SearchView re-consulte automáticamente.
+     */
+    private fun launchApiInBackground(searchTerm: String, @Suppress("UNUSED_PARAMETER") uri: Uri) {
+        val now = System.currentTimeMillis()
 
-            val requestBuilder = Request.Builder()
-                .url(url)
-                .header("User-Agent", "Mommys/1.4.6 (by AndoniXXR)")
-                .header("Accept", "application/json")
-                .get()
+        // Debounce: no lanzar si ya se buscó hace poco
+        if (searchTerm == lastSearchTerm && now - lastQueryTime < DEBOUNCE_MS) {
+            return
+        }
+        lastSearchTerm = searchTerm
+        lastQueryTime = now
 
-            // Agregar auth si hay credenciales
-            val username = prefs.getUsername()
-            val apiKey = prefs.getApiKey()
-            if (!username.isNullOrEmpty() && !apiKey.isNullOrEmpty() && !username.contains(":")) {
-                val credentials = "$username:$apiKey"
-                val basicAuth = "Basic " + Base64.encodeToString(
-                    credentials.toByteArray(Charsets.UTF_8), Base64.NO_WRAP
-                )
-                requestBuilder.header("Authorization", basicAuth)
-            }
+        // Cancelar request anterior si existe
+        pendingCall.getAndSet(null)?.cancel()
 
-            // Ejecutar request síncrono
-            val response = httpClient.newCall(requestBuilder.build()).execute()
+        Thread {
+            try {
+                val app = context?.applicationContext as? MommysApplication ?: return@Thread
+                val prefs = app.preferencesManager
 
-            if (!response.isSuccessful) {
-                response.close()
-                return null
-            }
+                val baseUrl = if (prefs.useE621()) "https://e621.net" else "https://e926.net"
+                val url = "$baseUrl/tags/autocomplete.json" +
+                    "?search[name_matches]=${Uri.encode(searchTerm)}*" +
+                    "&limit=$MAX_API_RESULTS"
 
-            val body = response.body?.string() ?: return null
-            response.close()
+                val requestBuilder = Request.Builder()
+                    .url(url)
+                    .header("User-Agent", "Mommys/1.4.6 (by AndoniXXR)")
+                    .header("Accept", "application/json")
+                    .get()
 
-            // Parsear respuesta JSON
-            val jsonArray = JSONArray(body)
-            if (jsonArray.length() == 0) return null
-
-            val cursor = MatrixCursor(SUGGEST_COLUMNS)
-            var id = 20000L
-
-            for (i in 0 until jsonArray.length()) {
-                val tag = jsonArray.getJSONObject(i)
-                val name = tag.getString("name")
-                val postCount = tag.optInt("post_count", 0)
-                val category = tag.optInt("category", 0)
-
-                // Categoría del tag para subtexto
-                val categoryText = when (category) {
-                    0 -> "General"
-                    1 -> "Artista"
-                    3 -> "Copyright"
-                    4 -> "Personaje"
-                    5 -> "Especie"
-                    6 -> "Inválido"
-                    7 -> "Meta"
-                    8 -> "Lore"
-                    else -> "Tag"
+                val username = prefs.getUsername()
+                val apiKey = prefs.getApiKey()
+                if (!username.isNullOrEmpty() && !apiKey.isNullOrEmpty() && !username.contains(":")) {
+                    val credentials = "$username:$apiKey"
+                    val basicAuth = "Basic " + Base64.encodeToString(
+                        credentials.toByteArray(Charsets.UTF_8), Base64.NO_WRAP
+                    )
+                    requestBuilder.header("Authorization", basicAuth)
                 }
 
-                val subtitle = "$categoryText • ${formatPostCount(postCount)}"
+                val call = httpClient.newCall(requestBuilder.build())
+                pendingCall.set(call)
 
-                cursor.addRow(arrayOf(
-                    0,                                          // suggest_format
-                    android.R.drawable.ic_menu_search,           // suggest_icon_1
-                    name,                                       // suggest_text_1
-                    subtitle,                                   // suggest_text_2
-                    name,                                       // suggest_query
-                    id++                                        // _id
-                ))
+                val response = call.execute()
+                pendingCall.set(null)
+
+                if (!response.isSuccessful) {
+                    response.close()
+                    return@Thread
+                }
+
+                val body = response.body?.string() ?: return@Thread
+                response.close()
+
+                val jsonArray = JSONArray(body)
+                if (jsonArray.length() == 0) return@Thread
+
+                // Guardar en cache
+                val tags = mutableListOf<ApiTag>()
+                for (i in 0 until jsonArray.length()) {
+                    val tag = jsonArray.getJSONObject(i)
+                    tags.add(ApiTag(
+                        name = tag.getString("name"),
+                        postCount = tag.optInt("post_count", 0),
+                        category = tag.optInt("category", 0)
+                    ))
+                }
+                apiCache[searchTerm] = tags
+
+                // Limpiar cache viejo si crece mucho
+                if (apiCache.size > 50) {
+                    val keysToRemove = apiCache.keys().toList()
+                        .take(apiCache.size - 30)
+                    keysToRemove.forEach { apiCache.remove(it) }
+                }
+
+                // Notificar al ContentResolver para que SearchView re-consulte
+                // Solo si el usuario sigue escribiendo el mismo término
+                if (lastSearchTerm == searchTerm) {
+                    context?.contentResolver?.notifyChange(
+                        Uri.parse("content://$AUTHORITY"), null
+                    )
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "API background call failed: ${e.message}")
             }
-
-            return cursor
-        } catch (e: Exception) {
-            Log.d(TAG, "API autocomplete failed, using fallback: ${e.message}")
-            return null
-        }
+        }.start()
     }
 
     /**
-     * Genera cursor con sugerencias locales estáticas (fallback offline)
+     * Construye cursor desde resultados API cacheados
+     */
+    private fun buildApiCursor(tags: List<ApiTag>): MatrixCursor {
+        val cursor = MatrixCursor(SUGGEST_COLUMNS)
+        var id = 20000L
+
+        for (tag in tags) {
+            val categoryText = when (tag.category) {
+                0 -> "General"
+                1 -> "Artista"
+                3 -> "Copyright"
+                4 -> "Personaje"
+                5 -> "Especie"
+                6 -> "Inválido"
+                7 -> "Meta"
+                8 -> "Lore"
+                else -> "Tag"
+            }
+            val subtitle = "$categoryText • ${formatPostCount(tag.postCount)}"
+
+            cursor.addRow(arrayOf(
+                0,
+                android.R.drawable.ic_menu_search,
+                tag.name,
+                subtitle,
+                tag.name,
+                id++
+            ))
+        }
+        return cursor
+    }
+
+    /**
+     * Genera cursor con sugerencias locales estáticas (instantáneo)
      */
     private fun getLocalSuggestionsCursor(lastWord: String, manager: SuggestionsManager): MatrixCursor {
         val cursor = MatrixCursor(SUGGEST_COLUMNS)
@@ -250,15 +314,14 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
             }
 
             cursor.addRow(arrayOf(
-                0,                  // suggest_format
-                icon,               // suggest_icon_1
-                suggestion.text,    // suggest_text_1
-                typeText,           // suggest_text_2
-                suggestion.text,    // suggest_query
-                id++                // _id
+                0,
+                icon,
+                suggestion.text,
+                typeText,
+                suggestion.text,
+                id++
             ))
         }
-
         return cursor
     }
 
