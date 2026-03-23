@@ -250,7 +250,7 @@ class SlidingPanelLayout @JvmOverloads constructor(
                 invalidateRect.set(0, 0, measuredWidth, content.top)
             }
         }
-        invalidate(invalidateRect)
+        invalidate()
     }
 
     /**

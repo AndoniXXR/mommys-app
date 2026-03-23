@@ -197,35 +197,32 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
         val currentItem = binding.viewPager.currentItem
         val nextItem = currentItem + direction
         
-        if (nextItem in 0 until pageHandlers.size) {
+        // Obtener handler de forma segura y verificar que tenga posts cargados
+        val handler = pageHandlers.getOrNull(nextItem)
+        val posts = handler?.getCurrentPosts() ?: emptyList()
+        
+        if (handler != null && posts.isNotEmpty()) {
             // Mover a la siguiente página
             binding.viewPager.setCurrentItem(nextItem, false)
             
-            // Obtener el handler de la nueva página
-            val handler = pageHandlers[nextItem]
-            val posts = handler.getCurrentPosts()
+            val postIndex = if (direction > 0) 0 else posts.size - 1
             
-            // Si la página ya tiene posts cargados, abrir el PostActivity inmediatamente
-            if (posts.isNotEmpty()) {
-                val postIndex = if (direction > 0) 0 else posts.size - 1
-                
-                // Crear intent para el primer/último post de la nueva página
-                val intent = PostActivity.createIntent(this, posts, postIndex)
-                
-                // Lanzar PostActivity sin animación para que parezca continuo
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-                postActivityLauncher.launch(intent)
-                
-                // Feedback visual
-                val msg = if (direction > 0) getString(R.string.ss_toast_next_page) else getString(R.string.ss_toast_prev_page)
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-            } else {
-                // Si los posts no están cargados, solo movemos el pager y el usuario verá el loading
-                // Opcional: Podríamos esperar a que carguen, pero eso es más complejo
-                Toast.makeText(this, "Loading next page...", Toast.LENGTH_SHORT).show()
-            }
+            // Calcular si hay más páginas con posts en cada dirección
+            val hasNext = pageHandlers.getOrNull(nextItem + 1)?.getCurrentPosts()?.isNotEmpty() == true
+            val hasPrev = nextItem > 0 && pageHandlers.getOrNull(nextItem - 1)?.getCurrentPosts()?.isNotEmpty() == true
+            
+            // Crear intent para el primer/último post de la nueva página
+            val intent = PostActivity.createIntent(this, posts, postIndex, hasNext, hasPrev)
+            
+            // Lanzar PostActivity sin animación para que parezca continuo
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+            postActivityLauncher.launch(intent)
+            
+            // Feedback visual
+            val msg = if (direction > 0) getString(R.string.ss_toast_next_page) else getString(R.string.ss_toast_prev_page)
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         } else {
-            val msg = if (direction > 0) "No more pages" else "No previous page"
+            val msg = if (direction > 0) getString(R.string.no_more_pages) else getString(R.string.no_previous_page)
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
     }
@@ -1130,8 +1127,12 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
             // Encontrar la posición del post clickeado
             val position = currentPosts.indexOfFirst { it.id == post.id }.coerceAtLeast(0)
             
+            // Calcular si hay más páginas con posts cargados en cada dirección
+            val hasNext = pageHandlers.getOrNull(currentPage + 1)?.getCurrentPosts()?.isNotEmpty() == true
+            val hasPrev = currentPage > 0 && pageHandlers.getOrNull(currentPage - 1)?.getCurrentPosts()?.isNotEmpty() == true
+            
             // Pasar posts pre-cargados como la app original
-            val intent = PostActivity.createIntent(this, currentPosts, position)
+            val intent = PostActivity.createIntent(this, currentPosts, position, hasNext, hasPrev)
             postActivityLauncher.launch(intent)
         } else {
             // Fallback: abrir solo ese post

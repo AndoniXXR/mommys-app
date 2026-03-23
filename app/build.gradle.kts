@@ -61,6 +61,10 @@ android {
         println("Building version: $versionName (code: $versionCode)")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Solo incluir los idiomas que la app soporta
+        // Esto elimina strings huérfanas de librerías en otros locales
+        resourceConfigurations += listOf("en", "es", "de", "fr", "ja", "pt", "ru", "zh")
     }
 
     buildTypes {

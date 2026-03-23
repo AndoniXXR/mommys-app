@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Ações principais -->
     <string name="abc_action_bar_home_description">Início</string>
@@ -262,7 +262,6 @@
     <string name="notifications_permission_decline">Não permitir</string>
     
     <!-- Idiomas -->
-    <string name="arrays_language_portuguese">Português (Portuguese)</string>
     <string name="arrays_language_english">Inglês (English)</string>
     <string name="arrays_language_spanish">Espanhol (Spanish)</string>
     

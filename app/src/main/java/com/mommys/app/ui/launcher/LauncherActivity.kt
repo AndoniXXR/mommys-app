@@ -1,6 +1,7 @@
 package com.mommys.app.ui.launcher
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.mommys.app.MommysApplication
@@ -74,6 +75,11 @@ class LauncherActivity : AppCompatActivity() {
         }
         startActivity(intent)
         finish()
-        overridePendingTransition(0, 0)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
+        } else {
+            @Suppress("DEPRECATION")
+            overridePendingTransition(0, 0)
+        }
     }
 }

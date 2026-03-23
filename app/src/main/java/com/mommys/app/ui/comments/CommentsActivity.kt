@@ -4,7 +4,10 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.BlendMode
+import android.graphics.BlendModeColorFilter
 import android.graphics.PorterDuff
+import android.os.Build
 import android.net.Uri
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
@@ -107,10 +110,15 @@ class CommentsActivity : AppCompatActivity() {
         }
         
         // Tint del navigation icon
-        binding.toolbar.navigationIcon?.setColorFilter(
-            ContextCompat.getColor(this, R.color.colorWhite),
-            PorterDuff.Mode.SRC_ATOP
-        )
+        binding.toolbar.navigationIcon?.let { icon ->
+            val color = ContextCompat.getColor(this, R.color.colorWhite)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                icon.colorFilter = BlendModeColorFilter(color, BlendMode.SRC_ATOP)
+            } else {
+                @Suppress("DEPRECATION")
+                icon.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+            }
+        }
         
         // Obtener datos del intent o deep link
         handleIntent()
@@ -343,11 +351,16 @@ class CommentsActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_comments, menu)
         // Tint icons
+        val tintColor = ContextCompat.getColor(this, R.color.colorWhite)
         for (i in 0 until menu.size()) {
-            menu.getItem(i).icon?.setColorFilter(
-                ContextCompat.getColor(this, R.color.colorWhite),
-                PorterDuff.Mode.SRC_ATOP
-            )
+            menu.getItem(i).icon?.let { icon ->
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    icon.colorFilter = BlendModeColorFilter(tintColor, BlendMode.SRC_ATOP)
+                } else {
+                    @Suppress("DEPRECATION")
+                    icon.setColorFilter(tintColor, PorterDuff.Mode.SRC_ATOP)
+                }
+            }
         }
         return true
     }

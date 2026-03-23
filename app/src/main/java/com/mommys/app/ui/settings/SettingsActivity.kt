@@ -44,6 +44,7 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(binding.root)
         
         setupToolbar()
+        setupBackNavigation()
         
         if (savedInstanceState == null) {
             navigateToSection(SECTION_MAIN)
@@ -109,16 +110,20 @@ class SettingsActivity : AppCompatActivity() {
         return super.onSupportNavigateUp()
     }
     
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (supportFragmentManager.backStackEntryCount > 0) {
-            supportFragmentManager.popBackStack()
-            fragmentStack.removeLastOrNull()
-            if (fragmentStack.isEmpty()) {
-                binding.toolbar.title = getString(R.string.settings_title)
+    private fun setupBackNavigation() {
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (supportFragmentManager.backStackEntryCount > 0) {
+                    supportFragmentManager.popBackStack()
+                    fragmentStack.removeLastOrNull()
+                    if (fragmentStack.isEmpty()) {
+                        binding.toolbar.title = getString(R.string.settings_title)
+                    }
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
             }
-        } else {
-            super.onBackPressed()
-        }
+        })
     }
 }

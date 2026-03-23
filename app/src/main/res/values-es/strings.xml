@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="abc_action_bar_home_description">Ir a inicio</string>
     <string name="abc_action_bar_up_description">Desplazarse hacia arriba</string>
@@ -42,8 +42,6 @@
     <string name="action_voted_up">Voto positivo añadido</string>
     <string name="action_voted_up_already">Votado previamente, voto mantenido</string>
     <string name="add">Añadir</string>
-    <string name="android.credentials.TYPE_PASSWORD_CREDENTIAL">Contraseña</string>
-    <string name="androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL">Llave de acceso</string>
     <string name="app_logs_menu_share">Compartir logs</string>
     <string name="app_logs_title">Logs del App</string>
     <string name="app_update_available_message">¡Hay una actualización disponible!\n\nNueva versión: %1$s</string>
@@ -182,7 +180,6 @@
     <string name="cd_main_menu">Mostrar el menú</string>
     <string name="cd_main_menu_filter">Mostrar el menú de filtros</string>
     <string name="cd_main_save">Búsquedas guardadas</string>
-    <string name="cd_main_search">Buscar</string>
     <string name="cd_posts_comments">Comentarios</string>
     <string name="cd_posts_download">Descargar Post</string>
     <string name="cd_posts_fav">Añadir a favoritos</string>
@@ -240,10 +237,8 @@
     <string name="disguise_message_disguised">¡Disfrazado, puede tardar unos segundos para que el nuevo icono de la aplicación aparezca!</string>
     <string name="disguise_message_regular">¡Disfraz removido, puede que tarde unos segundos para que el icono predeterminado de la aplicación aparezca!</string>
     <string name="donate_donators">Donadores</string>
-    <string name="donate_restore">Actualizar lista</string>
     <string name="donate_sub_title">¿Te gusta la app?\nMuestra tu apoyo donando. ¡Cualquier cantidad ayuda!\n\n Si suministras tu nombre de usuario de e926/e621 al donar, obtendrás ⭐ ❤️ mostrado al lado de tu nombre en comentarios y en tu perfil para que otros de usuarios de la app lo vean.\n\n ¿Quieres donar pero no dispones de dinero? Considera activar los anuncios desde los ajustes de la app.</string>
     <string name="donate_title">Donar</string>
-    <string name="donate_with_furaffinity">Enviar Shinies en FurAffinity</string>
     <string name="donate_with_kofi">Cómprame un café en Ko-fi</string>
     <string name="donate_with_patreon">Apóyame en Patreon</string>
     <string name="donate_with_paypal">Donar con PayPal</string>
@@ -264,8 +259,6 @@
     <string name="edit_post_et_general">General y meta</string>
     <string name="edit_post_et_species">Especies</string>
     <string name="edit_post_help">Antes de editar, lea la guia de etiquetado: https://e926.net/help/tags .\nSepara las tags con un espacio o nueva línea y escribe en el cuadro correcto.</string>
-    <string name="edit_post_quit_message">¿Descartar cambios?</string>
-    <string name="edit_post_quit_message_discard">Descartar</string>
     <string name="edit_post_rating">Clasificación del post</string>
     <string name="edit_post_rating_e">Explícito</string>
     <string name="edit_post_rating_q">Cuestionable</string>
@@ -383,30 +376,21 @@
     <string name="icon_content_description">Icono del cuadro de diálogo</string>
     <string name="item_view_role_description">Pestaña</string>
     <string name="later">Después</string>
-    <string name="launcher_ads_text">Anuncios opcionales:</string>
     <string name="launcher_button_start">Iniciar</string>
     <string name="launcher_cb_accept_pp">He leído y acepto la política de privacidad y los términos del servicio</string>
-    <string name="launcher_cb_enable_banner_ads">Activar anuncios</string>
-    <string name="launcher_cb_enable_interstitial_ads">Activar anuncios intersiciales</string>
     <string name="launcher_icon_text">Icono por @DoctorMiawoo</string>
     <string name="launcher_language">Idioma:</string>
     <string name="launcher_read_and_agree">Por favor, lee y acepta la política de privacidad y términos del servicio para usar la aplicación:</string>
     <string name="launcher_sub_title">¡Bienvenido a TWS v2! Esto es una publicación beta de la aplicación, aún hay características sin finalizar y pueden ocurrir algunos errores :)</string>
-    <string name="license_title">Licencias</string>
     <string name="loading">Cargando&amp;#8230</string>
     <string name="loading_message">Cargando %1$s, por favor, espere :)</string>
     <string name="login">Iniciar Sesión</string>
     <string name="login_api_key_empty">Se requiere una API key</string>
-    <string name="login_api_key_text">Introduzca su API key</string>
-    <string name="login_error_dialog_login_anyway">Iniciar sesión de todas formas</string>
     <string name="login_error_message">Error: %1$s</string>
     <string name="login_error_title">Fallo al iniciar sesión</string>
     <string name="login_subtitle">Introduzca su API key (no su contraseña) e inicie una sesión en e621.\n\nNo tiene un API key? Por favor, sigue estos pasos:\n 1. Inicie una sesión y vaya a https://e621.net/users/home\n 2. Haga clic en \"Manage API Access\"\n 3. Vuelva a introducir su contraseña y dale a Submit\n 4. Genera un API key y copialo\n 5. Utilice este API key junto con su nombre de usuario para iniciar una sesión en la aplicación.</string>
     <string name="login_success_toast">Conectado como %1$s</string>
-    <string name="login_username_email">Introduce sólo tu nombre de usuario, no tu email</string>
     <string name="login_username_empty">Se requiere un nombre de usuario</string>
-    <string name="login_username_text">Introduzca su nombre de usuario</string>
-    <string name="m3_loading_indicator_content_description">Cargando</string>
     <string name="main_back_again_to_exit">Pulsa el boton de retroceso otra vez para salir</string>
     <string name="main_btn_next">Siguiente</string>
     <string name="main_btn_next_desc">Ir a la página siguiente</string>
@@ -445,7 +429,6 @@
     <string name="menu_about">Acerca de</string>
     <string name="menu_about_about">Acerca de</string>
     <string name="menu_about_changelog">Cambios</string>
-    <string name="menu_about_check_for_updates">Buscar actualizaciones</string>
     <string name="menu_about_donate">Donar</string>
     <string name="menu_about_help">Ayuda</string>
     <string name="menu_about_licenses">Licencias</string>
@@ -483,12 +466,7 @@
     <string name="menu_popular_by_day">Popular del día</string>
     <string name="menu_popular_by_month">Popular del mes</string>
     <string name="menu_popular_by_week">Popular de la semana</string>
-    <string name="menu_selected">Seleccionado</string>
-    <string name="menu_selected_clear">Limpiar selección</string>
-    <string name="menu_selected_download">Descargar</string>
-    <string name="menu_selected_select_all">Seleccionar todo</string>
     <string name="menu_settings">Ajustes</string>
-    <string name="menu_translate_title">Ayudar a traducir</string>
     <string name="mtrl_badge_numberless_content_description">Notificación nueva</string>
     <string name="mtrl_checkbox_state_description_checked">Marcada</string>
     <string name="mtrl_checkbox_state_description_indeterminate">Marcada parcialmente</string>
@@ -532,14 +510,8 @@
     <string name="mtrl_picker_toggle_to_day_selection">Cambiar a la vista de calendario</string>
     <string name="mtrl_picker_toggle_to_text_input_mode">Cambiar al modo de introducción Texto</string>
     <string name="mtrl_picker_toggle_to_year_selection">Cambiar a la vista de año</string>
-    <string name="mtrl_picker_toggled_to_day_selection">Se ha cambiado a la vista de calendario</string>
-    <string name="mtrl_picker_toggled_to_year_selection">Se ha cambiado a la vista de año</string>
     <string name="mtrl_timepicker_cancel">Cancelar</string>
     <string name="mtrl_timepicker_confirm">Aceptar</string>
-    <string name="native_body">Cuerpo</string>
-    <string name="native_headline">Título</string>
-    <string name="native_media_view">Vista del contenido multimedia</string>
-    <string name="news_badge">Acerca de -&gt; Noticias</string>
     <string name="news_title">Noticias</string>
     <string name="no">No</string>
     <string name="not_set">Sin establecer</string>
@@ -547,14 +519,6 @@
     <string name="notifications_permission_confirm">Permitir</string>
     <string name="notifications_permission_decline">No permitir</string>
     <string name="notifications_permission_title">¿Permitir que la aplicación te envíe notificaciones?</string>
-    <string name="offline_dialog_image_description">Icono</string>
-    <string name="offline_dialog_text">Gracias por tu interés.\nTe daremos más información cuando vuelvas a estar online.</string>
-    <string name="offline_notification_title">Vuelves a estar online. ¿Seguimos por donde lo dejamos?</string>
-    <string name="offline_notification_title_with_advertiser">Vuelves a estar online. Sigue informándote sobre %s.</string>
-    <string name="offline_opt_in_confirm">Aceptar</string>
-    <string name="offline_opt_in_decline">No, gracias</string>
-    <string name="offline_opt_in_message">Te enviaremos una notificación que incluirá un enlace al sitio web del anunciante.</string>
-    <string name="offline_opt_in_title">Se abrirá el anuncio cuando recuperes la conexión.</string>
     <string name="ok">OK</string>
     <string name="open">Abrir</string>
     <string name="page_empty">Página vacía, no se encontraron posts</string>
@@ -593,7 +557,6 @@
     <string name="pool_title">Lista #%1$d</string>
     <string name="popular_by_day">Popular del día</string>
     <string name="popular_by_month">Popular del mes</string>
-    <string name="popular_by_title">Popular de</string>
     <string name="popular_by_week">Popular de la semana</string>
     <string name="popular_choose_day">Selecciona día</string>
     <string name="popular_choose_month">Selecciona mes</string>
@@ -671,10 +634,6 @@
     <string name="pref_ads">Anuncios opcionales</string>
     <string name="pref_ads_interstitial_summary">Muestra de forma ocasional un anuncio a pantalla completa tras volver de un post</string>
     <string name="pref_ads_interstitial_title">Activar anuncios intersiciales</string>
-    <string name="pref_ads_native_page_summary">Muestra anuncios entre páginas</string>
-    <string name="pref_ads_native_page_title">Anuncios entre páginas</string>
-    <string name="pref_ads_native_post_summary">Muestra anuncios entre posts</string>
-    <string name="pref_ads_native_post_title">Anuncios entre posts</string>
     <string name="pref_cloudflare">Cookies y Cloudflare</string>
     <string name="pref_cloudflare_self_summary">¿Los posts o miniaturas no cargan? Las llamadas a la API pueden ser bloqueadas por CloudFlare. Se debe de completar un captcha para usar la aplicación. Haz click aquí para abrir e926 manualmente para obtener las cookies necesarias.</string>
     <string name="pref_cloudflare_self_title">Recargar cookies/Cloudflare</string>
@@ -682,8 +641,6 @@
     <string name="pref_consent_above_18_title">Soy mayor de 18 años</string>
     <string name="pref_consent_biometrics_summary">Active para iniciar sesión mediante biometría (huellas de dedos, etc.) además del código PIN</string>
     <string name="pref_consent_biometrics_title">Activar biometría</string>
-    <string name="pref_consent_personalised_ads_summary">Deshabilitar esto hará que los anuncios sean menos relevantes</string>
-    <string name="pref_consent_personalised_ads_title">Anuncios Personalizados</string>
     <string name="pref_consent_pin_app_link_summary">Requiere un código pin al lanzar enlaces.</string>
     <string name="pref_consent_pin_app_link_title">Código pin para enlaces</string>
     <string name="pref_consent_pin_auto_lock_inst_summary">Active esto para bloquear la aplicación instantáneamente cuando valla al fondo.</string>
@@ -694,8 +651,6 @@
     <string name="pref_consent_pin_unlock_summary_pin">Active esto para requerir un código pin al lanzar la aplicación. Codigo pin: %1$s</string>
     <string name="pref_consent_pin_unlock_title">Código pin al lanzar la aplicación.</string>
     <string name="pref_export">Exportar e Importar</string>
-    <string name="pref_export_export_dialog_message">¿Quieres que el archivo exportado este encriptado? (previene que otras aplicaciones y usuarios puedan leer su contenido)</string>
-    <string name="pref_export_export_dialog_title">¿Encriptar archivo exportado?</string>
     <string name="pref_export_export_summary">Exportar todos los datos de usuario y sus ajustes a un archivo de respaldo</string>
     <string name="pref_export_export_title">Exportar datos de aplicación</string>
     <string name="pref_export_import_summary">Importar datos de usuario, búsquedas guardadas y ajustes desde un archivo de respaldo. \n\n¡Aviso! Esto sobrescribirá todos los datos de la aplicación, incluyendo los ajustes y las búsquedas guardadas!</string>
@@ -771,8 +726,6 @@
     <string name="pref_post_action_upvote_on_download_title">Votar al descargar</string>
     <string name="pref_post_action_upvote_on_fav_summary">Automáticamente vota un post al añadirlo a favoritos</string>
     <string name="pref_post_action_upvote_on_fav_title">Votar al añadir a favoritos</string>
-    <string name="pref_post_auto_hq_summary">Automáticamente carga imágenes en calidad alta (HQ) cuando está en modo de pantalla completa</string>
-    <string name="pref_post_auto_hq_title">Usar imágenes en alta cálidad (HQ) en modo pantalla completa</string>
     <string name="pref_post_back_button_location_summary">Esquina superior-izquierda</string>
     <string name="pref_post_back_button_location_title">Posición del botón de retroceso</string>
     <string name="pref_post_back_button_summary">Muestra el botón de retroceso</string>
@@ -791,16 +744,12 @@
     <string name="pref_post_hide_comments_title">Botón para ocultar los comentarios</string>
     <string name="pref_post_hide_score_summary">Habilita para ocultar la puntuación de los posts.</string>
     <string name="pref_post_hide_score_title">Ocultar puntuación del post</string>
-    <string name="pref_post_jump_delay_summary">El retraso hasta que la aplicación deba saltar al post seleccionado desde la vista en cuadrícula, en milisegundos (ms). Aumente esto si la aplicación salta al post incorrecto.</string>
-    <string name="pref_post_jump_delay_title">Retraso de salto</string>
     <string name="pref_post_keep_screen_awake_summary">Mantiene la pantalla encendida mientras se ve una publicación</string>
     <string name="pref_post_keep_screen_awake_title">Mantener la pantalla encendida</string>
     <string name="pref_post_load_hq_summary">Activa para cargar posts de imágenes en la mayor resolución disponible. Desactiva para menor calidad. (más rápido y ahorra datos)</string>
     <string name="pref_post_load_hq_title">Cargar imágenes en alta resolución</string>
     <string name="pref_post_long_click_to_unfav_summary">Activa para tener que mantener presionado el botón favoritos para quitar un post de favoritos</string>
     <string name="pref_post_long_click_to_unfav_title">Mantener para quitar de favoritos</string>
-    <string name="pref_post_post_default_video_format_title">Formato de Video predeterminado</string>
-    <string name="pref_post_post_default_video_quality_title">Calidad de Video predeterminada</string>
     <string name="pref_post_pull_to_close_summary">Habilita para poder cerrar una publicación jalando de la parte inferior un 45% de la pantalla</string>
     <string name="pref_post_pull_to_close_title">Jala para cerrar</string>
     <string name="pref_post_top_preview_summary">Muestra una parte de la imagen cuando se desliza hacia abajo.</string>
@@ -843,7 +792,6 @@
     <string name="pref_storage_custom_folder_enabled_title">Active una localización personalizada</string>
     <string name="pref_storage_custom_folder_summary">Cambia la localización de descargas para archivos descargados.</string>
     <string name="pref_storage_custom_folder_title">Localización de descarga personalizada</string>
-    <string name="pref_storage_file_name_dialog_message" formatted="false">Personaliza el nombre del archivo de las publicaciones descargadas. Opciones Permitidas: \n\n%artist%\n%id%\n%character%\n%tags%\n%score%\n%favs%\n%timesaved%, %yyyy%, %mm% y %dd%\n La extensión del archivo es añadido automáticamente\n\n Usa la barra oblicua \"/\" para usar un subfolder</string>
     <string name="pref_storage_file_name_dialog_title">Personalizar el nombre del archivo</string>
     <string name="pref_storage_file_name_title">Nombres de archivos y subfolders personalizados</string>
     <string name="pref_storage_hide_summary">Añade un punto \".\" antes del nombre del archivo para que otras aplicaciones no lo detecten (posiblemente incluyendo la aplicación de la galería)</string>
@@ -869,13 +817,6 @@
     <string name="report_post_message">¿Reportar este post por contenido inapropiado?</string>
     <string name="report_title">Reportar</string>
     <string name="restart_app_for_changes">Reinicia la aplicación para que los cambios surtan efecto</string>
-    <string name="s1">Guardar imagen</string>
-    <string name="s2">¿Permitir que el anuncio almacene imágenes en la galería de imágenes?</string>
-    <string name="s3">Aceptar</string>
-    <string name="s4">Rechazar</string>
-    <string name="s5">Crear evento de calendario</string>
-    <string name="s6">¿Permitir que el anuncio cree un evento de calendario?</string>
-    <string name="s7">Anuncio de prueba</string>
     <string name="save">Guardar</string>
     <string name="saved_check_new_posts">Comprobar nuevos posts</string>
     <string name="saved_check_new_posts_done">Servicio listo</string>
@@ -907,13 +848,6 @@
     <string name="saved_menu_add">Añadir ítem personalizado</string>
     <string name="saved_menu_clear_confirm_message">Esto eliminará todas tus búsquedas guardadas. ¿Quieres continuar?</string>
     <string name="saved_menu_clear_confirm_title">¿Estás seguro?</string>
-    <string name="saved_menu_export">Exportar a archivo</string>
-    <string name="saved_menu_import">Importar desde archivo</string>
-    <string name="saved_menu_order_by">Ordenar por</string>
-    <string name="saved_menu_order_by_date_created">Fecha de creación</string>
-    <string name="saved_menu_order_by_date_used">Fecha de uso</string>
-    <string name="saved_menu_order_by_name">Nombre</string>
-    <string name="saved_menu_order_by_tags">Tags</string>
     <string name="saved_menu_order_tags_alphabetically">Ordenar tags alfabéticamente</string>
     <string name="saved_save_current">Guardar búsqueda actual</string>
     <string name="saved_service_desc">Comprobando nuevos posts de tus búsquedas guardadas</string>
@@ -962,7 +896,6 @@
     <string name="v7_preference_off">DESACTIVADA</string>
     <string name="v7_preference_on">ACTIVADO</string>
     <string name="view">Ver</string>
-    <string name="watermark_label_prefix">AdMob -</string>
     <string name="webview_title">Por favor, completa el captcha (si aparece alguno). Pulsa el botón \"Listo\" cuando e621/e926 aparezca</string>
     <string name="webview_toast_done">Listo. Por favor recarga la página / vuelve a buscar</string>
     <string name="wiki_show_not_found">404 No se ha encontrado. No hay una wiki para esta tag</string>

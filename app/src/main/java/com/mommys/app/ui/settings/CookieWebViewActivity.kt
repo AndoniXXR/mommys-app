@@ -8,6 +8,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.mommys.app.MommysApplication
 import com.mommys.app.R
@@ -40,6 +41,7 @@ class CookieWebViewActivity : AppCompatActivity() {
         
         setupWebView()
         setupDoneButton()
+        setupBackNavigation()
         
         // Cargar el sitio apropiado basado en la configuración del host
         val url = if (prefs.useE621()) "https://e621.net" else "https://e926.net"
@@ -106,13 +108,17 @@ class CookieWebViewActivity : AppCompatActivity() {
         }
     }
     
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
-        }
+    private fun setupBackNavigation() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
     
     override fun onDestroy() {

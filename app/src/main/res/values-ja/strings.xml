@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- 基本操作 -->
     <string name="abc_action_bar_home_description">ホーム</string>
@@ -207,7 +207,6 @@
     
     <!-- 言語 -->
     <string name="arrays_language_chinese_simplified">簡体字中国語 (Chinese Simplified)</string>
-    <string name="arrays_language_japanese">日本語 (Japanese)</string>
     <string name="arrays_language_english">英語 (English)</string>
     <string name="arrays_language_spanish">スペイン語 (Spanish)</string>
     

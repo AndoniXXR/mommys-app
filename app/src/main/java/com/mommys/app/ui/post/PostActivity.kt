@@ -92,11 +92,16 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
     private var networkObserverJob: Job? = null
     // Posición del último post que falló por error de red (para retry)
     private var lastFailedPosition: Int = -1
+    // Flags de paginación: si hay más páginas disponibles
+    private var hasNextPage = true
+    private var hasPrevPage = true
     
     companion object {
         private const val TAG = "PostActivity"
         const val EXTRA_POST_ID = "post_id"
         const val EXTRA_INITIAL_POSITION = "initial_position"
+        const val EXTRA_HAS_NEXT_PAGE = "has_next_page"
+        const val EXTRA_HAS_PREV_PAGE = "has_prev_page"
         
         // Códigos de resultado para paginación (como app original 999/-999)
         const val RESULT_NEXT_PAGE = 999
@@ -124,10 +129,12 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
          * Crear intent con posts pre-cargados (método preferido)
          * Los posts se pasan via companion object como la app original
          */
-        fun createIntent(context: Context, posts: List<Post>, initialPosition: Int): Intent {
+        fun createIntent(context: Context, posts: List<Post>, initialPosition: Int, hasNextPage: Boolean = true, hasPrevPage: Boolean = true): Intent {
             pendingPosts = posts
             return Intent(context, PostActivity::class.java).apply {
                 putExtra(EXTRA_INITIAL_POSITION, initialPosition)
+                putExtra(EXTRA_HAS_NEXT_PAGE, hasNextPage)
+                putExtra(EXTRA_HAS_PREV_PAGE, hasPrevPage)
             }
         }
         
@@ -181,6 +188,8 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         // Obtener datos del intent
         initialPostId = deepLinkPostId ?: intent.getIntExtra(EXTRA_POST_ID, -1)
         initialPosition = intent.getIntExtra(EXTRA_INITIAL_POSITION, 0)
+        hasNextPage = intent.getBooleanExtra(EXTRA_HAS_NEXT_PAGE, true)
+        hasPrevPage = intent.getBooleanExtra(EXTRA_HAS_PREV_PAGE, true)
         
         Log.d(TAG, "initialPostId from intent: $initialPostId")
         Log.d(TAG, "initialPosition from intent: $initialPosition")
@@ -494,16 +503,32 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
                     // Lógica de detección de "swipe past end" (overscroll)
                     // Basado en di/b1.java de la app original
                     if (isDragging && positionOffset == 0f && positionOffsetPixels == 0 && lastOffsetPixels == 0) {
-                        if (position == 0) {
+                        if (position == 0 && hasPrevPage) {
                             // Intento de ir a la página anterior
                             setResult(RESULT_PREV_PAGE)
                             finish()
-                            overridePendingTransition(0, 0)
-                        } else if (position == (adapter?.itemCount ?: 0) - 1) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                                overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
+                            } else {
+                                @Suppress("DEPRECATION")
+                                overridePendingTransition(0, 0)
+                            }
+                        } else if (position == 0 && !hasPrevPage) {
+                            Toast.makeText(this@PostActivity, R.string.no_previous_page, Toast.LENGTH_SHORT).show()
+                            isDragging = false
+                        } else if (position == (adapter?.itemCount ?: 0) - 1 && hasNextPage) {
                             // Intento de ir a la página siguiente
                             setResult(RESULT_NEXT_PAGE)
                             finish()
-                            overridePendingTransition(0, 0)
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                                overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
+                            } else {
+                                @Suppress("DEPRECATION")
+                                overridePendingTransition(0, 0)
+                            }
+                        } else if (position == (adapter?.itemCount ?: 0) - 1 && !hasNextPage) {
+                            Toast.makeText(this@PostActivity, R.string.no_more_pages, Toast.LENGTH_SHORT).show()
+                            isDragging = false
                         }
                     }
                     lastOffsetPixels = positionOffsetPixels
@@ -1130,7 +1155,12 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         
         // Entrar en fullscreen si está habilitado
         if (settings.fullscreen) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.insetsController?.hide(android.view.WindowInsets.Type.statusBars())
+            } else {
+                @Suppress("DEPRECATION")
+                window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+            }
             binding.btnBackLeft.visibility = View.GONE
             binding.btnBackRight.visibility = View.GONE
         }
@@ -1195,7 +1225,12 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         slideshowSettings = null
         
         // Restaurar UI
-        window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.show(android.view.WindowInsets.Type.statusBars())
+        } else {
+            @Suppress("DEPRECATION")
+            window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        }
         setupBackButtons()
         
         Toast.makeText(this, R.string.ss_toast_stopped, Toast.LENGTH_SHORT).show()

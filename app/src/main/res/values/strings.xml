@@ -1024,6 +1024,8 @@
     <string name="ss_toast_stopped">Slideshow stopped</string>
     <string name="ss_toast_next_page">Next page</string>
     <string name="ss_toast_prev_page">Previous page</string>
+    <string name="no_more_pages">No more pages</string>
+    <string name="no_previous_page">No previous page</string>
     
     <!-- Notes -->
     <string name="notes_only_images">Only image and GIF posts are supported!</string>

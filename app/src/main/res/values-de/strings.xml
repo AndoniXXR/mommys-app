@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Acciones principales -->
     <string name="abc_action_bar_home_description">Zur Startseite</string>
@@ -133,7 +133,6 @@
     
     <!-- Posts - Menú -->
     <string name="post_menu_copy_post">Post-Link kopieren</string>
-    <string name="post_menu_download">Herunterladen</string>
     <string name="post_menu_edit_post">Post bearbeiten</string>
     <string name="post_menu_edit_post_not_logged_in">Du musst angemeldet sein um Posts zu bearbeiten!</string>
     <string name="post_menu_open_post">Im Browser öffnen</string>
@@ -485,8 +484,6 @@
     <string name="pref_export_import_summary">Benutzerdaten, gespeicherte Suchen und Einstellungen aus Sicherungsdatei importieren.\n\nWarnung! Dies überschreibt alle App-Daten!</string>
     
     <!-- Login -->
-    <string name="login_username_text">Benutzername eingeben</string>
-    <string name="login_api_key_text">API-Schlüssel eingeben</string>
     <string name="login_success_toast">Angemeldet als %1$s</string>
     <string name="login_error_title">Anmeldung fehlgeschlagen</string>
     
