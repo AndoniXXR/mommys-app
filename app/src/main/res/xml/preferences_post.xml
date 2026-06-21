@@ -91,7 +91,7 @@
         android:icon="@drawable/ic_quality"
         android:entries="@array/post_default_video_quality_entries"
         android:entryValues="@array/post_default_video_quality_values"
-        android:defaultValue="1"
+        android:defaultValue="0"
         android:singleLineTitle="false" />
 
     <ListPreference
@@ -101,7 +101,7 @@
         android:icon="@drawable/ic_quality"
         android:entries="@array/post_default_video_format_entries"
         android:entryValues="@array/post_default_video_format_values"
-        android:defaultValue="0"
+        android:defaultValue="1"
         android:singleLineTitle="false" />
 
     <SwitchPreferenceCompat

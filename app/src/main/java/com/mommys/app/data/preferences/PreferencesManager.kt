@@ -3,12 +3,14 @@ package com.mommys.app.data.preferences
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 
 /**
  * Manager para SharedPreferences
  * Basado en la estructura de la app original que usa múltiples archivos de preferencias
  */
-class PreferencesManager(context: Context) {
+class PreferencesManager(private val context: Context) {
     
     companion object {
         // Preference file names
@@ -52,6 +54,32 @@ class PreferencesManager(context: Context) {
         // Consent keys
         private const val KEY_CONSENT_ABOVE_18 = "consent_above_18"
         private const val KEY_ANALYTICS_ENABLED = "analytics_enabled"
+
+        // Cache de EncryptedSharedPreferences: una sola instancia por nombre compartida por
+        // TODAS las PreferencesManager. ESP no se sincroniza entre instancias creadas por
+        // separado (a diferencia de getSharedPreferences, que cachea por Context), así que si
+        // cada PreferencesManager crea la suya, un login escrito por una instancia no lo vería
+        // otra (p.ej. isLoggedIn() en el grid mostrando "restricted"). Compartir instancia = sincronizado.
+        private val securePrefsCache = HashMap<String, SharedPreferences>()
+
+        @Synchronized
+        private fun getSecurePrefs(context: Context, name: String): SharedPreferences {
+            securePrefsCache[name]?.let { return it }
+            val prefs = try {
+                val masterKey = MasterKey.Builder(context.applicationContext)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build()
+                EncryptedSharedPreferences.create(
+                    context.applicationContext, name, masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                )
+            } catch (e: Exception) {
+                context.applicationContext.getSharedPreferences("${name}_fallback", Context.MODE_PRIVATE)
+            }
+            securePrefsCache[name] = prefs
+            return prefs
+        }
     }
     
     private val userInfoPrefs: SharedPreferences = 
@@ -63,9 +91,66 @@ class PreferencesManager(context: Context) {
     private val consentPrefs: SharedPreferences = 
         context.getSharedPreferences(PREF_CONSENT, Context.MODE_PRIVATE)
     
-    private val pinPrefs: SharedPreferences = 
+    private val pinPrefs: SharedPreferences =
         context.getSharedPreferences(PREF_PIN, Context.MODE_PRIVATE)
-    
+
+    // === Almacenamiento cifrado (EncryptedSharedPreferences) para datos sensibles ===
+    private val credentialsSecure: SharedPreferences = securePrefs("credentials_secure")
+    private val cookiesSecure: SharedPreferences = securePrefs("cookies_secure")
+    private val pinSecure: SharedPreferences = securePrefs("pin_secure")
+
+    init {
+        migrateLegacySecureKeys()
+    }
+
+    /**
+     * Crea un archivo EncryptedSharedPreferences (cifrado con clave del Android Keystore).
+     * Si falla en un dispositivo con Keystore roto, cae a prefs plano (fallback) para no
+     * romper la app (ese dispositivo no tendría cifrado, pero seguiría funcionando).
+     */
+    private fun securePrefs(name: String): SharedPreferences = getSecurePrefs(context, name)
+
+    /**
+     * Migra una sola vez las claves sensibles que estaban en claro (user_info /
+     * user_preferences) a los archivos cifrados y las borra del plano.
+     * Así un usuario ya logueado conserva su sesión al actualizar.
+     */
+    private fun migrateLegacySecureKeys() {
+        try {
+            // username + api_key: user_info -> credentials_secure
+            if (credentialsSecure.getString(KEY_USERNAME, null) == null &&
+                credentialsSecure.getString(KEY_API_KEY, null) == null) {
+                val legacyUser = userInfoPrefs.getString(KEY_USERNAME, null)
+                val legacyKey = userInfoPrefs.getString(KEY_API_KEY, null)
+                if (legacyUser != null || legacyKey != null) {
+                    credentialsSecure.edit {
+                        if (legacyUser != null) putString(KEY_USERNAME, legacyUser)
+                        if (legacyKey != null) putString(KEY_API_KEY, legacyKey)
+                    }
+                    userInfoPrefs.edit {
+                        remove(KEY_USERNAME)
+                        remove(KEY_API_KEY)
+                    }
+                }
+            }
+            // cookies (cf_clearance): user_preferences -> cookies_secure
+            if (!cookiesSecure.contains("cookies")) {
+                val legacyCookies = userPrefs.getString("cookies", null)
+                if (legacyCookies != null) {
+                    cookiesSecure.edit { putString("cookies", legacyCookies) }
+                    userPrefs.edit { remove("cookies") }
+                }
+            }
+            // pin: user_preferences -> pin_secure
+            if (!pinSecure.contains(KEY_PIN) && userPrefs.contains(KEY_PIN)) {
+                pinSecure.edit { putInt(KEY_PIN, userPrefs.getInt(KEY_PIN, -1)) }
+                userPrefs.edit { remove(KEY_PIN) }
+            }
+        } catch (e: Exception) {
+            // La migración no debe romper la app
+        }
+    }
+
     /**
      * Obtener acceso a userPrefs para operaciones especiales como last_ad
      * Como se usa en la app original para ads
@@ -83,12 +168,12 @@ class PreferencesManager(context: Context) {
         }
     }
     
-    fun getUsername(): String? = userInfoPrefs.getString(KEY_USERNAME, null)
-    
-    fun getApiKey(): String? = userInfoPrefs.getString(KEY_API_KEY, null)
-    
+    fun getUsername(): String? = credentialsSecure.getString(KEY_USERNAME, null)
+
+    fun getApiKey(): String? = credentialsSecure.getString(KEY_API_KEY, null)
+
     fun setCredentials(username: String?, apiKey: String?) {
-        userInfoPrefs.edit {
+        credentialsSecure.edit {
             putString(KEY_USERNAME, username)
             putString(KEY_API_KEY, apiKey)
         }
@@ -97,7 +182,7 @@ class PreferencesManager(context: Context) {
     fun isLoggedIn(): Boolean = getUsername() != null && getApiKey() != null
     
     fun logout() {
-        userInfoPrefs.edit {
+        credentialsSecure.edit {
             remove(KEY_USERNAME)
             remove(KEY_API_KEY)
         }
@@ -294,14 +379,14 @@ class PreferencesManager(context: Context) {
     @get:JvmName("getUsernameValue")
     @set:JvmName("setUsernameValue")
     var username: String
-        get() = userInfoPrefs.getString(KEY_USERNAME, null) ?: ""
-        set(value) { userInfoPrefs.edit { putString(KEY_USERNAME, value) } }
-    
+        get() = credentialsSecure.getString(KEY_USERNAME, null) ?: ""
+        set(value) { credentialsSecure.edit { putString(KEY_USERNAME, value) } }
+
     @get:JvmName("getApiKeyValue")
     @set:JvmName("setApiKeyValue")
     var apiKey: String
-        get() = userInfoPrefs.getString(KEY_API_KEY, null) ?: ""
-        set(value) { userInfoPrefs.edit { putString(KEY_API_KEY, value) } }
+        get() = credentialsSecure.getString(KEY_API_KEY, null) ?: ""
+        set(value) { credentialsSecure.edit { putString(KEY_API_KEY, value) } }
     
     @get:JvmName("isUserLoggedIn")
     var isLoggedIn: Boolean
@@ -334,8 +419,8 @@ class PreferencesManager(context: Context) {
     
     // PIN stored as INT (0-9999), -1 means disabled (matching original app)
     var pinValue: Int
-        get() = userPrefs.getInt(KEY_PIN, -1)
-        set(value) { userPrefs.edit { putInt(KEY_PIN, value) } }
+        get() = pinSecure.getInt(KEY_PIN, -1)
+        set(value) { pinSecure.edit { putInt(KEY_PIN, value) } }
     
     fun isPinSet(): Boolean {
         val pin = pinValue
@@ -343,7 +428,7 @@ class PreferencesManager(context: Context) {
     }
     
     fun clearPin() {
-        userPrefs.edit { putInt(KEY_PIN, -1) }
+        pinSecure.edit { putInt(KEY_PIN, -1) }
     }
     
     private fun formatPin(pin: Int): String {
@@ -450,10 +535,9 @@ class PreferencesManager(context: Context) {
         get() = userPrefs.getBoolean("post_pull_to_close", true)
         set(value) { userPrefs.edit { putBoolean("post_pull_to_close", value) } }
     
-    // Video Quality: "0"=Original, "1"=720p (default), "2"=480p
-    // La app original mapea: 0→1 (original), 1→2 (720p), 2→3 (480p)
+    // Video Quality: "0"=Original (default), "1"=720p, "2"=480p
     var postVideoQuality: Int
-        get() = userPrefs.getString("post_default_video_quality", "1")?.toIntOrNull() ?: 1
+        get() = userPrefs.getString("post_default_video_quality", "0")?.toIntOrNull() ?: 0
         set(value) { userPrefs.edit { putString("post_default_video_quality", value.toString()) } }
     
     var postMuteVideos: Boolean
@@ -499,7 +583,7 @@ class PreferencesManager(context: Context) {
     // Video Format: "0"=WebM (default), "1"=MP4
     // La app original mapea: 0→1 (webm), 1→2 (mp4)
     var postVideoFormat: Int
-        get() = userPrefs.getString("post_default_video_format", "0")?.toIntOrNull() ?: 0
+        get() = userPrefs.getString("post_default_video_format", "1")?.toIntOrNull() ?: 1
         set(value) { userPrefs.edit { putString("post_default_video_format", value.toString()) } }
     
     var postLandscapeVideos: Boolean
@@ -880,7 +964,7 @@ class PreferencesManager(context: Context) {
      * Como WebViewActivity.java -> case 5 en el OnClickListener
      */
     fun setCookies(cookies: String) {
-        userPrefs.edit {
+        cookiesSecure.edit {
             putString("cookies", cookies)
         }
     }
@@ -889,7 +973,7 @@ class PreferencesManager(context: Context) {
      * Obtiene las cookies guardadas
      */
     fun getCookies(): String {
-        return userPrefs.getString("cookies", "") ?: ""
+        return cookiesSecure.getString("cookies", "") ?: ""
     }
     
     /**
@@ -903,7 +987,7 @@ class PreferencesManager(context: Context) {
      * Limpia las cookies
      */
     fun clearCookies() {
-        userPrefs.edit {
+        cookiesSecure.edit {
             remove("cookies")
         }
     }

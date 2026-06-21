@@ -107,8 +107,8 @@ class PostPagerAdapter(
     private var muteVideos = false           // post_mute_videos
     private var fullscreenVideos = false     // post_fullscreen_videos
     private var landscapeVideos = false      // post_landscape_videos
-    private var videoQuality = 1             // post_default_video_quality (0=original, 1=720p, 2=480p)
-    private var videoFormat = 0              // post_default_video_format (0=webm, 1=mp4)
+    private var videoQuality = 0             // post_default_video_quality (0=original default, 1=720p, 2=480p)
+    private var videoFormat = 1              // post_default_video_format (0=webm, 1=mp4 default)
     
     // ==================== ACTION PREFERENCES ====================
     private var upvoteOnFavorite = false     // post_action_upvote_on_fav
@@ -1223,13 +1223,13 @@ class PostPagerAdapter(
         }
 
         /**
-         * Abre la página wiki del tag
-         * Como WikiShowActivity en la app original
+         * Abre la página wiki del tag dentro de la app (WikiShowActivity),
+         * respetando el host configurado (e621/e926). Como la app original.
          */
         private fun openWikiPage(context: Context, tagName: String) {
-            val wikiUrl = "https://e926.net/wiki_pages/show_or_new?title=$tagName"
+            val intent = Intent(context, com.mommys.app.ui.wiki.WikiShowActivity::class.java)
+            intent.putExtra(com.mommys.app.ui.wiki.WikiShowActivity.EXTRA_TAG, tagName)
             try {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(wikiUrl))
                 context.startActivity(intent)
             } catch (e: Exception) {
                 showSnackbar(context, "Error opening wiki")
@@ -1462,7 +1462,11 @@ class PostPagerAdapter(
             binding.videoContainer.visibility = View.GONE
             binding.errorLayout.visibility = View.GONE
 
-            val imageUrl = post.file.url ?: post.sample.url ?: post.preview.url
+            // Adaptive loading: en red móvil (o con Data Saver) cargar sample en vez de full-res.
+            // La descarga explícita (botón descargar) siempre es full-res (PostDownloader intacto).
+            val useFullRes = com.mommys.app.util.AdaptiveQuality.shouldLoadFullRes()
+            val imageUrl = if (useFullRes) (post.file.url ?: post.sample.url ?: post.preview.url)
+                           else (post.sample.url ?: post.preview.url ?: post.file.url)
             val fileSize = post.file.size
             val fileSizeMb = fileSize / (1024.0 * 1024.0)
 
@@ -1475,6 +1479,16 @@ class PostPagerAdapter(
                 } else {
                     context.getString(R.string.post_error_not_logged_in)
                 }
+                return
+            }
+
+            // Modo ahorro (móvil / Data Saver): cargar sample vía Glide, sin descarga full-res
+            if (!useFullRes) {
+                binding.loadingLayout.visibility = View.GONE
+                Glide.with(context)
+                    .load(post.sample.url ?: post.preview.url)
+                    .placeholder(R.drawable.placeholder_image)
+                    .into(binding.imgPreview)
                 return
             }
 
@@ -1775,10 +1789,10 @@ class PostPagerAdapter(
             // Configuración de LoadControl (valores por defecto como wolfstash)
             val loadControl = DefaultLoadControl.Builder()
                 .setBufferDurationsMs(
-                    5000,  // minBufferMs
-                    5000,  // maxBufferMs
-                    2500,  // bufferForPlaybackMs (default, no agresivo)
-                    5000   // bufferForPlaybackAfterRebufferMs (default)
+                    10000, // minBufferMs - más buffer para móvil (era 5000)
+                    30000, // maxBufferMs - margen real para no rebuferear (era 5000)
+                    2500,  // bufferForPlaybackMs
+                    5000   // bufferForPlaybackAfterRebufferMs
                 )
                 .build()
 
@@ -1843,13 +1857,17 @@ class PostPagerAdapter(
                             val errorCode = error.errorCode
                             val errorMessage = error.message ?: ""
                             
-                            // Detectar error de MediaCodec VP9 de forma inteligente
-                            val isVp9Error = errorMessage.contains("MediaCodecVideoRenderer", ignoreCase = true) && 
-                                           (errorMessage.contains("vp9", ignoreCase = true) || 
-                                            errorMessage.contains("vp09", ignoreCase = true))
+                            // Detectar error de MediaCodec para codecs problemáticos (vp9/vp8/av1):
+                            // esos originales no se decodifican por hardware en todos los dispositivos.
+                            val isCodecError = errorMessage.contains("MediaCodecVideoRenderer", ignoreCase = true) &&
+                                (errorMessage.contains("vp9", ignoreCase = true) ||
+                                 errorMessage.contains("vp09", ignoreCase = true) ||
+                                 errorMessage.contains("vp8", ignoreCase = true) ||
+                                 errorMessage.contains("av01", ignoreCase = true) ||
+                                 errorMessage.contains("av1", ignoreCase = true))
                             
-                            // Si es error de VP9 y NO hemos intentado MP4 fallback aún
-                            if (isVp9Error && !hasTriedMp4Fallback && this@PostPagerAdapter.videoFormat == 0) {
+                            // Si es error de codec y NO hemos intentado MP4 fallback aún
+                            if (isCodecError && !hasTriedMp4Fallback && this@PostPagerAdapter.videoFormat == 0) {
                                 // Verificar si existe versión MP4 del video
                                 val mp4Url = post.getVideoUrl(this@PostPagerAdapter.videoQuality, format = 1)  // 1 = MP4
                                 val currentUrl = post.getVideoUrl(this@PostPagerAdapter.videoQuality, this@PostPagerAdapter.videoFormat)

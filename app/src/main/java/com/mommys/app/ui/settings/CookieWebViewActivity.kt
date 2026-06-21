@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.mommys.app.MommysApplication
+import com.mommys.app.data.api.HttpConfig
 import com.mommys.app.R
 
 /**
@@ -55,8 +56,9 @@ class CookieWebViewActivity : AppCompatActivity() {
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
-            // User-Agent exacto de la app original
-            userAgentString = "The Wolf's Stash v2 beta-4.15.2 (by ZepiWolf)"
+            // User-Agent canónico de la app (debe coincidir con el de la API para que
+            // Cloudflare acepte la cookie cf_clearance resuelta aquí)
+            userAgentString = HttpConfig.userAgent()
             cacheMode = WebSettings.LOAD_DEFAULT
             
             // Habilitar cookies

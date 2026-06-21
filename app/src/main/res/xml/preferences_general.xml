@@ -11,13 +11,14 @@
         android:defaultValue="en"
         android:singleLineTitle="false" />
 
-    <EditTextPreference
-        android:key="general_change_host"
+    <SwitchPreferenceCompat
+        android:key="use_e621_host"
         android:title="@string/pref_general_edit_host_title"
         android:summary="e926.net"
         android:icon="@drawable/ic_warning"
-        android:defaultValue="e926.net"
+        android:defaultValue="false"
         android:dependency="consent_above_18"
+        android:persistent="false"
         android:singleLineTitle="false" />
 
     <SwitchPreferenceCompat

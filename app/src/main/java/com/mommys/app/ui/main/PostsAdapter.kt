@@ -240,8 +240,8 @@ class PostsAdapter(
                 ))
             }
 
-            // Cargar imagen con Glide
-            val imageUrl = post.preview.url ?: post.sample?.url ?: post.file.url
+            // Cargar imagen con Glide. Adaptive: siempre preview/sample, nunca file 4K.
+            val imageUrl = com.mommys.app.util.AdaptiveQuality.thumbUrl(post) ?: post.file.url
             
             Glide.with(binding.imgPreview)
                 .load(imageUrl)

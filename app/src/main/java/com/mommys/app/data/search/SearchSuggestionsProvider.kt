@@ -10,6 +10,7 @@ import android.provider.BaseColumns
 import android.util.Base64
 import android.util.Log
 import com.mommys.app.MommysApplication
+import com.mommys.app.data.api.HttpConfig
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
@@ -49,6 +50,7 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
         OkHttpClient.Builder()
             .connectTimeout(1500, TimeUnit.MILLISECONDS)
             .readTimeout(1500, TimeUnit.MILLISECONDS)
+            .addInterceptor(HttpConfig.cloudflareHeaderInterceptor())
             .build()
     }
 
@@ -156,7 +158,6 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
 
             val requestBuilder = Request.Builder()
                 .url(url)
-                .header("User-Agent", "Mommys/1.4.6 (by AndoniXXR)")
                 .header("Accept", "application/json")
                 .get()
 

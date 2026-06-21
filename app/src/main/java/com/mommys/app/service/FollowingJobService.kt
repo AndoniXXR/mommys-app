@@ -21,9 +21,11 @@ import com.mommys.app.R
 import com.mommys.app.data.db.following.AppFollowingPostDatabase
 import com.mommys.app.data.db.following.FollowingPost
 import com.mommys.app.data.db.logs.AppLogDatabase
+import com.mommys.app.data.api.HttpConfig
 import com.mommys.app.data.preferences.PreferencesManager
 import com.mommys.app.ui.post.PostActivity
 import com.mommys.app.util.BlacklistHelper
+import com.mommys.app.util.CloudflareBlocker
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -273,7 +275,7 @@ class FollowingJobService : JobService() {
         
         try {
             connection.requestMethod = "GET"
-            connection.setRequestProperty("User-Agent", "MommysApp/1.0 (by Mommys)")
+            HttpConfig.applyCloudflareHeaders(connection)
             connection.connectTimeout = 15000
             connection.readTimeout = 15000
             
@@ -287,6 +289,9 @@ class FollowingJobService : JobService() {
             }
             
             if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+                if (connection.responseCode == 403 || connection.responseCode == 503) {
+                    CloudflareBlocker.notifyBlocked()
+                }
                 log(this, "HTTP error ${connection.responseCode} for tag: $tag")
                 return 0
             }
@@ -506,7 +511,7 @@ class FollowingJobService : JobService() {
             connection.doInput = true
             connection.connectTimeout = 10000
             connection.readTimeout = 10000
-            connection.setRequestProperty("User-Agent", "MommysApp/1.0 (by Mommys)")
+            HttpConfig.applyCloudflareHeaders(connection)
             connection.connect()
             
             val inputStream = connection.inputStream

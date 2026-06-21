@@ -26,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
+import com.mommys.app.BuildConfig
 import com.mommys.app.MommysApplication
 import com.mommys.app.R
 import com.mommys.app.data.api.ApiClient
@@ -50,6 +51,7 @@ import com.mommys.app.util.AdManager
 import com.mommys.app.util.UpdateManager
 import com.mommys.app.util.network.NetworkAwareDispatcher
 import com.mommys.app.util.network.NetworkMonitor
+import com.mommys.app.util.observeCloudflareBlocks
 import com.mommys.app.util.network.NetworkState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -270,6 +272,9 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
         
         // Configurar monitoreo de red (como ff/b.java en app original)
         setupNetworkMonitoring()
+
+        // Mostrar diálogo automático si Cloudflare bloquea la API (HTTP 403/503)
+        observeCloudflareBlocks()
     }
     
     /**
@@ -2176,9 +2181,16 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     }
     
     /**
-     * Verifica actualizaciones automáticamente al iniciar (una vez al día)
+     * Verifica actualizaciones automáticamente al iniciar (una vez al día).
+     *
+     * NOTA: el auto-check del arranque solo corre en builds release. En debug
+     * (emulador/desarrollo) se omite para evitar el falso "update available"
+     * cuando la versión local va por detrás de la última release publicada en
+     * GitHub (p.ej. build local 1.4.14 vs release 1.4.15). El check manual del
+     * menú "Check for Updates" sigue disponible en cualquier build.
      */
     private fun checkForUpdatesOnStartup() {
+        if (BuildConfig.DEBUG) return  // auto-check solo en release (ver nota arriba)
         lifecycleScope.launch {
             val result = UpdateManager.checkForUpdates(this@MainActivity, forceCheck = false)
             

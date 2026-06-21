@@ -112,6 +112,7 @@ android {
     
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -136,6 +137,9 @@ dependencies {
     implementation(libs.retrofit.gson)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
+
+    // Security (EncryptedSharedPreferences para credenciales)
+    implementation(libs.androidx.security.crypto)
     
     // Image Loading
     implementation(libs.glide)
@@ -151,6 +155,7 @@ dependencies {
     // Video Player
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.ui)
+    implementation(libs.media3.datasource.okhttp)
     
     // Coroutines
     implementation(libs.coroutines.core)

@@ -14,7 +14,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mommys.app.R
+import com.mommys.app.data.api.HttpConfig
 import com.mommys.app.data.preferences.PreferencesManager
+import com.mommys.app.util.CloudflareBlocker
 import com.mommys.app.databinding.ActivityBrowseTagsBinding
 import com.mommys.app.ui.main.MainActivity
 import kotlinx.coroutines.*
@@ -208,7 +210,7 @@ class BrowseTagsActivity : AppCompatActivity() {
         
         try {
             connection.requestMethod = "GET"
-            connection.setRequestProperty("User-Agent", "MommysApp/1.0 (by Mommys)")
+            HttpConfig.applyCloudflareHeaders(connection)
             connection.connectTimeout = 15000
             connection.readTimeout = 15000
             
@@ -222,6 +224,9 @@ class BrowseTagsActivity : AppCompatActivity() {
             }
             
             if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+                if (connection.responseCode == 403 || connection.responseCode == 503) {
+                    CloudflareBlocker.notifyBlocked()
+                }
                 throw Exception("HTTP ${connection.responseCode}")
             }
             

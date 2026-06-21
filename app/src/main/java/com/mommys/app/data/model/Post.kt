@@ -63,36 +63,29 @@ data class SampleInfo(
 )
 
 /**
- * Alternativas de video en diferentes calidades
- * Estructura: sample.alternates.{original|720p|480p}.urls[]
+ * Variantes de un post de video (mapea la estructura real de la API e621/e926).
+ * Estructura: sample.alternates = { has, original, variants{mp4}, samples{480p,720p} }
  */
 data class VideoAlternates(
-    @SerializedName("original") val original: VideoFormat? = null,
-    @SerializedName("720p") val quality720p: VideoFormat? = null,
-    @SerializedName("480p") val quality480p: VideoFormat? = null
+    @SerializedName("has") val has: Boolean = false,
+    @SerializedName("original") val original: VideoVariant? = null,
+    @SerializedName("variants") val variants: Map<String, VideoVariant>? = null,
+    @SerializedName("samples") val samples: Map<String, VideoVariant>? = null
 )
 
 /**
- * Formato de video con URLs de webm y mp4
+ * Una variante concreta de un video (original / variants["mp4"] / samples["480p"|"720p"]).
+ * Campos reales de la API: codec, fps, size, width, height, url.
  */
-data class VideoFormat(
+data class VideoVariant(
     @SerializedName("type") val type: String? = null,
+    @SerializedName("codec") val codec: String? = null,
+    @SerializedName("fps") val fps: Double? = null,
+    @SerializedName("size") val size: Long? = null,
     @SerializedName("width") val width: Int? = null,
     @SerializedName("height") val height: Int? = null,
-    @SerializedName("urls") val urls: List<String>? = null
-) {
-    /** Obtiene URL de webm */
-    val webmUrl: String?
-        get() = urls?.find { it.endsWith(".webm") }
-    
-    /** Obtiene URL de mp4 */
-    val mp4Url: String?
-        get() = urls?.find { it.endsWith(".mp4") }
-    
-    /** Verifica si es video */
-    val isVideo: Boolean
-        get() = type == "video"
-}
+    @SerializedName("url") val url: String? = null
+)
 
 data class Score(
     @SerializedName("up") val up: Int,
@@ -161,50 +154,43 @@ data class SinglePostResponse(
 
 /**
  * Obtiene la URL del video según las preferencias de calidad y formato.
- * Lógica basada en la app original (ei/s.java líneas 85-120):
- * 
+ * Mapea la estructura real de la API: sample.alternates.{original, variants["mp4"], samples["480p"|"720p"]}.
+ *
  * @param quality 0=Original, 1=720p (default), 2=480p
  * @param format 0=WebM (default), 1=MP4
- * @return URL del video o null si no hay video disponible
+ * @return URL del video o file.url si no hay variantes disponibles
  */
 fun Post.getVideoUrl(quality: Int, format: Int): String? {
-    val alternates = sample.alternates ?: return file.url
-    
-    // Mapear quality: 0=original, 1=720p, 2=480p
-    // Mapear format: 0=webm, 1=mp4
-    val preferWebm = format == 0
-    
-    // Función para obtener URL de un VideoFormat según preferencia
-    fun VideoFormat?.getUrl(): String? {
-        if (this == null || !isVideo) return null
-        return if (preferWebm) {
-            webmUrl ?: mp4Url  // Si no hay webm, intentar mp4
-        } else {
-            mp4Url ?: webmUrl  // Si no hay mp4, intentar webm
+    val alts = sample?.alternates ?: return file.url
+    val preferMp4 = format == 1
+
+    // URL del "original" respetando el formato preferido.
+    // Las variants SIEMPRE son mp4/H.264 (existen si el original NO es H.264).
+    fun originalPreferred(): String? {
+        val origUrl = alts.original?.url
+        val origIsH264 = alts.original?.codec?.startsWith("avc") == true  // H.264: siempre reproducible
+        val mp4Variant = alts.variants?.get("mp4")?.url                   // H.264 transcódito del original
+        return when {
+            preferMp4 && origIsH264 -> origUrl                  // original ya es H.264 mp4
+            preferMp4 && mp4Variant != null -> mp4Variant       // variants.mp4 (H.264); cubre AV1/VP9/VP8
+            !preferMp4 && origUrl?.endsWith(".webm") == true -> origUrl  // webm
+            origUrl != null -> origUrl                          // lo que haya
+            else -> mp4Variant
         }
     }
-    
-    // Intentar obtener según calidad preferida, con fallback
+
+    // 480p/720p viven en samples (siempre H.264 mp4); el formato no aplica ahí.
     val url = when (quality) {
-        0 -> { // Original
-            alternates.original.getUrl()
-                ?: alternates.quality720p.getUrl()
-                ?: alternates.quality480p.getUrl()
-        }
-        1 -> { // 720p (default)
-            alternates.quality720p.getUrl()
-                ?: alternates.original.getUrl()
-                ?: alternates.quality480p.getUrl()
-        }
-        2 -> { // 480p
-            alternates.quality480p.getUrl()
-                ?: alternates.quality720p.getUrl()
-                ?: alternates.original.getUrl()
-        }
-        else -> alternates.quality720p.getUrl()
+        0 -> originalPreferred()                              // Original
+        1 -> alts.samples?.get("720p")?.url                  // 720p
+            ?: originalPreferred()
+            ?: alts.samples?.get("480p")?.url
+        2 -> alts.samples?.get("480p")?.url                  // 480p
+            ?: alts.samples?.get("720p")?.url
+            ?: originalPreferred()
+        else -> alts.samples?.get("720p")?.url ?: originalPreferred()
     }
-    
-    // Si no hay alternates, usar URL original del archivo
+
     return url ?: file.url
 }
 

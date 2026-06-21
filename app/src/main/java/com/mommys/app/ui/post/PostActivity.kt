@@ -39,6 +39,7 @@ import com.mommys.app.data.db.seen.AppSeenDatabase
 import com.mommys.app.util.AdManager
 import com.mommys.app.util.BlacklistHelper
 import com.mommys.app.util.ProgressDownloader
+import com.mommys.app.util.observeCloudflareBlocks
 import com.mommys.app.util.network.NetworkAwareDispatcher
 import com.mommys.app.util.network.NetworkState
 import kotlinx.coroutines.Job
@@ -220,6 +221,9 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
         Log.d(TAG, "Setting up network monitoring...")
         setupNetworkMonitoring()
         
+        // Mostrar diálogo automático si Cloudflare bloquea la API (HTTP 403/503)
+        observeCloudflareBlocks()
+
         // Si tenemos posts pre-cargados, usarlos directamente
         if (posts.isNotEmpty()) {
             Log.d(TAG, "Using pre-loaded posts: ${posts.size}")

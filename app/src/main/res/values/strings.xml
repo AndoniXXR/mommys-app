@@ -878,9 +878,9 @@
     </string-array>
     
     <string-array name="post_default_video_quality_entries">
-        <item>480p</item>
-        <item>720p</item>
         <item>Original</item>
+        <item>720p</item>
+        <item>480p</item>
     </string-array>
     <string-array name="post_default_video_quality_values">
         <item>0</item>

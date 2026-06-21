@@ -74,8 +74,7 @@ interface ApiService {
     @POST("posts/321786/votes.json")
     suspend fun validateCredentials(
         @Query("score") score: Int = 0,
-        @Query("login") login: String,
-        @Query("api_key") apiKey: String
+        @Header("Authorization") auth: String
     ): Response<VoteResponse>
     
     /**

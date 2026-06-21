@@ -170,10 +170,15 @@ class LoginActivity : AppCompatActivity() {
     private fun validateCredentials(username: String, apiKey: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                // Basic Auth en header (HTTPS) en vez de ?login=&api_key= en la URL,
+                // para no exponer las credenciales en logs del servidor / proxies.
+                val auth = "Basic " + android.util.Base64.encodeToString(
+                    "$username:$apiKey".toByteArray(Charsets.UTF_8),
+                    android.util.Base64.NO_WRAP
+                )
                 val response = api.validateCredentials(
                     score = 0,
-                    login = username,
-                    apiKey = apiKey
+                    auth = auth
                 )
                 
                 withContext(Dispatchers.Main) {

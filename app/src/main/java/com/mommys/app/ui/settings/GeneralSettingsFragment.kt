@@ -12,7 +12,6 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -70,80 +69,57 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun setupHostPreference() {
-        val hostPref = findPreference<EditTextPreference>("general_change_host")
+        val hostPref = findPreference<SwitchPreferenceCompat>("use_e621_host")
         val consentPref = findPreference<SwitchPreferenceCompat>("consent_above_18")
-        
+
         hostPref?.apply {
-            // Load current value
-            val currentHost = preferencesManager.getHost()
-            text = currentHost
-            summary = currentHost
-            
-            setOnBindEditTextListener { editText ->
-                editText.hint = "e621.net or e926.net"
-                // Fix for invisible text: Force a high-contrast style
-                // This ensures text is readable regardless of the theme glitch
-                editText.setBackgroundColor(android.graphics.Color.WHITE)
-                editText.setTextColor(android.graphics.Color.BLACK)
-                editText.setHintTextColor(android.graphics.Color.GRAY)
-                // Add some padding since we changed the background
-                val padding = (10 * resources.displayMetrics.density).toInt()
-                editText.setPadding(padding, padding, padding, padding)
-            }
-            
-            setOnPreferenceChangeListener { _, newValue ->
-                val host = newValue as String
-                handleHostChange(host, this, consentPref)
+            // El estado real vive en "general_change_host"; el switch solo refleja useE621().
+            // persistent=false para no tener dos fuentes de verdad.
+            isChecked = preferencesManager.useE621()
+            summary = if (preferencesManager.useE621()) "e621.net" else "e926.net"
+
+            setOnPreferenceChangeListener { preference, newValue ->
+                val useE621 = newValue as Boolean
+                handleHostSwitchChange(useE621, preference as SwitchPreferenceCompat, consentPref)
             }
         }
     }
 
-    private fun handleHostChange(host: String, editTextPref: EditTextPreference, consentPref: SwitchPreferenceCompat?): Boolean {
-        return when (host) {
-            "e621.net" -> {
-                // Original: N(true, true, true) sets filter_rating to show all ratings
-                preferencesManager.setFilterRating(true, true, true)
-                preferencesManager.setHost(host)
-                preferencesManager.setAbove18(true)
-                ApiClient.setUseE621(true)
-                editTextPref.text = host
-                editTextPref.summary = host
-                consentPref?.isChecked = true
-                true
-            }
-            "e926.net" -> {
-                preferencesManager.setHost(host)
-                ApiClient.setUseE621(false)
-                editTextPref.text = host
-                editTextPref.summary = host
-                true
-            }
-            else -> {
-                Toast.makeText(context, R.string.pref_general_edit_host_not_supported, Toast.LENGTH_SHORT).show()
-                editTextPref.text = "e926.net"
-                preferencesManager.setHost("e926.net")
-                false
-            }
+    private fun handleHostSwitchChange(useE621: Boolean, switchPref: SwitchPreferenceCompat, consentPref: SwitchPreferenceCompat?): Boolean {
+        return if (useE621) {
+            // Activar e621: como la app original, mostrar todos los ratings y marcar consentimiento +18
+            preferencesManager.setFilterRating(true, true, true)
+            preferencesManager.setHost("e621.net")
+            preferencesManager.setAbove18(true)
+            ApiClient.setUseE621(true)
+            switchPref.summary = "e621.net"
+            consentPref?.isChecked = true
+            true
+        } else {
+            preferencesManager.setHost("e926.net")
+            ApiClient.setUseE621(false)
+            switchPref.summary = "e926.net"
+            true
         }
     }
 
     private fun setupConsentAbove18Preference() {
         val consentPref = findPreference<SwitchPreferenceCompat>("consent_above_18")
-        val hostPref = findPreference<EditTextPreference>("general_change_host")
-        
+        val hostPref = findPreference<SwitchPreferenceCompat>("use_e621_host")
+
         consentPref?.apply {
             isChecked = preferencesManager.isAbove18()
-            
+
             setOnPreferenceChangeListener { _, newValue ->
                 val isAbove18 = newValue as Boolean
                 preferencesManager.setAbove18(isAbove18)
-                
+
                 if (!isAbove18) {
                     // Force e926 when consent is removed
-                    hostPref?.text = "e926.net"
-                    hostPref?.summary = "e926.net"
                     preferencesManager.setHost("e926.net")
                     ApiClient.setUseE621(false)
+                    hostPref?.isChecked = false
+                    hostPref?.summary = "e926.net"
                 }
                 true
             }

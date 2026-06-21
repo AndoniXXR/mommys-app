@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.mommys.app.data.api.ApiClient
 import com.mommys.app.data.database.AppDatabase
 import com.mommys.app.data.preferences.PreferencesManager
+import com.mommys.app.util.AdaptiveImageController
 import com.mommys.app.util.network.NetworkAwareDispatcher
 import com.mommys.app.util.network.NetworkMonitor
 
@@ -65,6 +66,9 @@ class MommysApplication : Application() {
         // Inicializar NetworkMonitor y NetworkAwareDispatcher
         // Basado en ff/b.java constructor que llama a x() para registrar callbacks
         initializeNetworkMonitoring()
+
+        // Adaptive loading: ajusta la concurrencia de carga de imágenes según la red
+        AdaptiveImageController.init(this)
     }
     
     /**
