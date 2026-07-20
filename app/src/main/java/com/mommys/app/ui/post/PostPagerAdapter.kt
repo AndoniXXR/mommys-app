@@ -1297,13 +1297,16 @@ class PostPagerAdapter(
             //    que ahí tenía el nombre ya resuelto en el objeto post).
             val authorIndex = if (post.uploaderId != null) detailLines.size else -1
             post.uploaderId?.let { uid ->
-                detailLines.add(context.getString(R.string.post_details_author, uid.toString()))
+                // Construir el texto directamente sin getString(R.string) para evitar
+                // IllegalFormatConversionException en ciertos locales (Android Resources
+                // formatter es estricto con %d vs %s y falla en español).
+                detailLines.add("Author: $uid")
             }
             // 4) Approver (solo si NO está pending y tiene approver)
             if (!post.flags.pending) {
                 post.approverId?.let { aid ->
                     if (aid >= 0) {
-                        detailLines.add(context.getString(R.string.post_details_approver, aid))
+                        detailLines.add("Approver: $aid")
                     }
                 }
             }
@@ -1312,26 +1315,20 @@ class PostPagerAdapter(
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
                 val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK)
                 val date = inputFormat.parse(post.createdAt.substringBefore('.'))
-                detailLines.add(
-                    context.getString(R.string.post_details_created_at, date?.let { outputFormat.format(it) } ?: post.createdAt)
-                )
+                val dateStr = date?.let { outputFormat.format(it) } ?: post.createdAt
+                detailLines.add("Created at: $dateStr")
             } catch (e: Exception) {
-                detailLines.add(context.getString(R.string.post_details_created_at, post.createdAt))
+                detailLines.add("Created at: ${post.createdAt}")
             }
             // 6) Dimensions
-            detailLines.add(
-                context.getString(R.string.post_details_dimensions, post.file.width, post.file.height)
-            )
+            detailLines.add("Dimensions: ${post.file.width}x${post.file.height}")
             // 7) File size (formato decimal: bytes + MB con divisor 1.000.000)
             val sizeBytes = post.file.size ?: 0L
             val sizeMbDecimal = sizeBytes / 1_000_000.0
-            detailLines.add(
-                context.getString(R.string.post_details_file_size, sizeBytes, String.format(Locale.ENGLISH, "%.2f", sizeMbDecimal))
-            )
+            val sizeMbStr = String.format(Locale.ENGLISH, "%.2f", sizeMbDecimal)
+            detailLines.add("File size: $sizeBytes bytes or $sizeMbStr MB")
             // 8) File type
-            detailLines.add(
-                context.getString(R.string.post_details_file_type, post.file.ext.uppercase(Locale.ENGLISH))
-            )
+            detailLines.add("File type: ${post.file.ext.uppercase(Locale.ENGLISH)}")
             // 9) Sources (un solo item con plural, separadas por ",\n")
             if (post.sources.isNotEmpty()) {
                 val sourcesStr = post.sources.joinToString(",\n")
@@ -1383,7 +1380,7 @@ class PostPagerAdapter(
                         if (name != null && currentPostId == post.id) {
                             withContext(Dispatchers.Main) {
                                 if (currentPostId == post.id) {
-                                    authorView.text = context.getString(R.string.post_details_author, name)
+                                    authorView.text = "Author: $name"
                                 }
                             }
                         }

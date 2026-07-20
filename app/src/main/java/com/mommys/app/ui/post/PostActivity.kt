@@ -41,6 +41,7 @@ import com.mommys.app.util.BlacklistHelper
 import com.mommys.app.util.ProgressDownloader
 import com.mommys.app.util.observeCloudflareBlocks
 import com.mommys.app.util.network.NetworkAwareDispatcher
+import com.mommys.app.util.network.NetworkEvent
 import com.mommys.app.util.network.NetworkState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
@@ -82,15 +83,15 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
     // Pull-to-close sliding panel (como la app original PostActivity.java líneas 360-376)
     private var slidingPanel: SlidingPanelLayout? = null
     
-    // ===== NETWORK MONITORING (como ff/b.java en app original) =====
+    // ===== NETWORK MONITORING =====
     // NetworkMonitor para detectar cambios de conectividad
     private val networkMonitor by lazy { MommysApplication.getInstance().networkMonitor }
     // NetworkAwareDispatcher para retry de acciones fallidas
     private val networkDispatcher by lazy { MommysApplication.getInstance().networkDispatcher }
-    // Flag para detectar reconexión (si estaba offline y ahora online)
-    private var wasOffline = false
-    // Job para cancelar la observación cuando se destruye la activity
-    private var networkObserverJob: Job? = null
+    // Job para observar el estado de red (banner rojo de offline)
+    private var networkStateJob: Job? = null
+    // Job para observar eventos de transición real (auto-refresh silencioso)
+    private var networkEventsJob: Job? = null
     // Posición del último post que falló por error de red (para retry)
     private var lastFailedPosition: Int = -1
     // Flags de paginación: si hay más páginas disponibles
@@ -1324,7 +1325,8 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
      */
     override fun onDestroy() {
         // Cancelar observación de red
-        networkObserverJob?.cancel()
+        networkStateJob?.cancel()    // Banner de estado (offline)
+        networkEventsJob?.cancel()   // Eventos de transición (auto-refresh)
         
         // Mostrar interstitial si está habilitado y listo
         // Exactamente como PostActivity.java líneas 560-580
@@ -1397,65 +1399,66 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
     }
     
     // ==================== NETWORK MONITORING ====================
-    // Similar a ff/b.java (NetworkConnectivityListener) en la app original
-    
-    /**
-     * Configura el monitoreo de red usando StateFlow para observar cambios
-     * Cuando se detecta desconexión, marca wasOffline = true
-     * Cuando se reconecta, muestra Snackbar y reintenta la carga del post actual si falló
-     */
+    // Mismo fix que MainActivity: dos suscripciones independientes.
+    //
+    // 1) networkStateJob: observa el estado actual (para el banner rojo de offline).
+    //    StateFlow reemite al volver de background, pero eso es lo que queremos
+    //    para el banner (que refleje siempre la verdad).
+    //
+    // 2) networkEventsJob: observa EVENTOS de transición real via SharedFlow(replay=0).
+    //    NO reemite al volver de background. Solo dispara auto-refresh silencioso
+    //    (reintentar post fallido) cuando hubo una desconexión REAL.
+    //
+    // Sin snackbar verde (la app original no lo hace y saturaba al usuario).
+
     private fun setupNetworkMonitoring() {
-        networkObserverJob = lifecycleScope.launch {
+        // 1) Banner de estado: rojo solo cuando realmente no hay red
+        networkStateJob = lifecycleScope.launch {
             networkMonitor.networkState.collectLatest { state ->
                 updateNetworkStatusUI(state)
             }
         }
-    }
-    
-    /**
-     * Actualiza la UI según el estado de red
-     * - Sin conexión: Marca wasOffline y muestra Snackbar informativo
-     * - Reconexión: Muestra Snackbar verde y reintenta carga fallida
-     */
-    private fun updateNetworkStatusUI(state: NetworkState) {
-        when {
-            // Sin conexión
-            !state.isOnline -> {
-                wasOffline = true
-                // Guardar la posición actual como potencialmente fallida
-                lastFailedPosition = binding.viewPager.currentItem
-            }
-            
-            // Conexión restaurada
-            else -> {
-                if (wasOffline) {
-                    wasOffline = false
-                    showReconnectedSnackbar()
+        // 2) Reintento silencioso de post fallido en transiciones reales offline->online
+        networkEventsJob = lifecycleScope.launch {
+            networkMonitor.networkEvents.collect { event ->
+                when (event) {
+                    NetworkEvent.BecameOnline -> {
+                        // Reintentar posts individuales marcados como fallidos
+                        networkDispatcher.flushFailedActions()
+                    }
+                    NetworkEvent.BecameOffline -> {
+                        // Nada: el banner ya lo pinta networkStateJob.
+                    }
                 }
             }
         }
     }
-    
+
     /**
-     * Muestra un Snackbar indicando que la conexión se ha restablecido
-     * Incluye acción para reintentar la carga del post actual
+     * Actualiza la UI del banner de estado de red.
+     * Solo muestra/oculta el banner rojo de "sin conexión".
+     * Sin banner de conexión lenta (no aporta).
      */
-    private fun showReconnectedSnackbar() {
-        Snackbar.make(
-            binding.root,
-            R.string.network_reconnected,
-            Snackbar.LENGTH_LONG
-        ).setAction(R.string.refresh) {
-            // Reintentar carga del post actual
-            retryCurrentPost()
-        }.setBackgroundTint(
-            ContextCompat.getColor(this, R.color.success_background)
-        ).show()
-        
-        // Flush acciones pendientes del dispatcher
-        networkDispatcher.flushFailedActions()
+    private fun updateNetworkStatusUI(state: NetworkState) {
+        val txtNetworkStatus = binding.root.findViewById<android.widget.TextView>(
+            com.mommys.app.R.id.txtNetworkStatus
+        ) ?: return
+
+        if (!state.isOnline) {
+            txtNetworkStatus.visibility = android.view.View.VISIBLE
+            txtNetworkStatus.text = getString(com.mommys.app.R.string.network_offline)
+            txtNetworkStatus.setBackgroundColor(
+                ContextCompat.getColor(this, com.mommys.app.R.color.error_background)
+            )
+            txtNetworkStatus.setCompoundDrawablesWithIntrinsicBounds(
+                com.mommys.app.R.drawable.ic_wifi_off, 0, 0, 0
+            )
+            txtNetworkStatus.compoundDrawablePadding = 16
+        } else {
+            txtNetworkStatus.visibility = android.view.View.GONE
+        }
     }
-    
+
     /**
      * Reintenta la carga del post actual
      * Notifica al adapter que debe recargar la vista en la posición actual
