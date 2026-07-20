@@ -63,6 +63,15 @@ object ApiClient {
             .readTimeout(RW_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .writeTimeout(RW_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .dns(HttpConfig.ipv4FirstDns)
+            // CookieJar compartido: captura Set-Cookie de cada redirect de Cloudflare
+            // (cf_chl_*, __cf_bm, cf_clearance) y las reenvía en el siguiente hop.
+            // Esto replica lo que jsoup hace por defecto en la app original.
+            .cookieJar(CloudflareCookieJar.get())
+            // Seguir redirects (incluidos cross-protocol http<->https) como hace jsoup.
+            // OkHttp por defecto ya sigue redirects, pero lo dejamos explícito y además
+            // habilitamos los de SSL para no perder saltos en el challenge de Cloudflare.
+            .followRedirects(true)
+            .followSslRedirects(true)
             .addInterceptor(createHeaderInterceptor())
             .addInterceptor(createAuthInterceptor())
             .addInterceptor(createCloudflareInterceptor())

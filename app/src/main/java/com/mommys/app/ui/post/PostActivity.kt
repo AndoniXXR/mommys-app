@@ -794,12 +794,23 @@ class PostActivity : AppCompatActivity(), MaxAdListener, NetworkAwareDispatcher.
     }
 
     /**
-     * Buscar por tag - abre nueva MainActivity
+     * Buscar por tag - abre nueva MainActivity.
+     *
+     * Replica el comportamiento de la app original (op0.java:74-78):
+     * si la preferencia `search_in_new_task` está activa (default true),
+     * abre la nueva búsqueda en una TASK separada del multitarea, para que
+     * el Back en ella no recorra el histórico de la task original.
+     * Los flags usados son:
+     *  - FLAG_ACTIVITY_NEW_TASK (0x08000000 = 134217728)
+     *  - FLAG_ACTIVITY_NEW_DOCUMENT (0x00080000 = 524288, era CLEAR_WHEN_TASK_RESET)
      */
     private fun searchByTag(tag: String) {
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra(MainActivity.EXTRA_SEARCH_QUERY, tag)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        if (MommysApplication.getInstance().preferencesManager.searchInNewTask) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
         }
         startActivity(intent)
     }

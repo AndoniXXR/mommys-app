@@ -949,20 +949,22 @@ class PostPagerAdapter(
             context: Context
         ) {
             // Header de categoría (como adapter_post_item_tag_category.xml)
+            // textSize = 16sp (post_content_tags_title_size de la app original)
             val categoryHeader = TextView(context).apply {
                 text = categoryName
                 setTypeface(typeface, Typeface.BOLD)
-                textSize = 14f
+                textSize = 16f
                 setPadding(8, 12, 8, 4)
             }
             container.addView(categoryHeader)
 
             // Cada tag (como adapter_post_item_tag.xml)
+            // textSize = 14sp (default Android, igual que la original que no lo especifica)
             tags.forEach { tagName ->
                 val tagView = TextView(context).apply {
                     text = tagName
                     setTextColor(tagColor)
-                    textSize = 13f
+                    textSize = 14f
                     setPadding(16, 4, 8, 4)
                     isClickable = true
                     isFocusable = true
@@ -1246,6 +1248,17 @@ class PostPagerAdapter(
             showSnackbar(context, R.string.tag_copied)
         }
 
+        /**
+         * Construye la sección "Details" del post alineada con la app original
+         * Wolf's Stash (jw2.java case 0):
+         *  - Campos en el MISMO ORDEN que la original: pending, flagged, author,
+         *    approver, created_at, dimensions, file_size, file_type, sources.
+         *  - Cada item es un TextView centrado con textSize 14sp (default Android,
+         *    igual que adapter_post_item_tag.xml que no especifica textSize).
+         *  - File size en formato decimal (%.2f con divisor 1.000.000, no binario).
+         *  - Sources en un ÚNICO item usando el plural post_details_sources,
+         *    separadas por ",\n" (no un item por source).
+         */
         private fun setupDetails(post: Post, context: Context) {
             val detailsContainer = binding.detailsContainer
             detailsContainer.removeAllViews()
@@ -1265,78 +1278,118 @@ class PostPagerAdapter(
                 )
             }
 
-            // Agregar detalles dinámicamente
-            val details = mutableListOf<Pair<String, String>>()
+            // Construir la lista de detalles en el mismo orden que la original (jw2.java).
+            // Cada item es un String, salvo el del author que puede necesitar
+            // actualizarse async tras resolver el nombre del uploader vía API.
+            val detailLines = mutableListOf<String>()
 
-            // Fecha
+            // 1) Pending
+            if (post.flags.pending) {
+                detailLines.add(context.getString(R.string.post_details_pending))
+            }
+            // 2) Flagged
+            if (post.flags.flagged) {
+                detailLines.add(context.getString(R.string.post_details_flagged))
+            }
+            // 3) Author (uploader). Mostramos el ID como placeholder inicial;
+            //    tras crear los TextViews lanzamos una coroutine para resolver
+            //    el nombre real vía /users/{id}.json (como hace la original,
+            //    que ahí tenía el nombre ya resuelto en el objeto post).
+            val authorIndex = if (post.uploaderId != null) detailLines.size else -1
+            post.uploaderId?.let { uid ->
+                detailLines.add(context.getString(R.string.post_details_author, uid.toString()))
+            }
+            // 4) Approver (solo si NO está pending y tiene approver)
+            if (!post.flags.pending) {
+                post.approverId?.let { aid ->
+                    if (aid >= 0) {
+                        detailLines.add(context.getString(R.string.post_details_approver, aid))
+                    }
+                }
+            }
+            // 5) Created at (formato yyyy-MM-dd HH:mm:ss igual que la original)
             try {
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK)
                 val date = inputFormat.parse(post.createdAt.substringBefore('.'))
-                details.add(context.getString(R.string.detail_label_created) to (date?.let { outputFormat.format(it) } ?: post.createdAt))
+                detailLines.add(
+                    context.getString(R.string.post_details_created_at, date?.let { outputFormat.format(it) } ?: post.createdAt)
+                )
             } catch (e: Exception) {
-                details.add(context.getString(R.string.detail_label_created) to post.createdAt)
+                detailLines.add(context.getString(R.string.post_details_created_at, post.createdAt))
+            }
+            // 6) Dimensions
+            detailLines.add(
+                context.getString(R.string.post_details_dimensions, post.file.width, post.file.height)
+            )
+            // 7) File size (formato decimal: bytes + MB con divisor 1.000.000)
+            val sizeBytes = post.file.size ?: 0L
+            val sizeMbDecimal = sizeBytes / 1_000_000.0
+            detailLines.add(
+                context.getString(R.string.post_details_file_size, sizeBytes, String.format(Locale.ENGLISH, "%.2f", sizeMbDecimal))
+            )
+            // 8) File type
+            detailLines.add(
+                context.getString(R.string.post_details_file_type, post.file.ext.uppercase(Locale.ENGLISH))
+            )
+            // 9) Sources (un solo item con plural, separadas por ",\n")
+            if (post.sources.isNotEmpty()) {
+                val sourcesStr = post.sources.joinToString(",\n")
+                detailLines.add(
+                    context.resources.getQuantityString(R.plurals.post_details_sources, post.sources.size, sourcesStr)
+                )
             }
 
-            // Uploader
-            post.uploaderId?.let {
-                details.add(context.getString(R.string.detail_label_uploader) to it.toString())
-            }
-
-            // Size
-            details.add(context.getString(R.string.detail_label_size) to "${post.file.width}x${post.file.height}")
-
-            // Format
-            details.add(context.getString(R.string.detail_label_format) to post.file.ext.uppercase())
-
-            // File size
-            val fileSizeKb = (post.file.size ?: 0) / 1024
-            val fileSizeMb = fileSizeKb / 1024.0
-            val fileSizeStr = if (fileSizeMb >= 1) {
-                String.format("%.2f MB", fileSizeMb)
-            } else {
-                "$fileSizeKb KB"
-            }
-            details.add(context.getString(R.string.detail_label_file_size) to fileSizeStr)
-
-            // Agregar cada detalle
-            details.forEach { (label, value) ->
+            // Poblar el contenedor: cada línea como un TextView alineado a la derecha
+            // de 14sp (igual que adapter_post_item_tag.xml inflado en jw2.java, donde
+            // jw2.java aplica setTextAlignment(6) = TEXT_ALIGNMENT_VIEW_END).
+            detailLines.forEachIndexed { index, line ->
                 val detailView = TextView(context).apply {
-                    text = "$label: $value"
-                    textSize = 12f
+                    text = line
+                    textSize = 14f
+                    // setTextAlignment(6) en jw2.java = TEXT_ALIGNMENT_VIEW_END (derecha en LTR).
+                    // La sección Details está en el lado derecho del post, y sus items
+                    // se alinean a la derecha para coincidir visualmente.
+                    textAlignment = View.TEXT_ALIGNMENT_VIEW_END
                     setPadding(8, 4, 8, 4)
+                    // autoLink para que las URLs de sources sean clicables
+                    autoLinkMask = android.text.util.Linkify.WEB_URLS
+                    movementMethod = android.text.method.LinkMovementMethod.getInstance()
                 }
                 detailsContainer.addView(detailView)
-            }
 
-            // Sources
-            if (post.sources.isNotEmpty()) {
-                val sourcesLabel = TextView(context).apply {
-                    text = context.getString(R.string.detail_label_sources)
-                    setTypeface(typeface, Typeface.BOLD)
-                    textSize = 12f
-                    setPadding(8, 12, 8, 4)
+                // Guardar referencia al TextView del author para actualizarlo async
+                if (index == authorIndex) {
+                    resolveAuthorName(post, context, detailView)
                 }
-                detailsContainer.addView(sourcesLabel)
+            }
+        }
 
-                post.sources.forEach { source ->
-                    val sourceView = TextView(context).apply {
-                        text = source
-                        setTextColor(ContextCompat.getColor(context, R.color.colorTextImportant))
-                        textSize = 11f
-                        setPadding(16, 2, 8, 2)
-                        isClickable = true
-                        isFocusable = true
-                        setOnClickListener {
-                            try {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(source))
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                // URL inválida
+        /**
+         * Resuelve el nombre del uploader vía /users/{id}.json y actualiza el TextView.
+         * Si falla (red, API caída, etc.) deja el ID como fallback.
+         *
+         * Race guard: si el ViewHolder se recicla para otro post mientras la llamada
+         * está en vuelo, no actualizamos (comprobamos currentPostId).
+         */
+        private fun resolveAuthorName(post: Post, context: Context, authorView: TextView) {
+            val uid = post.uploaderId ?: return
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val api = com.mommys.app.data.api.ApiClient.getApiService()
+                    val response = api.getUser(uid)
+                    if (response.isSuccessful) {
+                        val name = response.body()?.name
+                        if (name != null && currentPostId == post.id) {
+                            withContext(Dispatchers.Main) {
+                                if (currentPostId == post.id) {
+                                    authorView.text = context.getString(R.string.post_details_author, name)
+                                }
                             }
                         }
                     }
-                    detailsContainer.addView(sourceView)
+                } catch (e: Exception) {
+                    // Red caída u otro error: dejamos el ID como fallback, sin romper la UI.
                 }
             }
         }
@@ -1365,27 +1418,41 @@ class PostPagerAdapter(
         }
 
         /**
-         * Configura y carga GIF animado usando Glide
-         * GIFs son cargados como imágenes animadas, no como videos
-         * Similar a la implementación de la app original (adapter_post_item_gif.xml)
+         * Configura y carga un GIF animado mostrando progreso de descarga real.
+         *
+         * ANTES se usaba Glide.asGif() directo con un RequestListener que solo recibe
+         * onLoadFailed/onResourceReady. La API de Glide no expone bytes leídos, así que
+         * el progreso se inicializaba en "0.00 MB / X.XX MB" y nunca se actualizaba
+         * hasta que el GIF aparecía de golpe (bug visual reportado por usuarios).
+         *
+         * AHORA replica el patrón de [setupImage]: descargar el GIF como bytes vía
+         * [ProgressDownloader] (que reporta bytesRead/contentLength en cada chunk) y,
+         * al completar, cargar los bytes en Glide.asGif() para decodificarlo como GIF
+         * animado. Así la barra y el texto "X.XX MB / Y.YY MB" avanzan en tiempo real.
+         *
+         * Adaptive: igual que [setupImage], en red móvil o con Data Saver activo se
+         * descarga el `sample` en vez del `file` original, para ahorrar datos en
+         * GIFs grandes. Esto antes se ignoraba (siempre full-res).
          */
         private fun setupGif(post: Post) {
             val context = binding.root.context
-            
+
+            // Cancelar descarga anterior si existe
+            activeDownloadCall?.cancel()
+            activeDownloadCall = null
+
             binding.previewFrameParent.visibility = View.VISIBLE
             binding.videoContainer.visibility = View.GONE
             binding.errorLayout.visibility = View.GONE
-            binding.loadingLayout.visibility = View.VISIBLE
-            binding.progressBar.progress = 0
-            binding.progressBar.max = 100
 
-            val gifUrl = post.file.url ?: post.sample.url ?: post.preview.url
+            // Adaptive: en red móvil o Data Saver, cargar sample (más ligero)
+            val useFullRes = com.mommys.app.util.AdaptiveQuality.shouldLoadFullRes()
+            val gifUrl = if (useFullRes) (post.file.url ?: post.sample.url ?: post.preview.url)
+                         else (post.sample.url ?: post.preview.url ?: post.file.url)
             val fileSize = post.file.size
             val fileSizeMb = fileSize / (1024.0 * 1024.0)
-            
-            binding.txtLoading.text = String.format("0.00 MB / %.2f MB", fileSizeMb)
 
-            // Verificar si la URL es válida (como ei/e0.java línea 656-662)
+            // Verificar si la URL es válida
             if (gifUrl == null || gifUrl.isEmpty() || gifUrl == "null" || !gifUrl.startsWith("http")) {
                 binding.loadingLayout.visibility = View.GONE
                 binding.errorLayout.visibility = View.VISIBLE
@@ -1397,11 +1464,121 @@ class PostPagerAdapter(
                 return
             }
 
-            // Cargar GIF con Glide que soporta animación nativa
+            // Cargar preview/sample via Glide EN PARALELO (igual que setupImage):
+            // el usuario ve algo al instante mientras se descarga el GIF completo.
+            val previewUrl = post.preview.url ?: post.sample.url
+            if (previewUrl != null && previewUrl != gifUrl) {
+                Glide.with(context)
+                    .load(previewUrl)
+                    .placeholder(R.drawable.placeholder_image)
+                    .into(binding.imgPreview)
+            }
+
+            // Mostrar loading overlay sobre el preview
+            binding.loadingLayout.visibility = View.VISIBLE
+            binding.progressBar.progress = 0
+            binding.progressBar.max = 100
+            binding.txtLoading.text = String.format("0.00 MB / %.2f MB", fileSizeMb)
+
+            // Descargar GIF con progreso real
+            activeDownloadCall = ProgressDownloader.download(gifUrl, object : ProgressDownloader.ProgressListener {
+                override fun onProgress(bytesRead: Long, contentLength: Long, done: Boolean) {
+                    if (contentLength > 0) {
+                        val progress = ((bytesRead.toDouble() / contentLength.toDouble()) * 100).toInt()
+                        val bytesReadMb = bytesRead / (1024.0 * 1024.0)
+                        val totalMb = contentLength / (1024.0 * 1024.0)
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            binding.progressBar.setProgress(progress, true)
+                        } else {
+                            binding.progressBar.progress = progress
+                        }
+                        binding.txtLoading.text = String.format("%.2f MB / %.2f MB", bytesReadMb, totalMb)
+                    }
+                }
+
+                override fun onComplete(data: ByteArray?) {
+                    activeDownloadCall = null
+                    // Race guard: si el ViewHolder ya fue reciclado para otro post, no cargar
+                    if (currentPostId != post.id) return
+
+                    if (data != null) {
+                        // Transición suave: fade-out del loading overlay
+                        binding.loadingLayout.animate()
+                            .alpha(0f)
+                            .setDuration(200)
+                            .withEndAction {
+                                binding.loadingLayout.visibility = View.GONE
+                                binding.loadingLayout.alpha = 1f
+                            }
+                            .start()
+
+                        // Cargar los bytes descargados como GIF animado con Glide
+                        Glide.with(context)
+                            .asGif()
+                            .load(data)
+                            .listener(object : RequestListener<com.bumptech.glide.load.resource.gif.GifDrawable> {
+                                override fun onLoadFailed(
+                                    e: GlideException?,
+                                    model: Any?,
+                                    target: Target<com.bumptech.glide.load.resource.gif.GifDrawable>,
+                                    isFirstResource: Boolean
+                                ): Boolean {
+                                    binding.loadingLayout.visibility = View.GONE
+                                    binding.errorLayout.visibility = View.VISIBLE
+                                    binding.txtError.text = e?.message ?: "Error decoding GIF"
+                                    return false
+                                }
+
+                                override fun onResourceReady(
+                                    resource: com.bumptech.glide.load.resource.gif.GifDrawable,
+                                    model: Any,
+                                    target: Target<com.bumptech.glide.load.resource.gif.GifDrawable>?,
+                                    dataSource: DataSource,
+                                    isFirstResource: Boolean
+                                ): Boolean {
+                                    binding.loadingLayout.visibility = View.GONE
+                                    binding.errorLayout.visibility = View.GONE
+                                    resource.start()  // iniciar animación
+                                    return false
+                                }
+                            })
+                            .into(binding.imgPreview)
+                    } else {
+                        // data == null: fallback a Glide directo desde la URL
+                        loadGifWithGlide(gifUrl, context, post.id)
+                    }
+                }
+
+                override fun onError(exception: Exception) {
+                    activeDownloadCall = null
+                    binding.loadingLayout.visibility = View.GONE
+                    // Fallback a Glide directo desde la URL
+                    loadGifWithGlide(gifUrl, context, post.id)
+                }
+            })
+
+            // PhotoView permite zoom incluso en GIFs
+            binding.imgPreview.maximumScale = 5f
+            binding.imgPreview.mediumScale = 2.5f
+
+            // Retry button
+            binding.btnRefresh.setOnClickListener {
+                binding.errorLayout.visibility = View.GONE
+                setupGif(post)
+            }
+        }
+
+        /**
+         * Fallback para cargar un GIF directamente con Glide desde la URL (sin progreso).
+         * Se usa si ProgressDownloader falla o devuelve datos nulos.
+         */
+        private fun loadGifWithGlide(gifUrl: String, context: Context, postId: Int) {
+            if (currentPostId != postId) return
+
             Glide.with(context)
-                .asGif()  // Indicar explícitamente que es un GIF
+                .asGif()
                 .load(gifUrl)
-                .placeholder(R.drawable.placeholder_image)
                 .listener(object : RequestListener<com.bumptech.glide.load.resource.gif.GifDrawable> {
                     override fun onLoadFailed(
                         e: GlideException?,
@@ -1412,8 +1589,6 @@ class PostPagerAdapter(
                         binding.loadingLayout.visibility = View.GONE
                         binding.errorLayout.visibility = View.VISIBLE
                         binding.txtError.text = e?.message ?: "Error loading GIF"
-                        
-                        // Notificar error de red para retry automático
                         if (isNetworkError(e)) {
                             onNetworkError(bindingAdapterPosition)
                         }
@@ -1429,22 +1604,11 @@ class PostPagerAdapter(
                     ): Boolean {
                         binding.loadingLayout.visibility = View.GONE
                         binding.errorLayout.visibility = View.GONE
-                        // Iniciar la animación del GIF
                         resource.start()
                         return false
                     }
                 })
                 .into(binding.imgPreview)
-
-            // PhotoView permite zoom incluso en GIFs
-            binding.imgPreview.maximumScale = 5f
-            binding.imgPreview.mediumScale = 2.5f
-
-            // Retry button
-            binding.btnRefresh.setOnClickListener {
-                binding.errorLayout.visibility = View.GONE
-                setupGif(post)
-            }
         }
 
         /**

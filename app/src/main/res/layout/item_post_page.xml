@@ -261,7 +261,7 @@
                         <TextView
                             android:id="@+id/txtRatingE"
                             android:textStyle="bold"
-                            android:textColor="@color/colorRed"
+                            android:textColor="@color/colorRedBright"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="E"
@@ -290,7 +290,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textIsSelectable="true"
-                            android:layout_marginStart="4dp"
+                            android:layout_marginStart="@dimen/post_content_title_id_padding"
                             tools:text="#12345" />
 
                         <View
@@ -299,7 +299,7 @@
 
                         <ImageView
                             android:id="@+id/imgUpInfo"
-                            android:layout_width="14dp"
+                            android:layout_width="@dimen/post_content_title_icon_size"
                             android:layout_height="match_parent"
                             android:src="@drawable/ic_arrow_up"
                             app:tint="@color/colorUpvote" />
@@ -317,7 +317,7 @@
 
                         <ImageView
                             android:id="@+id/imgDownInfo"
-                            android:layout_width="14dp"
+                            android:layout_width="@dimen/post_content_title_icon_size"
                             android:layout_height="match_parent"
                             android:src="@drawable/ic_arrow_down"
                             app:tint="@color/colorDownvote" />
@@ -334,7 +334,7 @@
                             android:layout_height="0dp" />
 
                         <ImageView
-                            android:layout_width="14dp"
+                            android:layout_width="@dimen/post_content_title_icon_size"
                             android:layout_height="match_parent"
                             android:src="@drawable/ic_favorite"
                             app:tint="@color/colorFavorite" />

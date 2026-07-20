@@ -150,6 +150,10 @@ class PostsAdapter(
             parent,
             false
         )
+        // Setear el ratio UNA vez al crear el ViewHolder (como hace la original en
+        // el constructor de up2). Antes se hacía en cada bind(), lo que disparaba
+        // requestLayout() por cada item y causaba "saltos" al hacer scroll.
+        (binding.imgPreview as? AspectRatioImageView)?.aspectRatio = aspectRatio
         return PostViewHolder(binding)
     }
     
@@ -227,9 +231,9 @@ class PostsAdapter(
         }
         
         fun bind(post: Post) {
-            // Actualizar el ratio de aspecto (puede cambiar desde Settings)
-            (binding.imgPreview as? AspectRatioImageView)?.aspectRatio = aspectRatio
-            
+            // El ratio de aspecto se setea una sola vez en onCreateViewHolder
+            // (no en cada bind) para evitar requestLayout() innecesarios.
+
             // Placeholder multicolor aleatorio como la app original (ei/m.java)
             val placeholder = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
@@ -242,13 +246,19 @@ class PostsAdapter(
 
             // Cargar imagen con Glide. Adaptive: siempre preview/sample, nunca file 4K.
             val imageUrl = com.mommys.app.util.AdaptiveQuality.thumbUrl(post) ?: post.file.url
-            
+
+            // Override a ~320px: la app original (vp2.onBindViewHolder) aplica
+            // RequestOptions con override(~300) al grid. Sin esto, Glide decodifica
+            // el preview a su resolución nativa (puede ser 800-1500px) desperdiciando
+            // memoria y CPU. Limitando a 320px el decodificado es mucho más rápido
+            // y el resultado visual en un thumbnail es idéntico.
             Glide.with(binding.imgPreview)
                 .load(imageUrl)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .placeholder(placeholder)
                 .error(R.drawable.placeholder_image)
                 .centerCrop()
+                .override(320)
                 .into(binding.imgPreview)
             
             // Indicador de tipo (video, gif, etc) - usar views separados como el original

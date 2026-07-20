@@ -238,16 +238,22 @@ class NetworkAwareDispatcher private constructor() : NetworkMonitor.NetworkConne
     // ================= NetworkConnectivityListener =================
     
     /**
-     * Llamado cuando la red está disponible
-     * Basado en Dispatcher.performNetworkStateChange() líneas 343-351
+     * Llamado cuando la red está disponible.
+     *
+     * IMPORTANTE: solo reintentamos las acciones marcadas con markForReplay (p.ej. posts
+     * individuales que fallaron al cargar en PostActivity). NO llamamos a notifyPageRefresh():
+     * eso recargaba el grid de MainActivity al volver de background (porque Android re-valida
+     * la red durante el segundo plano y disparaba este callback), lo cual no ocurre en la
+     * app original Wolf's Stash y resultaba molesto. El usuario refresca el grid manualmente
+     * con pull-to-refresh; el reintento automático queda reservado para posts concretos fallidos.
+     *
+     * Las descargas no se ven afectadas: usan WorkManager, que tiene su propio sistema de
+     * reintentos y restricciones de red totalmente independiente de este dispatcher.
      */
     override fun onNetworkAvailable(state: NetworkState) {
         Log.d(TAG, "Network available, flushing failed actions...")
-        
-        // Ejecutar acciones fallidas con un pequeño delay
         mainHandler.postDelayed({
             flushFailedActions()
-            notifyPageRefresh()
         }, BATCH_DELAY_MS)
     }
     

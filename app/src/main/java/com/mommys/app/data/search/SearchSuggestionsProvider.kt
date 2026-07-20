@@ -19,9 +19,15 @@ import java.util.concurrent.TimeUnit
 
 /**
  * ContentProvider para sugerencias de búsqueda.
- * Llamada directa a la API (query() corre en binder thread, no bloquea el UI).
- * Cache en memoria para que consultas repetidas sean instantáneas.
- * Fallback a tags locales si la API falla.
+ *
+ * ESTRATEGIA (alineada con la app original Wolf's Stash):
+ * 1. Carga UNA vez `assets/suggestions.json` (150k tags con post_count y categoria)
+ *    y lo cachea en memoria (`localTags`). Todas las búsquedas se filtran en local.
+ * 2. Solo si la busqueda local da MENOS de 5 resultados, llama a la API como fallback
+ *    (para tags muy nuevos o raros). Esa llamada se cachea en `apiCache`.
+ *
+ * Esto hace que las sugerencias sean instantáneas para el 99% de los casos
+ * (como en la app original) sin depender de la red en cada tecla.
  */
 class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
 
@@ -29,7 +35,8 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
         const val AUTHORITY = "com.mommys.app.search.provider"
         const val MODE = DATABASE_MODE_QUERIES or DATABASE_MODE_2LINES
         private const val TAG = "SearchSugProvider"
-        private const val MAX_API_RESULTS = 20
+        private const val MAX_RESULTS = 25
+        private const val MIN_LOCAL_RESULTS_BEFORE_API = 5
 
         private val SUGGEST_COLUMNS = arrayOf(
             SearchManager.SUGGEST_COLUMN_FORMAT,
@@ -43,7 +50,50 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
 
     private var suggestionsManager: SuggestionsManager? = null
 
-    // Cache en memoria: término → resultados API
+    /**
+     * Tags locales cargados desde assets/suggestions.json.
+     * Cache estático: sobrevive entre instancias del provider (que el framework
+     * crea/destruye frecuentemente). Se carga UNA sola vez por sesión de app.
+     */
+    object LocalTagStore {
+        @Volatile
+        private var loaded = false
+        // Cada entrada: [name, postCount, category]
+        val tags: MutableList<TagEntry> = mutableListOf()
+
+        @Synchronized
+        fun ensureLoaded(context: android.content.Context) {
+            if (loaded) return
+            try {
+                val start = System.currentTimeMillis()
+                context.assets.open("suggestions.json").use { input ->
+                    val bytes = input.readBytes()
+                    val arr = JSONArray(String(bytes, Charsets.UTF_8))
+                    for (i in 0 until arr.length()) {
+                        val entry = arr.getJSONArray(i)
+                        tags.add(
+                            TagEntry(
+                                name = entry.getString(0),
+                                postCount = entry.optInt(1, 0),
+                                category = entry.optInt(2, 0)
+                            )
+                        )
+                    }
+                }
+                loaded = true
+                val ms = System.currentTimeMillis() - start
+                Log.d(TAG, "LocalTagStore loaded ${tags.size} tags in ${ms}ms")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading suggestions.json", e)
+                loaded = true  // no reintentar infinitamente
+            }
+        }
+    }
+
+    data class TagEntry(val name: String, val postCount: Int, val category: Int)
+    private data class CachedTag(val name: String, val postCount: Int, val category: Int)
+
+    // Cache de llamadas API (para tags raros que no estan en local)
     private val apiCache = ConcurrentHashMap<String, List<CachedTag>>()
 
     private val httpClient: OkHttpClient by lazy {
@@ -53,12 +103,6 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
             .addInterceptor(HttpConfig.cloudflareHeaderInterceptor())
             .build()
     }
-
-    private data class CachedTag(
-        val name: String,
-        val postCount: Int,
-        val category: Int
-    )
 
     init {
         setupSuggestions(AUTHORITY, MODE)
@@ -86,6 +130,26 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
             null
         }
 
+        // Sugerencias de tags SOLO en e621 (NSFW).
+        // En e926 (SFW) no se cargan sugerencias de tags, solo historial, porque el
+        // JSON incluye tags con nombres explícitos (sex, penis, genitals, etc.) que
+        // no deberían aparecer cuando el usuario eligió modo SFW.
+        // Esto replica exactamente el comportamiento de la app original
+        // (RecentSearchesProvider + MainActivity.o0 = useE621).
+        val useE621 = try {
+            (context?.applicationContext as? MommysApplication)?.preferencesManager?.useE621() ?: false
+        } catch (e: Exception) {
+            false
+        }
+
+        if (!useE621) {
+            // e926: devolver solo el historial reciente
+            return recentCursor ?: MatrixCursor(SUGGEST_COLUMNS)
+        }
+
+        // e621: asegurar que el store local este cargado y mostrar sugerencias
+        context?.let { LocalTagStore.ensureLoaded(it) }
+
         // 2. Sugerencias de tags
         val tagsCursor = getTagSuggestionsCursor(query)
 
@@ -105,46 +169,79 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
         val lastWord = fullQuery.trim().split("\\s+".toRegex()).lastOrNull() ?: ""
         if (lastWord.isEmpty()) return MatrixCursor(SUGGEST_COLUMNS)
 
-        // Operadores: solo local
+        // Operadores: solo local (no hay API para esto)
         if (manager.isOperator(lastWord) || lastWord.contains(":")) {
             return buildLocalCursor(lastWord, manager)
         }
 
-        // 1. Cache hit → instantáneo
-        val cached = findCached(lastWord)
-        if (cached != null) return buildApiCursor(cached)
+        // 1. Filtrar en local (instantaneo)
+        val localMatches = filterLocalTags(lastWord)
 
-        // 2. Llamar API directamente (estamos en binder thread, no UI thread)
+        // 2. Si hay suficientes resultados locales, devolverlos sin llamar a la API
+        if (localMatches.size >= MIN_LOCAL_RESULTS_BEFORE_API) {
+            return buildApiCursor(localMatches)
+        }
+
+        // 3. Pocos resultados locales: intentar API (cache primero)
+        val cached = apiCache[lastWord]
+        if (cached != null) {
+            // Combinar locales + cacheados
+            val combined = (localMatches + cached.map { CachedTag(it.name, it.postCount, it.category) })
+                .distinctBy { it.name }
+            return buildApiCursor(combined)
+        }
+
+        // 4. Llamar API (solo si local fallo)
         val apiResult = callApi(lastWord)
         if (apiResult != null && apiResult.isNotEmpty()) {
             apiCache[lastWord] = apiResult
-            trimCache()
-            return buildApiCursor(apiResult)
+            trimApiCache()
+            val combined = (localMatches + apiResult)
+                .distinctBy { it.name }
+            return buildApiCursor(combined)
         }
 
-        // 3. Fallback: tags locales
-        return buildLocalCursor(lastWord, manager)
+        // 5. Fallback final: tags locales hardcoded (418 tags)
+        return if (localMatches.isEmpty()) buildLocalCursor(lastWord, manager)
+        else buildApiCursor(localMatches)
     }
 
     /**
-     * Busca en cache: exacto primero, luego filtra desde un prefijo cacheado
+     * Filtra los tags locales por coincidencia (startsWith primero, contains despues).
+     * Instantáneo: pura memoria.
      */
-    private fun findCached(term: String): List<CachedTag>? {
-        apiCache[term]?.let { return it }
+    private fun filterLocalTags(term: String): List<CachedTag> {
+        val termLower = term.lowercase()
+        val startsWith = mutableListOf<CachedTag>()
+        val contains = mutableListOf<CachedTag>()
 
-        for (i in term.length - 1 downTo 1) {
-            val prefix = term.substring(0, i)
-            val cached = apiCache[prefix]
-            if (cached != null) {
-                val filtered = cached.filter { it.name.contains(term, ignoreCase = true) }
-                if (filtered.isNotEmpty()) return filtered
+        for (tag in LocalTagStore.tags) {
+            val nameLower = tag.name.lowercase()
+            when {
+                nameLower.startsWith(termLower) -> startsWith.add(
+                    CachedTag(tag.name, tag.postCount, tag.category)
+                )
+                nameLower.contains(termLower) -> contains.add(
+                    CachedTag(tag.name, tag.postCount, tag.category)
+                )
+            }
+            // Limitar para no devolver miles
+            if (startsWith.size >= MAX_RESULTS) break
+        }
+
+        // Si startsWith no lleno el cupo, completar con contains
+        val result = startsWith.toMutableList()
+        if (result.size < MAX_RESULTS) {
+            for (c in contains) {
+                if (result.size >= MAX_RESULTS) break
+                result.add(c)
             }
         }
-        return null
+        return result
     }
 
     /**
-     * Llamada síncrona a la API. Seguro porque query() corre en binder thread.
+     * Llamada síncrona a la API (solo para tags raros). Segura porque query() corre en binder thread.
      */
     private fun callApi(searchTerm: String): List<CachedTag>? {
         try {
@@ -154,7 +251,7 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
             val baseUrl = if (prefs.useE621()) "https://e621.net" else "https://e926.net"
             val url = "$baseUrl/tags/autocomplete.json" +
                 "?search[name_matches]=${Uri.encode(searchTerm)}*" +
-                "&limit=$MAX_API_RESULTS"
+                "&limit=$MAX_RESULTS"
 
             val requestBuilder = Request.Builder()
                 .url(url)
@@ -235,7 +332,7 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
         return cursor
     }
 
-    private fun trimCache() {
+    private fun trimApiCache() {
         if (apiCache.size > 50) {
             apiCache.keys().toList().take(apiCache.size - 30).forEach { apiCache.remove(it) }
         }

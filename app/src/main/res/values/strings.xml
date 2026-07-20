@@ -1053,6 +1053,10 @@
         <item quantity="one">Pool: %1$s</item>
         <item quantity="other">Pools: %1$s</item>
     </plurals>
+    <plurals name="post_details_sources">
+        <item quantity="one">Source: %1$s</item>
+        <item quantity="other">Sources: %1$s</item>
+    </plurals>
     
     <!-- Pool navigation -->
     <string name="loading_pool">Loading pool #%1$d…</string>
@@ -1338,7 +1342,7 @@
     <string name="post_details_dimensions">Dimensions: %1$dx%2$d</string>
     <string name="post_details_file_size">File size: %1$d bytes or %2$s MB</string>
     <string name="post_details_file_type">File type: %1$s</string>
-    <string name="post_details_author">Author: %1$d</string>
+    <string name="post_details_author">Author: %1$s</string>
     <string name="post_details_author_start">Author:</string>
     <string name="post_details_approver">Approver: %1$d</string>
     <string name="post_details_approver_start">Approver:</string>
@@ -1351,8 +1355,8 @@
     <string name="detail_label_rating">Rating</string>
     <string name="detail_label_id">ID</string>
     <string name="post_details_parent">Parent: %1$s</string>
-    <string name="post_details_pending">Post pending approval</string>
-    <string name="post_details_flagged">Post flagged for deletion</string>
+    <string name="post_details_pending">Post is pending approval</string>
+    <string name="post_details_flagged">Post has been flagged for deletion</string>
     <string name="post_image_desc">Post item</string>
     <string name="post_desc_more">More…</string>
     <string name="post_desc_less">Less…</string>

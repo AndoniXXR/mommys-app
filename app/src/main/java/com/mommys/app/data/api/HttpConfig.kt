@@ -1,6 +1,5 @@
 package com.mommys.app.data.api
 
-import com.mommys.app.BuildConfig
 import com.mommys.app.MommysApplication
 import okhttp3.Dns
 import okhttp3.Interceptor
@@ -10,18 +9,29 @@ import java.net.InetAddress
 /**
  * Fuente única de verdad para el User-Agent y las cookies de Cloudflare.
  *
- * Centraliza el UA canónico (derivado de la versión de la app) y las cookies
- * almacenadas en preferencias, de modo que TODOS los clientes HTTP (API, Glide,
- * ExoPlayer, suggestions) usen exactamente el mismo UA y las mismas cookies.
+ * Centraliza el UA canónico y las cookies almacenadas en preferencias, de modo
+ * que TODOS los clientes HTTP (API, Glide, ExoPlayer, suggestions) usen
+ * exactamente el mismo UA y las mismas cookies.
  *
  * Esto es CRÍTICO para el bypass de Cloudflare: la cookie cf_clearance queda
  * ligada al User-Agent con el que se resolvió el challenge, así que el cliente
  * que resuelve el captcha (WebView) y los que consumen la API DEBEN coincidir.
+ *
+ * NOTA SOBRE EL UA: antes se derivaba de BuildConfig.VERSION_NAME, lo que hacía
+ * que cada recompilación cambiara el UA e invalidara instantáneamente cualquier
+ * cf_clearance guardada (Cloudflare liga cf_clearance a dominio+UA+IP). Ahora el
+ * UA es una constante estable entre versiones, igual que en la app original
+ * Wolf's Stash ("The Wolf's Stash v2 beta-4.16.4 (by ZepiWolf)" era fijo).
  */
 object HttpConfig {
 
-    /** User-Agent canónico compartido por toda la app. */
-    fun userAgent(): String = "Mommys/${BuildConfig.VERSION_NAME} (by AndoniXXR)"
+    /**
+     * User-Agent canónico compartido por toda la app.
+     * ESTABLE entre versiones para no invalidar cf_clearance entre recompilaciones.
+     */
+    fun userAgent(): String = STABLE_USER_AGENT
+
+    private const val STABLE_USER_AGENT = "Mommys/1.x (by AndoniXXR)"
 
     /** Cookies guardadas tras resolver el challenge de Cloudflare (string "k=v; k=v"). */
     fun cookies(): String =

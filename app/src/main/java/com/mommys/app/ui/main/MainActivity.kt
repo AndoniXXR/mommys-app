@@ -51,6 +51,7 @@ import com.mommys.app.util.AdManager
 import com.mommys.app.util.UpdateManager
 import com.mommys.app.util.network.NetworkAwareDispatcher
 import com.mommys.app.util.network.NetworkMonitor
+import com.mommys.app.util.network.NetworkEvent
 import com.mommys.app.util.observeCloudflareBlocks
 import com.mommys.app.util.network.NetworkState
 import kotlinx.coroutines.CoroutineScope
@@ -95,6 +96,34 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     
     // Tags de búsqueda actual
     private var currentTags: List<String> = emptyList()
+
+    // ===== HISTORIAL DE NAVEGACIÓN DE BÚSQUEDAS (en memoria) =====
+    // Permite al usuario pulsar Back para regresar a la búsqueda anterior en vez
+    // de cerrar la app de golpe. El historial NO persiste entre sesiones: al
+    // cerrar el proceso se pierde, evitando el bug original de "vuelve a la
+    // búsqueda de ayer" (que era causado por la pila de activities persistida
+    // por Android entre sesiones).
+    //
+    // Cada entrada guarda el estado COMPLETO de la búsqueda: tags, PageHandlers
+    // (con sus posts ya cargados), página actual del ViewPager y estado de scroll.
+    // Así al regresar, la restauración es instantánea sin recargar de la API.
+    //
+    // Límite: maxHistorySize. Al superarlo se elimina la entrada más vieja
+    // (FIFO), liberando su RAM automáticamente.
+    private data class SearchHistoryEntry(
+        val tags: List<String>,
+        val pageHandlers: MutableList<PageHandler>,
+        val totalPages: Int,
+        val currentPage: Int,           // posición 0-indexed del ViewPager
+        val scrollStates: Map<Int, android.os.Parcelable>  // estado scroll por nº página
+    )
+
+    private val searchHistory = ArrayDeque<SearchHistoryEntry>()
+    private val maxHistorySize = 5
+    // Flag para indicar que startNewSearch se está llamando desde navigateBack
+    // para restaurar una búsqueda anterior sin posts cacheados. Evita que el
+    // historial se corrompa (no debe empujar el estado actual de nuevo).
+    private var isRestoringFromHistory = false
     
     // Página actual (1-indexed, para mostrar al usuario)
     private var currentPageDisplay = 1
@@ -169,15 +198,20 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     // Cuando cambia el host en Settings, necesitamos recargar los posts
     private var currentHost: String = ""
     
-    // ===== NETWORK MONITORING (como ff/b.java en app original) =====
-    // NetworkMonitor para detectar cambios de conectividad
+    // ===== NETWORK MONITORING =====
+    // NetworkMonitor para detectar cambios de conectividad.
+    // Nota: la app original Wolf's Stash no muestra feedback de reconexión; delega los
+    // reintentos a OkHttp/Picasso/Glide en silencio. Aquí mantenemos SOLO el banner rojo
+    // de "sin conexión" (feedback útil) y el auto-refresh silencioso (vía dispatcher).
+    // Eliminado: el snackbar verde de "conexión restablecida" (saturaba al usuario y
+    // aparecía por un bug de StateFlow reemitiendo el último valor al volver a primer plano).
     private val networkMonitor by lazy { MommysApplication.getInstance().networkMonitor }
     // NetworkAwareDispatcher para retry de acciones fallidas
     private val networkDispatcher by lazy { MommysApplication.getInstance().networkDispatcher }
-    // Flag para detectar reconexión (si estaba offline y ahora online)
-    private var wasOffline = false
-    // Job para cancelar la observación cuando se destruye la activity
-    private var networkObserverJob: Job? = null
+    // Job para cancelar la observación de estado de red (banner) cuando se destruye la activity
+    private var networkStateJob: Job? = null
+    // Job para cancelar la observación de eventos de transición (auto-refresh)
+    private var networkEventsJob: Job? = null
     
     // Launcher para PostActivity con manejo de resultados (paginación)
     private val postActivityLauncher = registerForActivityResult(
@@ -319,10 +353,12 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     }
     
     /**
-     * Configura el manejo del botón back como la app original:
-     * - Si el SearchView tiene foco, quitarlo primero
-     * - Si hay activities debajo (no es raíz), volver a la anterior
-     * - Si es la activity raíz: "presiona otra vez para salir"
+     * Configura el manejo del botón back:
+     * - Si el popup de info está visible, cerrarlo primero.
+     * - Si el SearchView tiene foco, quitarlo primero.
+     * - Si hay historial de búsquedas (el usuario ya había buscado algo antes),
+     *   regresar a la búsqueda anterior recargando en la misma activity.
+     * - Si no hay historial (estamos en la raíz): "presiona otra vez para salir".
      */
     private fun setupBackPressHandler() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -333,7 +369,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                     hidePostInfo()
                     return
                 }
-                
+
                 // Si el SearchView tiene foco, quitarlo primero
                 if (binding.searchView.hasFocus()) {
                     binding.searchView.clearFocus()
@@ -342,34 +378,91 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                     imm.hideSoftInputFromWindow(binding.searchView.windowToken, 0)
                     return
                 }
-                
-                // Si NO es la actividad raíz, simplemente cerrar y volver a la anterior
-                // (como la app original - cada búsqueda es una nueva activity)
-                if (!isTaskRoot) {
-                    prefs.setLastSearch(currentTags.joinToString(" "))
-                    prefs.setLastSearchPage(binding.viewPager.currentItem + 1)
-                    finish()
+
+                // Si hay historial, regresar a la búsqueda anterior
+                if (searchHistory.isNotEmpty()) {
+                    navigateBack()
                     return
                 }
-                
-                // Es la activity raíz - comportamiento: presiona otra vez para salir
+
+                // No hay historial (estamos en la raíz): presiona otra vez para salir
                 if (backPressedOnce) {
                     // Segunda vez - guardar estado y salir completamente
                     prefs.setLastSearch(currentTags.joinToString(" "))
                     prefs.setLastSearchPage(binding.viewPager.currentItem + 1)
-                    finishAffinity() // Cierra toda la app
+                    finishAffinity()
                 } else {
-                    // Primera vez - mostrar mensaje
                     backPressedOnce = true
                     Toast.makeText(this@MainActivity, R.string.main_back_again_to_exit, Toast.LENGTH_SHORT).show()
-                    
-                    // Resetear después de 2 segundos
                     binding.root.postDelayed({
                         backPressedOnce = false
                     }, 2000)
                 }
             }
         })
+    }
+
+    /**
+     * Regresa a la búsqueda anterior del historial, recargando en la misma
+     * actividad (sin apilar nueva). Restaura el estado COMPLETO de la búsqueda
+     * anterior: PageHandlers (con posts ya cargados), página actual del ViewPager
+     * y posiciones de scroll. Así no se recarga nada desde la API.
+     */
+    private fun navigateBack() {
+        if (searchHistory.isEmpty()) return
+        val entry = searchHistory.removeLast()
+
+        // Restaurar el estado de la búsqueda sin pasar por startNewSearch
+        // (que borraría los PageHandler y recargaría de la API).
+        currentTags = entry.tags
+        binding.searchView.setQuery(entry.tags.joinToString(" "), false)
+
+        // Detectar si el estado restaurado tiene posts válidos o está "vacío"
+        // (caso de la raíz al inicio de la app, que se guardó antes de cargar).
+        val hasAnyPosts = entry.pageHandlers.any { it.posts.isNotEmpty() }
+
+        if (hasAnyPosts) {
+            // ===== CASO 1: hay posts cacheados → restauración instantánea =====
+            pageHandlers.clear()
+            pageHandlers.addAll(entry.pageHandlers)
+            pagesAdapter.notifyPagesChanged()
+
+            totalPages.set(entry.totalPages)
+            currentPageDisplay = entry.currentPage + 1
+            pagesCreated.set(entry.pageHandlers.size)
+            pagesFrontier.set(entry.pageHandlers.lastOrNull()?.pageNumber ?: 0)
+            reachedEnd.set(entry.pageHandlers.lastOrNull()?.isEmptyAndLast() ?: false)
+            endSignal.set(false)
+            endPageNumber.set(-1)
+            pendingPageJump = 0
+
+            binding.progressBar.visibility = View.GONE
+
+            // Restaurar la página actual del ViewPager tras el layout
+            binding.viewPager.post {
+                if (entry.currentPage < pageHandlers.size) {
+                    binding.viewPager.setCurrentItem(entry.currentPage, false)
+                }
+                // Restaurar posiciones de scroll de cada página
+                for (handler in pageHandlers) {
+                    entry.scrollStates[handler.pageNumber]?.let { state ->
+                        handler.recyclerView?.get()?.layoutManager?.onRestoreInstanceState(state)
+                    }
+                }
+                updatePageNumber()
+            }
+        } else {
+            // ===== CASO 2: la raíz estaba vacía (sin posts cargados) =====
+            // Esto ocurre cuando se guardó la raíz antes de que terminara la
+            // carga inicial. No podemos restaurar posts que no existen, así que
+            // recargamos desde la API pasando por startNewSearch (como si el
+            // usuario acabara de hacer esa búsqueda).
+            // isRestoringFromHistory evita que el historial se corrompa.
+            isRestoringFromHistory = true
+            pendingPageJump = entry.currentPage + 1
+            startNewSearch(entry.tags)
+            isRestoringFromHistory = false
+        }
     }
     
     override fun onNewIntent(intent: Intent) {
@@ -777,6 +870,23 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
      * Comportamiento como la app original: cada búsqueda abre una nueva activity
      * para poder usar Back y volver a la búsqueda anterior.
      */
+    /**
+     * Ejecuta una nueva búsqueda del usuario EN LA MISMA ACTIVITY (in-situ),
+     * igual que la app original Wolf's Stash (que instancia `new ww2(...)` en
+     * la misma MainActivity en lugar de abrir una nueva).
+     *
+     * ANTES esto abría una nueva MainActivity apilada por cada búsqueda, lo que
+     * hacía crecer la pila indefinidamente. Como Android persiste la task entre
+     * sesiones, al volver a la app días después el usuario veía búsquedas viejas
+     * al pulsar Back ("vuelve a la búsqueda de ayer").
+     *
+     * Ahora la búsqueda se sobrescribe en la activity actual. Al pulsar Back se
+     * sale directamente (o llega a la activity raíz con "presiona otra vez").
+     *
+     * Para clicks en tags desde PostActivity y saved searches, el comportamiento
+     * sí puede abrir task nueva: ver preferencias search_in_new_task y
+     * search_saved_new_window (Fase 2).
+     */
     private fun openNewSearch(tags: String, page: Int = 1) {
         // Guardar en historial (framework + Room, como la original)
         if (tags.isNotEmpty()) {
@@ -787,13 +897,11 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
                 searchHelper.saveToHistory(tags)
             }
         }
-        
-        // Abrir nueva MainActivity con los tags
-        val intent = Intent(this, MainActivity::class.java).apply {
-            putExtra("tags", tags)
-            putExtra("page", page)
-        }
-        startActivity(intent)
+
+        // Recargar la búsqueda EN ESTA activity (no apilar nueva).
+        binding.searchView.setQuery(tags, false)
+        pendingPageJump = page
+        performSearch(tags)
     }
     
     /**
@@ -946,18 +1054,52 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     }
     
     /**
-     * Inicia una nueva búsqueda - limpia todo y empieza desde la página 1
+     * Inicia una nueva búsqueda - limpia todo y empieza desde la página 1.
+     *
+     * Antes de cambiar currentTags, empuja SIEMPRE el estado actual al historial
+     * (incluso si es la raíz vacía). Así el usuario puede pulsar Back para
+     * regresar a cualquier búsqueda anterior, incluida la raíz.
      */
     private fun startNewSearch(tags: List<String>) {
+        // Guardar el estado COMPLETO de la búsqueda actual (tags, PageHandlers con
+        // sus posts ya cargados, página actual del ViewPager y estado de scroll
+        // de cada página) para poder restaurarlo instantáneamente al pulsar Back.
+        // Se omite cuando se está restaurando desde el historial (navigateBack).
+        if (!isRestoringFromHistory) {
+            val scrollStates = mutableMapOf<Int, android.os.Parcelable>()
+            val currentPage = binding.viewPager.currentItem
+            for (handler in pageHandlers) {
+                handler.recyclerView?.get()?.layoutManager
+                    ?.onSaveInstanceState()?.let { state ->
+                        scrollStates[handler.pageNumber] = state
+                    }
+            }
+            searchHistory.addLast(
+                SearchHistoryEntry(
+                    tags = currentTags,
+                    pageHandlers = pageHandlers.toMutableList(),
+                    totalPages = totalPages.get(),
+                    currentPage = currentPage,
+                    scrollStates = scrollStates
+                )
+            )
+            while (searchHistory.size > maxHistorySize) {
+                // NUNCA eliminar la raíz (entrada 0). Solo eliminamos la búsqueda
+                // más vieja DESPUÉS de la raíz (índice 1), así el usuario siempre
+                // puede regresar al inicio por muchos back que dé.
+                searchHistory.removeAt(1)
+            }
+        }
+
         currentTags = tags
-        
+
         // Limpiar páginas existentes
         val oldSize = pageHandlers.size
         pageHandlers.clear()
         if (oldSize > 0) {
             pagesAdapter.notifyPagesChanged()
         }
-        
+
         pagesCreated.set(0)
         totalPages.set(0)
         pagesFrontier.set(0)
@@ -966,9 +1108,9 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
         endPageNumber.set(-1)
         currentPageDisplay = 1
         pendingPageJump = 0
-        
+
         binding.progressBar.visibility = View.VISIBLE
-        
+
         // Crear solo la primera página
         // Se añadirán más dinámicamente después de que esta cargue
         addMorePages(1, 1)
@@ -1842,9 +1984,13 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     override fun onDestroy() {
         super.onDestroy()
         suggestionJob?.cancel()
-        networkObserverJob?.cancel() // Cancelar observación de red
+        networkStateJob?.cancel()    // Cancelar observación de estado de red (banner)
+        networkEventsJob?.cancel()   // Cancelar observación de eventos de red (auto-refresh)
         searchHelper.cleanup()
         UpdateManager.cleanup(this) // Limpiar recursos del UpdateManager
+        // Vaciar el historial de navegación para liberar RAM y asegurar que
+        // NO persiste entre sesiones (evita el bug "búsqueda de ayer").
+        searchHistory.clear()
     }
     
     // ==================== IMPLEMENTACIÓN DE SelectionCallback ====================
@@ -2201,108 +2347,77 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, 
     }
     
     // ==================== NETWORK MONITORING ====================
-    // Similar a ff/b.java (NetworkConnectivityListener) en la app original
-    
+
     /**
-     * Configura el monitoreo de red usando StateFlow para observar cambios
-     * Similar a cómo la app original registra NetworkCallback en ff/b.java
-     * 
-     * Observa el networkState del NetworkMonitor y:
-     * - Actualiza el banner de estado de red (txtNetworkStatus)
-     * - Detecta reconexiones para mostrar Snackbar
-     * - Marca wasOffline para saber si debemos hacer auto-refresh
+     * Configura el monitoreo de red con DOS suscripciones independientes:
+     *
+     * 1) networkStateJob: observa el estado actual (para pintar/ocultar el banner rojo
+     *    de "sin conexión"). Es un StateFlow: reemite al volver de segundo plano, pero
+     *    eso es lo que queremos para el banner (que refleje siempre la verdad).
+     *
+     * 2) networkEventsJob: observa EVENTOS de transición real via SharedFlow(replay=0).
+     *    NO reemite al volver de background. Solo dispara auto-refresh silencioso cuando
+     *    hubo una desconexión REAL verificada. Es lo que sustituye al snackbar verde.
+     *
+     * Decisión de diseño: NO mostramos snackbar de "conexión restablecida" (la app
+     * original no lo hace y saturaba al usuario). El auto-refresh se ejecuta en silencio.
+     * Tampoco mostramos banner de "conexión lenta" (no aporta, la app original no lo tiene).
      */
     private fun setupNetworkMonitoring() {
-        networkObserverJob = lifecycleScope.launch {
+        // 1) Banner de estado: rojo solo cuando realmente no hay red
+        networkStateJob = lifecycleScope.launch {
             networkMonitor.networkState.collectLatest { state ->
                 updateNetworkStatusUI(state)
             }
         }
-    }
-    
-    /**
-     * Actualiza la UI del banner de estado de red
-     * Similar a cómo la app original muestra/oculta el banner en MainActivity
-     * 
-     * Comportamiento:
-     * - Sin conexión: Mostrar banner rojo con icono wifi_off
-     * - Conexión lenta (2G/3G): Mostrar banner amarillo de advertencia
-     * - Reconexión después de estar offline: Mostrar Snackbar verde
-     * - Conexión normal: Ocultar banner
-     * 
-     * @param state Estado actual de la red desde NetworkMonitor
-     */
-    private fun updateNetworkStatusUI(state: NetworkState) {
-        val txtNetworkStatus = binding.root.findViewById<android.widget.TextView>(R.id.txtNetworkStatus)
-            ?: return
-        
-        when {
-            // Sin conexión - mostrar banner rojo
-            !state.isOnline -> {
-                txtNetworkStatus.visibility = View.VISIBLE
-                txtNetworkStatus.text = getString(R.string.network_offline)
-                txtNetworkStatus.setBackgroundColor(
-                    ContextCompat.getColor(this, R.color.error_background)
-                )
-                txtNetworkStatus.setCompoundDrawablesWithIntrinsicBounds(
-                    R.drawable.ic_wifi_off, 0, 0, 0
-                )
-                txtNetworkStatus.compoundDrawablePadding = 16
-                
-                // Marcar que estamos offline para detectar reconexión
-                wasOffline = true
-            }
-            
-            // Conexión lenta (2G/3G) - mostrar advertencia amarilla
-            state.isSlow -> {
-                txtNetworkStatus.visibility = View.VISIBLE
-                txtNetworkStatus.text = getString(R.string.network_slow)
-                txtNetworkStatus.setBackgroundColor(
-                    ContextCompat.getColor(this, R.color.warning_background)
-                )
-                txtNetworkStatus.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-                
-                // Si estábamos offline y ahora tenemos conexión (aunque lenta)
-                if (wasOffline) {
-                    wasOffline = false
-                    showReconnectedSnackbar()
-                }
-            }
-            
-            // Conexión normal - ocultar banner
-            else -> {
-                txtNetworkStatus.visibility = View.GONE
-                
-                // Si estábamos offline, mostrar Snackbar de reconexión
-                if (wasOffline) {
-                    wasOffline = false
-                    showReconnectedSnackbar()
+        // 2) Reintento silencioso de acciones fallidas (posts individuales) en transiciones
+        //    reales offline->online. NO refresca el grid: la app original Wolf's Stash no lo
+        //    hace y resultaba molesto al volver de background. El grid se refresca solo con
+        //    pull-to-refresh manual del usuario.
+        networkEventsJob = lifecycleScope.launch {
+            networkMonitor.networkEvents.collect { event ->
+                when (event) {
+                    NetworkEvent.BecameOnline -> {
+                        // Reintenta posts individuales marcados como fallidos (vía dispatcher).
+                        // No toca el grid de MainActivity.
+                        networkDispatcher.flushFailedActions()
+                    }
+                    NetworkEvent.BecameOffline -> {
+                        // Nada extra: el banner ya lo pinta networkStateJob.
+                    }
                 }
             }
         }
     }
-    
+
     /**
-     * Muestra un Snackbar indicando que la conexión se ha restablecido
-     * Similar a cómo la app original muestra feedback visual al reconectar
-     * 
-     * El Snackbar incluye acción para refrescar la página actual
+     * Actualiza la UI del banner de estado de red.
+     *
+     * Comportamiento simplificado (alineado con la app original):
+     * - Sin conexión: banner rojo con icono wifi_off.
+     * - Hay conexión (sea lenta o rápida): ocultar banner.
+     *
+     * Sin banner amarillo de "conexión lenta" (satura y la original no lo muestra).
+     * Sin snackbar verde de reconexión (eliminado: era invención de Mommys y disparaba
+     * falsos positivos al volver de background).
      */
-    private fun showReconnectedSnackbar() {
-        Snackbar.make(
-            binding.root,
-            R.string.network_reconnected,
-            Snackbar.LENGTH_LONG
-        ).setAction(R.string.refresh) {
-            // Refrescar la página actual
-            onRefresh()
-        }.setBackgroundTint(
-            ContextCompat.getColor(this, R.color.success_background)
-        ).show()
-        
-        // Flush acciones pendientes del dispatcher
-        // Esto reintenta automáticamente las cargas fallidas
-        networkDispatcher.flushFailedActions()
+    private fun updateNetworkStatusUI(state: NetworkState) {
+        val txtNetworkStatus = binding.root.findViewById<android.widget.TextView>(R.id.txtNetworkStatus)
+            ?: return
+
+        if (!state.isOnline) {
+            txtNetworkStatus.visibility = View.VISIBLE
+            txtNetworkStatus.text = getString(R.string.network_offline)
+            txtNetworkStatus.setBackgroundColor(
+                ContextCompat.getColor(this, R.color.error_background)
+            )
+            txtNetworkStatus.setCompoundDrawablesWithIntrinsicBounds(
+                R.drawable.ic_wifi_off, 0, 0, 0
+            )
+            txtNetworkStatus.compoundDrawablePadding = 16
+        } else {
+            txtNetworkStatus.visibility = View.GONE
+        }
     }
     
     /**

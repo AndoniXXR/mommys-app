@@ -143,7 +143,12 @@ class SavedSearchesActivity : AppCompatActivity() {
     }
     
     /**
-     * Continuar búsqueda - abre MainActivity con los tags y página guardada
+     * Continuar búsqueda - abre MainActivity con los tags y página guardada.
+     *
+     * Replica el comportamiento de la app original (fp0.java:140):
+     * si la preferencia `search_saved_new_window` está activa (default true),
+     * abre la búsqueda como ventana/task nueva en el multitarea, igual que la
+     * preferencia search_in_new_task para clicks en tags.
      */
     private fun continueSearch(search: SavedSearchEntity) {
         // Actualizar timestamp de último uso
@@ -151,13 +156,19 @@ class SavedSearchesActivity : AppCompatActivity() {
             val app = MommysApplication.getInstance()
             app.database.savedSearchDao().incrementUseCount(search.id)
         }
-        
+
         // Abrir MainActivity con los tags y página
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra("tags", search.query)
             putExtra("page", search.page)
             putExtra("finish", true)
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        if (MommysApplication.getInstance().preferencesManager.searchSavedNewWindow) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
+        } else {
+            // Si no es en ventana nueva, limpiar la pila para no acumular
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         startActivity(intent)
         finish()

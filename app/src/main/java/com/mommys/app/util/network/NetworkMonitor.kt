@@ -16,8 +16,11 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
@@ -53,23 +56,36 @@ class NetworkMonitor private constructor(private val context: Context) {
     }
     
     // ConnectivityManager para detectar estado de red
-    private val connectivityManager: ConnectivityManager? = 
+    private val connectivityManager: ConnectivityManager? =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-    
+
     // Handler para el hilo principal
     private val mainHandler = Handler(Looper.getMainLooper())
-    
+
     // Estado de red actual (StateFlow para coroutines)
-    private val _networkState = MutableStateFlow(NetworkState.DISCONNECTED)
+    // IMPORTANTE: arrancamos con el estado REAL, no con DISCONNECTED forzado.
+    // Antes esto era NetworkState.DISCONNECTED, lo que provocaba que el primer collect
+    // viera siempre "offline" aunque hubiera red, y disparaba el snackbar de reconexión.
+    private val _networkState = MutableStateFlow(initialNetworkState())
     val networkState: StateFlow<NetworkState> = _networkState.asStateFlow()
-    
+
     // Estado de red actual (LiveData para compatibilidad con ViewModels)
-    private val _networkStateLiveData = MutableLiveData(NetworkState.DISCONNECTED)
+    private val _networkStateLiveData = MutableLiveData(_networkState.value)
     val networkStateLiveData: LiveData<NetworkState> = _networkStateLiveData
-    
+
     // Estado de conexión simple (para uso rápido)
-    private val _isConnected = MutableStateFlow(false)
+    private val _isConnected = MutableStateFlow(_networkState.value.isConnected)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
+
+    // Eventos de TRANSICIÓN REAL de red (no estado).
+    // SharedFlow con replay = 0: NO reemite el último valor al reconectar el collector.
+    // Esto es la clave para evitar el falso "conexión restablecida" al volver de background:
+    // cuando la Activity vuelve a estar activa, solo recibe eventos NUEVOS, no un valor viejo.
+    private val _networkEvents = MutableSharedFlow<NetworkEvent>(
+        replay = 0,
+        extraBufferCapacity = 16
+    )
+    val networkEvents: SharedFlow<NetworkEvent> = _networkEvents.asSharedFlow()
     
     // Listeners para cambios de conectividad
     private val connectivityListeners = mutableListOf<NetworkConnectivityListener>()
@@ -86,8 +102,9 @@ class NetworkMonitor private constructor(private val context: Context) {
     // Si el monitor está registrado
     private var isRegistered = false
     
-    // Último estado de conexión conocido (para detectar cambios)
-    private var wasConnected = false
+    // Último estado de conexión conocido (para detectar cambios).
+    // Inicializa coherente con el estado real leído al instanciar.
+    private var wasConnected: Boolean = _networkState.value.isOnline
     
     // Modo avión
     private var isAirplaneMode = false
@@ -112,8 +129,26 @@ class NetworkMonitor private constructor(private val context: Context) {
         fun onNetworkCapabilitiesChanged(state: NetworkState)
     }
     
+    /**
+     * Calcula el estado de red real en el momento de la instanciación.
+     * Evita arrancar con DISCONNECTED cuando en realidad hay conexión,
+     * lo que provocaba el snackbar espurio de reconexión.
+     */
+    private fun initialNetworkState(): NetworkState {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                getNetworkStateModern()
+            } else {
+                getNetworkStateLegacy()
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not read initial network state, defaulting to DISCONNECTED", e)
+            NetworkState.DISCONNECTED
+        }
+    }
+
     init {
-        // Obtener estado inicial
+        // Re-leer estado inicial por si cambió entre instanciación y registro
         updateNetworkState()
     }
     
@@ -242,82 +277,114 @@ class NetworkMonitor private constructor(private val context: Context) {
     
     /**
      * Registra NetworkCallback para API 24+
-     * Basado en a6/e.java y ff/b.java de la app original
+     *
+     * Diseno del fix: separamos "estado" (para el banner) de "eventos de transicion real"
+     * (para auto-refresh). Solo se emiten BecameOffline/BecameOnline cuando HAY una
+     * transicion verificada, ignorando el ruido de onCapabilitiesChanged (cambio de signal,
+     * re-validacion de red, cambio de DNS) que hacia titubear isValidated y disparaba
+     * el snackbar espurio de reconexion.
      */
     private fun registerNetworkCallback() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             return
         }
-        
+
         val callback = object : ConnectivityManager.NetworkCallback() {
-            
+
             /**
-             * Llamado cuando una red está disponible
-             * Corresponde a onAvailable() en a6/e.java línea 26
+             * Llamado cuando una red está disponible.
+             * Si antes estabamos offline REAL (activeNetwork == null), emitimos BecameOnline.
              */
             override fun onAvailable(network: Network) {
                 Log.d(TAG, "Network available: $network")
                 mainHandler.post {
+                    val wasOffline = !_networkState.value.isOnline
                     updateNetworkState()
-                    
-                    // Notificar si pasamos de desconectado a conectado
-                    if (!wasConnected) {
+                    // Solo emitir transicion si veníamos de offline real y ahora hay online
+                    val nowOnline = _networkState.value.isOnline
+                    if (wasOffline && nowOnline) {
+                        emitEvent(NetworkEvent.BecameOnline)
+                    }
+                    if (!wasConnected && nowOnline) {
                         wasConnected = true
                         notifyNetworkAvailable()
                     }
                 }
             }
-            
+
             /**
-             * Llamado cuando se pierde la red
-             * Corresponde a onLost() en a6/e.java línea 91
+             * Llamado cuando se pierde una red.
+             * NO asumimos offline aquí: otra red podria seguir activa (WiFi+mobile simultaneos).
+             * Confirmamos consultando activeNetwork y sus capacidades reales.
              */
             override fun onLost(network: Network) {
                 Log.d(TAG, "Network lost: $network")
                 mainHandler.post {
-                    // Verificar si realmente perdimos toda conectividad
-                    // (podría haber otra red disponible)
+                    val wasOnline = _networkState.value.isOnline
                     updateNetworkState()
-                    
-                    if (!_isConnected.value && wasConnected) {
+                    // Confirmar offline REAL: sin red activa O sin NET_CAPABILITY_INTERNET.
+                    // Esto evita el falso offline durante titubeos de transicion WiFi<->movil.
+                    val nowOnline = _networkState.value.isOnline
+                    if (wasOnline && !nowOnline) {
+                        emitEvent(NetworkEvent.BecameOffline)
                         wasConnected = false
                         notifyNetworkLost()
                     }
                 }
             }
-            
+
             /**
-             * Llamado cuando cambian las capacidades de red
-             * Corresponde a onCapabilitiesChanged() en a6/e.java línea 62
+             * Llamado cuando cambian las capacidades de red.
+             * Es RUIDOSO: se dispara por cambio de signal WiFi, re-validacion, cambio de DNS, etc.
+             * Aqui NO emitimos BecameOnline/BecameOffline (eso provocaba falsos positivos).
+             * Solo actualizamos el estado para el banner y, opcionalmente, un evento de cambio
+             * de tipo de red (WiFi<->movil) que la UI puede usar si lo necesita.
              */
             override fun onCapabilitiesChanged(
                 network: Network,
                 networkCapabilities: NetworkCapabilities
             ) {
-                Log.d(TAG, "Network capabilities changed")
                 mainHandler.post {
                     val previousState = _networkState.value
                     updateNetworkStateFromCapabilities(networkCapabilities)
-                    
-                    // Notificar cambio de capacidades si cambió algo significativo
                     val newState = _networkState.value
-                    if (previousState.networkType != newState.networkType ||
-                        previousState.isMetered != newState.isMetered) {
+
+                    // Transicion online/offline real detectada via capacidades
+                    // (ej: la red pierde INTERNET cap sin onLost previo)
+                    if (previousState.isOnline && !newState.isOnline) {
+                        emitEvent(NetworkEvent.BecameOffline)
+                        wasConnected = false
+                        notifyNetworkLost()
+                    } else if (!previousState.isOnline && newState.isOnline) {
+                        emitEvent(NetworkEvent.BecameOnline)
+                        if (!wasConnected) {
+                            wasConnected = true
+                            notifyNetworkAvailable()
+                        }
+                    } else if (previousState.networkType != newState.networkType ||
+                        previousState.isMetered != newState.isMetered
+                    ) {
                         notifyCapabilitiesChanged()
                     }
                 }
             }
-            
+
             /**
-             * Llamado cuando cambia el estado de bloqueo de red
-             * Corresponde a onBlockedStatusChanged() en a6/e.java línea 47
+             * Llamado cuando cambia el estado de bloqueo de red.
              */
             override fun onBlockedStatusChanged(network: Network, blocked: Boolean) {
                 Log.d(TAG, "Network blocked status changed: blocked=$blocked")
-                if (!blocked) {
-                    mainHandler.post {
-                        updateNetworkState()
-                        if (_isConnected.value && !wasConnected) {
+                mainHandler.post {
+                    val previousOnline = _networkState.value.isOnline
+                    updateNetworkState()
+                    val nowOnline = _networkState.value.isOnline
+                    if (previousOnline && !nowOnline) {
+                        emitEvent(NetworkEvent.BecameOffline)
+                        wasConnected = false
+                        notifyNetworkLost()
+                    } else if (!previousOnline && nowOnline) {
+                        emitEvent(NetworkEvent.BecameOnline)
+                        if (!wasConnected) {
                             wasConnected = true
                             notifyNetworkAvailable()
                         }
@@ -325,9 +392,8 @@ class NetworkMonitor private constructor(private val context: Context) {
                 }
             }
         }
-        
-        // Registrar callback para todas las redes
-        // Basado en ff/b.java línea 90: registerDefaultNetworkCallback
+
+        // Registrar callback para la red por defecto
         try {
             connectivityManager?.registerDefaultNetworkCallback(callback)
             networkCallback = callback
@@ -345,38 +411,43 @@ class NetworkMonitor private constructor(private val context: Context) {
     @Suppress("DEPRECATION")
     private fun registerBroadcastReceiver() {
         val receiver = object : BroadcastReceiver() {
-            
+
             private var previouslyConnected = false
-            
+
             override fun onReceive(context: Context, intent: Intent?) {
                 if (intent?.action != ConnectivityManager.CONNECTIVITY_ACTION) {
                     return
                 }
-                
+
                 // Obtener estado de red actual
                 val networkInfo = connectivityManager?.activeNetworkInfo
                 val connected = networkInfo != null && networkInfo.isConnected
-                
+
                 Log.d(TAG, "Connectivity changed: connected=$connected")
-                
+
                 mainHandler.post {
+                    val previousOnline = _networkState.value.isOnline
                     updateNetworkState()
-                    
-                    // Notificar cambio de conectado a desconectado o viceversa
-                    // Basado en ff/a.java líneas 30-37
-                    if (connected && !previouslyConnected) {
-                        previouslyConnected = true
-                        wasConnected = true
-                        notifyNetworkAvailable()
-                    } else if (!connected && previouslyConnected) {
+                    val nowOnline = _networkState.value.isOnline
+
+                    // Transicion real online->offline
+                    if (previousOnline && !nowOnline) {
+                        emitEvent(NetworkEvent.BecameOffline)
                         previouslyConnected = false
                         wasConnected = false
                         notifyNetworkLost()
                     }
+                    // Transicion real offline->online
+                    else if (!previousOnline && nowOnline) {
+                        emitEvent(NetworkEvent.BecameOnline)
+                        previouslyConnected = true
+                        wasConnected = true
+                        notifyNetworkAvailable()
+                    }
                 }
             }
         }
-        
+
         // Registrar para CONNECTIVITY_ACTION
         @Suppress("DEPRECATION")
         val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
@@ -612,7 +683,18 @@ class NetworkMonitor private constructor(private val context: Context) {
     }
     
     // ================= NOTIFICACIONES A LISTENERS =================
-    
+
+    /**
+     * Emite un evento de transición real al SharedFlow de eventos.
+     * tryEmit porque extraBufferCapacity > 0; si falla, no es crítico (se pierde un evento).
+     * Los consumidores (MainActivity) usan esto para saber CUÁNDO hacer auto-refresh,
+     * en lugar de inspeccionar el estado que reemite al reconectar.
+     */
+    private fun emitEvent(event: NetworkEvent) {
+        Log.d(TAG, "Emitting network event: $event")
+        _networkEvents.tryEmit(event)
+    }
+
     /**
      * Notifica a todos los listeners que la red está disponible
      */

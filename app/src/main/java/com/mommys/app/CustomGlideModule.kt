@@ -10,6 +10,7 @@ import com.bumptech.glide.load.engine.cache.InternalCacheDiskCacheFactory
 import com.bumptech.glide.load.engine.cache.LruResourceCache
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.module.AppGlideModule
+import com.mommys.app.data.api.CloudflareCookieJar
 import com.mommys.app.data.api.HttpConfig
 import com.mommys.app.util.AdaptiveImageController
 import okhttp3.OkHttpClient
@@ -40,6 +41,11 @@ class CustomGlideModule : AppGlideModule() {
             .connectTimeout(10, TimeUnit.SECONDS)   // era 5s; 10s aguanta 3G/4G inestable
             .readTimeout(30, TimeUnit.SECONDS)      // era 15s
             .dns(HttpConfig.ipv4FirstDns)
+            // Mismo CookieJar que la API para que las imágenes detrás de Cloudflare
+            // también pasen siguiendo los redirects con cookies intermedias.
+            .cookieJar(CloudflareCookieJar.get())
+            .followRedirects(true)
+            .followSslRedirects(true)
             .addInterceptor(HttpConfig.cloudflareHeaderInterceptor())
             .build()
 

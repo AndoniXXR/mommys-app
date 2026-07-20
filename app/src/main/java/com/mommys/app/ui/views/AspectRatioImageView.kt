@@ -22,13 +22,20 @@ class AspectRatioImageView @JvmOverloads constructor(
      * - 1.0 = cuadrado
      * - 1.1 = ligeramente más alto (default de la app original)
      * - 1.33 = 4:3
+     *
+     * IMPORTANTE: NO llamamos requestLayout() en el setter. Eso provocaba que cada
+     * bind del grid disparara un re-layout completo del RecyclerView (causa principal
+     * de los "saltos" al hacer scroll). La app original (PressableHigherImageView)
+     * solo cambia el campo interno sin invalidar el layout.
+     *
+     * El nuevo ratio se aplicará en el próximo onMeasure natural (por ejemplo, al
+     * reciclar el holder o al volver de Settings que fuerza un notifyItemRangeChanged).
      */
     var aspectRatio: Double = 1.1
         set(value) {
             field = value.coerceIn(1.0, 2.0)
-            requestLayout()
         }
-    
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val width = measuredWidth

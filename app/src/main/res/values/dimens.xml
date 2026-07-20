@@ -36,7 +36,19 @@
     <!-- Additional dimens from original app -->
     <dimen name="text_margin">16dp</dimen>
     <dimen name="login_input_margin">8dp</dimen>
-    
+
     <!-- AppBar collapsing -->
     <dimen name="app_bar_height">180dp</dimen>
+
+    <!-- Post content (valores exactos de la app original Wolf's Stash) -->
+    <dimen name="post_content_margin">8dp</dimen>
+    <dimen name="post_content_space">16dp</dimen>
+    <dimen name="post_content_space_to_bottom">48dp</dimen>
+    <dimen name="post_content_tags_title_size">16sp</dimen>
+    <dimen name="post_content_title_artist_padding">8dp</dimen>
+    <dimen name="post_content_title_height">56dp</dimen>
+    <dimen name="post_content_title_icon_size">16dp</dimen>
+    <dimen name="post_content_title_id_padding">3dp</dimen>
+    <dimen name="post_content_title_item_padding">8dp</dimen>
+    <dimen name="post_content_title_margin">8dp</dimen>
 </resources>

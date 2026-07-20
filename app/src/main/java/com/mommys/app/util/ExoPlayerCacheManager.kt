@@ -7,6 +7,7 @@ import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.datasource.okhttp.OkHttpDataSource
+import com.mommys.app.data.api.CloudflareCookieJar
 import com.mommys.app.data.api.HttpConfig
 import okhttp3.OkHttpClient
 import java.io.File
@@ -57,15 +58,15 @@ object ExoPlayerCacheManager {
 
             // OkHttp compartido con la app: mismo User-Agent y cookies de Cloudflare
             // que la API, para que los videos (también detrás de Cloudflare) pasen.
-            // El interceptor lee las cookies en cada petición, así que tras resolver
-            // un challenge nuevo no hace falta reconstruir el cache.
+            // CookieJar compartido para seguir redirects de CF con cookies intermedias.
             val okHttpClient = OkHttpClient.Builder()
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .dns(HttpConfig.ipv4FirstDns)
-                .addInterceptor(HttpConfig.cloudflareHeaderInterceptor())
+                .cookieJar(CloudflareCookieJar.get())
                 .followRedirects(true)
                 .followSslRedirects(true)
+                .addInterceptor(HttpConfig.cloudflareHeaderInterceptor())
                 .build()
 
             // OkHttp gestiona los redirects (incluido cross-protocol) vía el cliente:

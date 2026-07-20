@@ -39,6 +39,7 @@
     <color name="colorDarkGrey">#8e8e8e</color>
     <color name="colorGreen">#FF1E8737</color>
     <color name="colorRed">#FFA62429</color>
+    <color name="colorRedBright">#ff0009</color>
     <color name="colorBlue">#FF0778B5</color>
     <color name="colorOrange">#FFFFA500</color>
     <color name="colorPurple">#FF6C328B</color>

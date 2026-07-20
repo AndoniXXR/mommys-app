@@ -8,6 +8,9 @@ import com.mommys.app.data.preferences.PreferencesManager
 import com.mommys.app.util.AdaptiveImageController
 import com.mommys.app.util.network.NetworkAwareDispatcher
 import com.mommys.app.util.network.NetworkMonitor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MommysApplication : Application() {
     
@@ -69,6 +72,22 @@ class MommysApplication : Application() {
 
         // Adaptive loading: ajusta la concurrencia de carga de imágenes según la red
         AdaptiveImageController.init(this)
+
+        // Precargar el store de tags locales en background para que la 1ª
+        // búsqueda del usuario sea instantánea (el JSON de 852k tags pesa ~19MB
+        // y parsearlo en el binder thread del ContentProvider causaría lag).
+        // SOLO en e621: en e926 no se usan sugerencias de tags (modo SFW), así
+        // que no tiene sentido gastar RAM/CPU cargando el JSON.
+        if (preferencesManager.useE621()) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    com.mommys.app.data.search.SearchSuggestionsProvider.LocalTagStore
+                        .ensureLoaded(this@MommysApplication)
+                } catch (e: Exception) {
+                    android.util.Log.w("MommysApplication", "No se pudo precargar suggestions.json", e)
+                }
+            }
+        }
     }
     
     /**
